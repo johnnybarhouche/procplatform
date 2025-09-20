@@ -108,6 +108,10 @@ class MockDatabase {
     return this.projects.find(p => p.id === id) || null;
   }
 
+  async getUserById(id: string): Promise<User | null> {
+    return this.users.find(user => user.id === id) || null;
+  }
+
   // Material Request operations
   async createMaterialRequest(data: {
     projectId: string;

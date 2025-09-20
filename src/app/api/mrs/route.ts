@@ -82,12 +82,56 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    // Return all MRs (in real app, apply RLS and user permissions)
     const mrs = await db.getMaterialRequests();
+
+    const detailedMRs = await Promise.all(
+      mrs.map(async (mr) => {
+        const [project, requester, lineItems, attachments] = await Promise.all([
+          db.getProjectById(mr.projectId),
+          db.getUserById(mr.createdBy),
+          db.getMRLineItems(mr.id),
+          db.getMRAttachments(mr.id)
+        ]);
+
+        return {
+          id: mr.id,
+          mrn: mr.mrn,
+          project_id: mr.projectId,
+          project_name: project?.name ?? 'Unknown Project',
+          requester_id: mr.createdBy,
+          requester_name: requester?.name ?? 'Unknown Requester',
+          status: mr.status,
+          created_at: mr.createdAt,
+          updated_at: mr.updatedAt,
+          line_items: lineItems.map((item) => ({
+            id: item.id,
+            item_code: item.itemCode,
+            description: item.description,
+            uom: item.uom,
+            quantity: item.quantity,
+            unit_price: (item as { unitPrice?: number }).unitPrice ?? 0,
+            remarks: item.remarks,
+            location: item.location,
+            brand_asset: item.brandAsset,
+            serial_chassis_engine_no: item.serialChassisEngineNo,
+            model_year: item.modelYear
+          })),
+          attachments: attachments.map((attachment) => ({
+            id: attachment.id,
+            filename: attachment.fileName,
+            url: attachment.fileUrl,
+            file_type: attachment.fileType ?? 'application/octet-stream',
+            file_size: attachment.fileSize ?? 0,
+            uploaded_at: attachment.uploadedAt
+          }))
+        };
+      })
+    );
+
     return NextResponse.json({
       success: true,
-      mrs: mrs,
-      total: mrs.length
+      mrs: detailedMRs,
+      total: detailedMRs.length
     });
   } catch (error) {
     console.error('Error fetching MRs:', error);

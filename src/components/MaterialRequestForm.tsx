@@ -125,8 +125,21 @@ export default function MaterialRequestForm({ projects }: MaterialRequestFormPro
       });
 
       if (!mrResponse.ok) {
-        const errorData = await mrResponse.json();
-        throw new Error(errorData.error || 'Failed to create Material Request');
+        let errorMessage = 'Failed to create Material Request';
+        try {
+          const rawBody = (await mrResponse.text()).trim();
+          if (rawBody) {
+            try {
+              const parsed = JSON.parse(rawBody);
+              errorMessage = parsed.error || parsed.message || rawBody;
+            } catch {
+              errorMessage = rawBody;
+            }
+          }
+        } catch (parseError) {
+          console.error('Error reading MR response body:', parseError);
+        }
+        throw new Error(errorMessage);
       }
 
       const mrData = await mrResponse.json();
