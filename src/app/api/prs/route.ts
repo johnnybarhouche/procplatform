@@ -1,6 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PurchaseRequisition, QuoteApproval, AuditLog, LineItemDecision, MRLineItem } from '@/types/procurement';
 import { notificationService } from '@/lib/notification-service';
+import { createMockSupplier } from '@/lib/mock-suppliers';
+
+const sampleSupplierOverrides = {
+  id: 'supplier-001',
+  supplier_code: 'SUP-001',
+  name: 'ABC Construction Supplies',
+  email: 'quotes@abc.com',
+  category: 'Construction',
+  rating: 4.5,
+  quote_count: 15,
+  avg_response_time: 24,
+  last_quote_date: '2025-01-15',
+  status: 'approved' as const,
+  has_been_used: true,
+};
+
+const buildSampleSupplier = () => createMockSupplier(sampleSupplierOverrides);
 
 // Mock database for PRs - in production this would come from database
 const purchaseRequisitions: PurchaseRequisition[] = [];
@@ -10,24 +27,15 @@ const auditLogs: AuditLog[] = [];
 const initializeData = () => {
   if (purchaseRequisitions.length === 0) {
     // Create sample PR from approved quote approval
+    const baseSupplier = buildSampleSupplier();
+
     const samplePR: PurchaseRequisition = {
       id: 'pr-001',
       pr_number: 'PR-2025-001',
       project_id: '1',
       project_name: 'Project Alpha',
       supplier_id: 'supplier-001',
-      supplier: {
-        id: 'supplier-001',
-        name: 'ABC Construction Supplies',
-        email: 'quotes@abc.com',
-        category: 'Construction',
-        rating: 4.5,
-        quote_count: 15,
-        avg_response_time: 24,
-        last_quote_date: new Date().toISOString(),
-        is_active: true,
-        compliance_docs: []
-      },
+      supplier: baseSupplier,
       status: 'draft',
       total_value: 15000,
       currency: 'AED',
@@ -53,18 +61,7 @@ const initializeData = () => {
             id: 'q-001',
             rfq_id: 'rfq-001',
             supplier_id: 'supplier-001',
-            supplier: {
-              id: 'supplier-001',
-              name: 'ABC Construction Supplies',
-              email: 'quotes@abc.com',
-              category: 'Construction',
-              rating: 4.5,
-              quote_count: 15,
-              avg_response_time: 24,
-              last_quote_date: new Date().toISOString(),
-              is_active: true,
-              compliance_docs: []
-            },
+            supplier: baseSupplier,
             status: 'submitted',
             submitted_at: new Date().toISOString(),
             valid_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
@@ -194,7 +191,9 @@ export async function POST(request: NextRequest) {
     if (!quote_approval_id || !project_id) {
       return NextResponse.json({ error: 'quote_approval_id and project_id are required' }, { status: 400 });
     }
-    
+
+    const baseSupplier = buildSampleSupplier();
+
     // Mock: Get quote approval data (in production this would come from database)
     const quoteApproval: QuoteApproval = {
       id: quote_approval_id,
@@ -265,18 +264,7 @@ export async function POST(request: NextRequest) {
             id: 'q-001',
             rfq_id: 'rfq-001',
             supplier_id: 'supplier-001',
-            supplier: {
-              id: 'supplier-001',
-              name: 'ABC Construction Supplies',
-              email: 'quotes@abc.com',
-              category: 'Construction',
-              rating: 4.5,
-              quote_count: 15,
-              avg_response_time: 24,
-              last_quote_date: new Date().toISOString(),
-              is_active: true,
-              compliance_docs: []
-            },
+            supplier: baseSupplier,
             status: 'submitted',
             submitted_at: new Date().toISOString(),
             valid_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),

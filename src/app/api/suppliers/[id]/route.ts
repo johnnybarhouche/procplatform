@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Supplier } from '@/types/procurement';
 
-// Mock database for suppliers
+// Mock database for suppliers (in a real app, this would be a database)
 const suppliers: Supplier[] = [
   {
     id: '1',
@@ -172,118 +172,124 @@ const suppliers: Supplier[] = [
   }
 ];
 
-export async function GET(request: NextRequest) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const { searchParams } = new URL(request.url);
-    const category = searchParams.get('category');
-    const status = searchParams.get('status');
-    const isActive = searchParams.get('is_active');
-    const search = searchParams.get('search');
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
-
-    let filteredSuppliers = [...suppliers];
-
-    // Apply filters
-    if (category) {
-      filteredSuppliers = filteredSuppliers.filter(s => 
-        s.category.toLowerCase().includes(category.toLowerCase())
+    const { id: supplierId } = await params;
+    const supplier = suppliers.find(s => s.id === supplierId);
+    
+    if (!supplier) {
+      return NextResponse.json(
+        { error: 'Supplier not found' },
+        { status: 404 }
       );
     }
 
-    if (status) {
-      filteredSuppliers = filteredSuppliers.filter(s => s.status === status);
-    }
-
-    if (isActive !== null) {
-      const activeFilter = isActive === 'true';
-      filteredSuppliers = filteredSuppliers.filter(s => s.is_active === activeFilter);
-    }
-
-    if (search) {
-      const searchLower = search.toLowerCase();
-      filteredSuppliers = filteredSuppliers.filter(s => 
-        s.name.toLowerCase().includes(searchLower) ||
-        s.email.toLowerCase().includes(searchLower) ||
-        s.category.toLowerCase().includes(searchLower) ||
-        s.supplier_code.toLowerCase().includes(searchLower)
-      );
-    }
-
-    // Apply pagination
-    const total = filteredSuppliers.length;
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const paginatedSuppliers = filteredSuppliers.slice(startIndex, endIndex);
-
-    return NextResponse.json({
-      suppliers: paginatedSuppliers,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit)
-      }
-    });
+    return NextResponse.json(supplier);
   } catch (error) {
-    console.error('Error fetching suppliers:', error);
+    console.error('Error fetching supplier:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch suppliers' },
+      { error: 'Failed to fetch supplier' },
       { status: 500 }
     );
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const body = await request.json();
-    const now = new Date().toISOString();
+    const { id: supplierId } = await params;
+    const supplierIndex = suppliers.findIndex(s => s.id === supplierId);
     
-    // Generate unique supplier code
-    const nextId = suppliers.length + 1;
-    const supplierCode = body.supplier_code || `SUP-${String(nextId).padStart(3, '0')}`;
+    if (supplierIndex === -1) {
+      return NextResponse.json(
+        { error: 'Supplier not found' },
+        { status: 404 }
+      );
+    }
+
+    const supplier = suppliers[supplierIndex];
     
-    const newSupplier: Supplier = {
-      id: nextId.toString(),
-      supplier_code: supplierCode,
-      name: body.name,
-      email: body.email,
-      phone: body.phone,
-      address: body.address,
-      category: body.category,
-      rating: 0,
-      quote_count: 0,
-      avg_response_time: 0,
-      last_quote_date: now.split('T')[0],
-      is_active: true,
-      status: 'pending',
-      has_been_used: false,
-      contacts: body.contacts || [],
-      performance_metrics: {
-        id: `perf-${nextId}`,
-        supplier_id: nextId.toString(),
-        total_quotes: 0,
-        successful_quotes: 0,
-        avg_response_time_hours: 0,
-        on_time_delivery_rate: 0,
-        quality_rating: 0,
-        communication_rating: 0,
-        last_updated: now
-      },
-      compliance_docs: [],
-      created_at: now,
-      updated_at: now,
-      created_by: body.created_by || 'system',
-      created_by_name: body.created_by_name || 'System'
+    // Check if supplier has been used in transactions
+    if (supplier.has_been_used) {
+      return NextResponse.json(
+        { 
+          error: 'Cannot modify supplier that has been used in transactions',
+          details: 'This supplier has been used in procurement transactions and cannot be modified'
+        },
+        { status: 400 }
+      );
+    }
+
+    // Update supplier with new data
+    const updatedSupplier: Supplier = {
+      ...supplier,
+      ...body,
+      id: supplierId, // Ensure ID doesn't change
+      updated_at: new Date().toISOString()
     };
 
-    suppliers.push(newSupplier);
+    suppliers[supplierIndex] = updatedSupplier;
 
-    return NextResponse.json(newSupplier, { status: 201 });
+    return NextResponse.json(updatedSupplier);
   } catch (error) {
-    console.error('Error creating supplier:', error);
+    console.error('Error updating supplier:', error);
     return NextResponse.json(
-      { error: 'Failed to create supplier' },
+      { error: 'Failed to update supplier' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id: supplierId } = await params;
+    const supplierIndex = suppliers.findIndex(s => s.id === supplierId);
+    
+    if (supplierIndex === -1) {
+      return NextResponse.json(
+        { error: 'Supplier not found' },
+        { status: 404 }
+      );
+    }
+
+    const supplier = suppliers[supplierIndex];
+    
+    // Check if supplier has been used in transactions
+    if (supplier.has_been_used) {
+      return NextResponse.json(
+        { 
+          error: 'Cannot delete supplier that has been used in transactions',
+          details: 'This supplier has been used in procurement transactions and cannot be deleted'
+        },
+        { status: 400 }
+      );
+    }
+
+    // Soft delete - set is_active to false
+    suppliers[supplierIndex] = {
+      ...supplier,
+      is_active: false,
+      status: 'inactive',
+      updated_at: new Date().toISOString()
+    };
+
+    return NextResponse.json({ 
+      message: 'Supplier deactivated successfully',
+      supplier: suppliers[supplierIndex]
+    });
+  } catch (error) {
+    console.error('Error deactivating supplier:', error);
+    return NextResponse.json(
+      { error: 'Failed to deactivate supplier' },
       { status: 500 }
     );
   }

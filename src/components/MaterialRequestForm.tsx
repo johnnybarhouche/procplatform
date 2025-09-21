@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import ItemPicker from './ItemPicker';
+import { Item } from '@/types/procurement';
 
 interface MRLineItem {
   id: string;
@@ -38,6 +40,8 @@ export default function MaterialRequestForm({ projects }: MaterialRequestFormPro
     }
   ]);
   const [attachments, setAttachments] = useState<File[]>([]);
+  const [showItemPicker, setShowItemPicker] = useState(false);
+  const [pickingForItemId, setPickingForItemId] = useState<string | null>(null);
 
   const addLineItem = () => {
     const newItem: MRLineItem = {
@@ -59,6 +63,23 @@ export default function MaterialRequestForm({ projects }: MaterialRequestFormPro
     if (lineItems.length > 1) {
       setLineItems(lineItems.filter(item => item.id !== id));
     }
+  };
+
+  const openItemPicker = (itemId: string) => {
+    setPickingForItemId(itemId);
+    setShowItemPicker(true);
+  };
+
+  const handleItemSelect = (item: Item) => {
+    if (pickingForItemId) {
+      updateLineItem(pickingForItemId, 'itemCode', item.item_code);
+      updateLineItem(pickingForItemId, 'description', item.description);
+      updateLineItem(pickingForItemId, 'uom', item.uom);
+      if (item.brand) updateLineItem(pickingForItemId, 'brandAsset', item.brand);
+      if (item.model) updateLineItem(pickingForItemId, 'modelYear', item.model);
+    }
+    setShowItemPicker(false);
+    setPickingForItemId(null);
   };
 
   const updateLineItem = (id: string, field: keyof MRLineItem, value: string | number) => {
@@ -228,13 +249,22 @@ export default function MaterialRequestForm({ projects }: MaterialRequestFormPro
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Item Code *
                   </label>
-                  <input
-                    type="text"
-                    value={item.itemCode}
-                    onChange={(e) => updateLineItem(item.id, 'itemCode', e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    required
-                  />
+                  <div className="flex space-x-2">
+                    <input
+                      type="text"
+                      value={item.itemCode}
+                      onChange={(e) => updateLineItem(item.id, 'itemCode', e.target.value)}
+                      className="flex-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => openItemPicker(item.id)}
+                      className="px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500"
+                    >
+                      Select from Catalog
+                    </button>
+                  </div>
                 </div>
 
                 <div>
@@ -383,6 +413,17 @@ export default function MaterialRequestForm({ projects }: MaterialRequestFormPro
           </button>
         </div>
       </form>
+
+      {/* Item Picker Modal */}
+      {showItemPicker && (
+        <ItemPicker
+          onItemSelect={handleItemSelect}
+          onClose={() => {
+            setShowItemPicker(false);
+            setPickingForItemId(null);
+          }}
+        />
+      )}
     </div>
   );
 }

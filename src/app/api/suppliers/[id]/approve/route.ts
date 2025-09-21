@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Supplier } from '@/types/procurement';
+import { createMockSupplier } from '@/lib/mock-suppliers';
 
-// Mock database for suppliers
+// Mock database for suppliers (in a real app, this would be a database)
 const suppliers: Supplier[] = [
-  {
+  createMockSupplier({
     id: '1',
     supplier_code: 'SUP-001',
     name: 'ABC Construction Supplies',
@@ -15,7 +16,6 @@ const suppliers: Supplier[] = [
     quote_count: 25,
     avg_response_time: 24,
     last_quote_date: '2025-01-15',
-    is_active: true,
     status: 'approved',
     approval_date: '2025-01-01',
     approved_by: 'user1',
@@ -32,8 +32,8 @@ const suppliers: Supplier[] = [
         position: 'Sales Manager',
         is_primary: true,
         created_at: '2025-01-01T00:00:00Z',
-        updated_at: '2025-01-01T00:00:00Z'
-      }
+        updated_at: '2025-01-01T00:00:00Z',
+      },
     ],
     performance_metrics: {
       id: '1',
@@ -44,7 +44,7 @@ const suppliers: Supplier[] = [
       on_time_delivery_rate: 95.0,
       quality_rating: 4.5,
       communication_rating: 4.3,
-      last_updated: '2025-01-15T00:00:00Z'
+      last_updated: '2025-01-15T00:00:00Z',
     },
     compliance_docs: [
       {
@@ -52,15 +52,15 @@ const suppliers: Supplier[] = [
         name: 'Trade License',
         url: 'https://example.com/docs/trade-license.pdf',
         expiry_date: '2025-12-31',
-        is_valid: true
-      }
+        is_valid: true,
+      },
     ],
     created_at: '2025-01-01T00:00:00Z',
     updated_at: '2025-01-15T00:00:00Z',
     created_by: 'user1',
-    created_by_name: 'John Smith'
-  },
-  {
+    created_by_name: 'John Smith',
+  }),
+  createMockSupplier({
     id: '2',
     supplier_code: 'SUP-002',
     name: 'XYZ Electrical Solutions',
@@ -72,7 +72,6 @@ const suppliers: Supplier[] = [
     quote_count: 18,
     avg_response_time: 36,
     last_quote_date: '2025-01-10',
-    is_active: true,
     status: 'approved',
     approval_date: '2025-01-02',
     approved_by: 'user2',
@@ -89,8 +88,8 @@ const suppliers: Supplier[] = [
         position: 'Procurement Director',
         is_primary: true,
         created_at: '2025-01-02T00:00:00Z',
-        updated_at: '2025-01-02T00:00:00Z'
-      }
+        updated_at: '2025-01-02T00:00:00Z',
+      },
     ],
     performance_metrics: {
       id: '2',
@@ -101,7 +100,7 @@ const suppliers: Supplier[] = [
       on_time_delivery_rate: 88.0,
       quality_rating: 4.2,
       communication_rating: 4.0,
-      last_updated: '2025-01-10T00:00:00Z'
+      last_updated: '2025-01-10T00:00:00Z',
     },
     compliance_docs: [
       {
@@ -109,15 +108,15 @@ const suppliers: Supplier[] = [
         name: 'ISO 9001 Certificate',
         url: 'https://example.com/docs/iso-9001.pdf',
         expiry_date: '2025-06-30',
-        is_valid: true
-      }
+        is_valid: true,
+      },
     ],
     created_at: '2025-01-02T00:00:00Z',
     updated_at: '2025-01-10T00:00:00Z',
     created_by: 'user2',
-    created_by_name: 'Sarah Johnson'
-  },
-  {
+    created_by_name: 'Sarah Johnson',
+  }),
+  createMockSupplier({
     id: '3',
     supplier_code: 'SUP-003',
     name: 'DEF Industrial Parts',
@@ -129,7 +128,6 @@ const suppliers: Supplier[] = [
     quote_count: 42,
     avg_response_time: 12,
     last_quote_date: '2025-01-18',
-    is_active: true,
     status: 'pending',
     has_been_used: false,
     contacts: [
@@ -142,8 +140,8 @@ const suppliers: Supplier[] = [
         position: 'Business Development Manager',
         is_primary: true,
         created_at: '2025-01-18T00:00:00Z',
-        updated_at: '2025-01-18T00:00:00Z'
-      }
+        updated_at: '2025-01-18T00:00:00Z',
+      },
     ],
     performance_metrics: {
       id: '3',
@@ -154,7 +152,7 @@ const suppliers: Supplier[] = [
       on_time_delivery_rate: 98.0,
       quality_rating: 4.8,
       communication_rating: 4.7,
-      last_updated: '2025-01-18T00:00:00Z'
+      last_updated: '2025-01-18T00:00:00Z',
     },
     compliance_docs: [
       {
@@ -162,128 +160,71 @@ const suppliers: Supplier[] = [
         name: 'Quality Certificate',
         url: 'https://example.com/docs/quality-cert.pdf',
         expiry_date: '2025-09-15',
-        is_valid: true
-      }
+        is_valid: true,
+      },
     ],
     created_at: '2025-01-18T00:00:00Z',
     updated_at: '2025-01-18T00:00:00Z',
     created_by: 'user3',
-    created_by_name: 'Mike Wilson'
-  }
+    created_by_name: 'Mike Wilson',
+  }),
 ];
 
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const category = searchParams.get('category');
-    const status = searchParams.get('status');
-    const isActive = searchParams.get('is_active');
-    const search = searchParams.get('search');
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
-
-    let filteredSuppliers = [...suppliers];
-
-    // Apply filters
-    if (category) {
-      filteredSuppliers = filteredSuppliers.filter(s => 
-        s.category.toLowerCase().includes(category.toLowerCase())
-      );
-    }
-
-    if (status) {
-      filteredSuppliers = filteredSuppliers.filter(s => s.status === status);
-    }
-
-    if (isActive !== null) {
-      const activeFilter = isActive === 'true';
-      filteredSuppliers = filteredSuppliers.filter(s => s.is_active === activeFilter);
-    }
-
-    if (search) {
-      const searchLower = search.toLowerCase();
-      filteredSuppliers = filteredSuppliers.filter(s => 
-        s.name.toLowerCase().includes(searchLower) ||
-        s.email.toLowerCase().includes(searchLower) ||
-        s.category.toLowerCase().includes(searchLower) ||
-        s.supplier_code.toLowerCase().includes(searchLower)
-      );
-    }
-
-    // Apply pagination
-    const total = filteredSuppliers.length;
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const paginatedSuppliers = filteredSuppliers.slice(startIndex, endIndex);
-
-    return NextResponse.json({
-      suppliers: paginatedSuppliers,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit)
-      }
-    });
-  } catch (error) {
-    console.error('Error fetching suppliers:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch suppliers' },
-      { status: 500 }
-    );
-  }
-}
-
-export async function POST(request: NextRequest) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const body = await request.json();
+    const { approved_by, approval_notes } = body;
+    
+    const { id: supplierId } = await params;
+    const supplierIndex = suppliers.findIndex(s => s.id === supplierId);
+    
+    if (supplierIndex === -1) {
+      return NextResponse.json(
+        { error: 'Supplier not found' },
+        { status: 404 }
+      );
+    }
+
+    const supplier = suppliers[supplierIndex];
+    
+    // Check if supplier is already approved
+    if (supplier.status === 'approved') {
+      return NextResponse.json(
+        { error: 'Supplier is already approved' },
+        { status: 400 }
+      );
+    }
+
+    // Update supplier with approval information
     const now = new Date().toISOString();
-    
-    // Generate unique supplier code
-    const nextId = suppliers.length + 1;
-    const supplierCode = body.supplier_code || `SUP-${String(nextId).padStart(3, '0')}`;
-    
-    const newSupplier: Supplier = {
-      id: nextId.toString(),
-      supplier_code: supplierCode,
-      name: body.name,
-      email: body.email,
-      phone: body.phone,
-      address: body.address,
-      category: body.category,
-      rating: 0,
-      quote_count: 0,
-      avg_response_time: 0,
-      last_quote_date: now.split('T')[0],
-      is_active: true,
-      status: 'pending',
-      has_been_used: false,
-      contacts: body.contacts || [],
-      performance_metrics: {
-        id: `perf-${nextId}`,
-        supplier_id: nextId.toString(),
-        total_quotes: 0,
-        successful_quotes: 0,
-        avg_response_time_hours: 0,
-        on_time_delivery_rate: 0,
-        quality_rating: 0,
-        communication_rating: 0,
-        last_updated: now
-      },
-      compliance_docs: [],
-      created_at: now,
-      updated_at: now,
-      created_by: body.created_by || 'system',
-      created_by_name: body.created_by_name || 'System'
+    const updatedSupplier: Supplier = {
+      ...supplier,
+      status: 'approved',
+      approval_date: now,
+      approved_by: approved_by,
+      approved_by_name: approved_by, // In a real app, you'd look up the user name
+      approval_notes: approval_notes,
+      updated_at: now
     };
 
-    suppliers.push(newSupplier);
+    suppliers[supplierIndex] = updatedSupplier;
 
-    return NextResponse.json(newSupplier, { status: 201 });
+    // In a real application, you would:
+    // 1. Send notification to supplier
+    // 2. Log the approval action in audit logs
+    // 3. Update any related systems
+
+    return NextResponse.json({
+      message: 'Supplier approved successfully',
+      supplier: updatedSupplier
+    });
   } catch (error) {
-    console.error('Error creating supplier:', error);
+    console.error('Error approving supplier:', error);
     return NextResponse.json(
-      { error: 'Failed to create supplier' },
+      { error: 'Failed to approve supplier' },
       { status: 500 }
     );
   }

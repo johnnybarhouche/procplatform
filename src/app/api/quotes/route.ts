@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Quote } from '@/types/procurement';
+import { Quote, Supplier } from '@/types/procurement';
+import { createMockSupplier } from '@/lib/mock-suppliers';
 
 // Mock database for quotes
 const quotes: Quote[] = [];
@@ -39,22 +40,14 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
+    const supplierOverrides = (body.supplier as Partial<Supplier> | undefined) ?? {};
+    const supplier = createMockSupplier({ id: body.supplier_id, ...supplierOverrides });
+
     const newQuote: Quote = {
       id: (quotes.length + 1).toString(),
       rfq_id: body.rfq_id,
       supplier_id: body.supplier_id,
-      supplier: body.supplier || {
-        id: body.supplier_id,
-        name: 'Unknown Supplier',
-        email: '',
-        category: '',
-        rating: 0,
-        quote_count: 0,
-        avg_response_time: 0,
-        last_quote_date: new Date().toISOString().split('T')[0],
-        is_active: true,
-        compliance_docs: []
-      },
+      supplier,
       status: 'submitted',
       submitted_at: new Date().toISOString(),
       valid_until: body.valid_until,

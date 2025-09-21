@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { QuoteApproval, QuotePack, AuditLog } from '@/types/procurement';
+import { createMockSupplier } from '@/lib/mock-suppliers';
 
 // Mock data - in production this would come from database
 const quoteApprovals: QuoteApproval[] = [];
@@ -9,6 +10,20 @@ const auditLogs: AuditLog[] = [];
 const initializeData = () => {
   if (quoteApprovals.length === 0) {
     // Create sample quote pack and approval
+    const supplier = createMockSupplier({
+      id: 'supplier-001',
+      supplier_code: 'SUP-001',
+      name: 'ABC Construction Supplies',
+      email: 'quotes@abc.com',
+      category: 'Construction',
+      rating: 4.5,
+      quote_count: 15,
+      avg_response_time: 24,
+      last_quote_date: new Date().toISOString().split('T')[0],
+      status: 'approved',
+      has_been_used: true,
+    });
+
     const sampleQuotePack: QuotePack = {
       id: 'qp-001',
       rfq_id: 'rfq-001',
@@ -44,18 +59,7 @@ const initializeData = () => {
           id: 'q-001',
           rfq_id: 'rfq-001',
           supplier_id: 'supplier-001',
-          supplier: {
-            id: 'supplier-001',
-            name: 'ABC Construction Supplies',
-            email: 'quotes@abc.com',
-            category: 'Construction',
-            rating: 4.5,
-            quote_count: 15,
-            avg_response_time: 24,
-            last_quote_date: new Date().toISOString(),
-            is_active: true,
-            compliance_docs: []
-          },
+          supplier,
           status: 'submitted',
           submitted_at: new Date().toISOString(),
           valid_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
