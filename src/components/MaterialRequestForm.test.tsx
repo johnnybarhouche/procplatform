@@ -20,20 +20,21 @@ describe('MaterialRequestForm', () => {
     expect(screen.getByText('Create Material Request')).toBeInTheDocument();
     expect(screen.getByText('Project Selection')).toBeInTheDocument();
     expect(screen.getByText('Line Items')).toBeInTheDocument();
-    expect(screen.getByText('Attachments')).toBeInTheDocument();
+    expect(screen.getAllByText('Attachments')).toHaveLength(2); // Table header and card header
   });
 
   it('auto-selects project when only one project is available', () => {
     const singleProject = [{ id: '1', name: 'Single Project' }];
     render(<MaterialRequestForm projects={singleProject} onSubmit={mockOnSubmit} />);
     
-    expect(screen.getByText('Project: Single Project')).toBeInTheDocument();
+    expect(screen.getByText('Project:')).toBeInTheDocument();
+    expect(screen.getByText('Single Project')).toBeInTheDocument();
   });
 
   it('shows project dropdown when multiple projects are available', () => {
     render(<MaterialRequestForm projects={mockProjects} onSubmit={mockOnSubmit} />);
     
-    expect(screen.getByRole('combobox')).toBeInTheDocument();
+    expect(screen.getAllByRole('combobox')).toHaveLength(2); // Project selector and UoM selector
     expect(screen.getByText('Select a project')).toBeInTheDocument();
   });
 
@@ -41,16 +42,17 @@ describe('MaterialRequestForm', () => {
     render(<MaterialRequestForm projects={mockProjects} onSubmit={mockOnSubmit} />);
     
     // Should start with one line item
-    expect(screen.getByText('Line Item 1')).toBeInTheDocument();
+    expect(screen.getByText(/Line Item 1/)).toBeInTheDocument();
     
     // Add another line item
     fireEvent.click(screen.getByText('Add Line Item'));
-    expect(screen.getByText('Line Item 2')).toBeInTheDocument();
+    expect(screen.getByText(/Line Item 2/)).toBeInTheDocument();
     
-    // Remove the second line item
-    const removeButtons = screen.getAllByText('Remove');
-    fireEvent.click(removeButtons[0]);
-    expect(screen.queryByText('Line Item 2')).not.toBeInTheDocument();
+    // Remove the second line item (there should be Remove Line buttons for both items now)
+    const removeButtons = screen.getAllByText('Remove Line');
+    expect(removeButtons).toHaveLength(2); // Both line items now have remove buttons
+    fireEvent.click(removeButtons[1]); // Click the second remove button (for the second line item)
+    expect(screen.queryByText(/Line Item 2/)).not.toBeInTheDocument();
   });
 
   it('validates required fields before submission', async () => {
@@ -68,18 +70,19 @@ describe('MaterialRequestForm', () => {
   it('submits form with valid data', async () => {
     render(<MaterialRequestForm projects={mockProjects} onSubmit={mockOnSubmit} />);
     
-    // Select project
-    fireEvent.change(screen.getByRole('combobox'), { target: { value: '1' } });
+    // Select project (first combobox)
+    const projectSelect = screen.getAllByRole('combobox')[0];
+    fireEvent.change(projectSelect, { target: { value: '1' } });
     
-    // Fill required line item fields
-    const itemCodeInput = screen.getByDisplayValue('');
+    // Fill required line item fields using label text
+    const itemCodeInput = screen.getByLabelText(/Line Item 1/);
     fireEvent.change(itemCodeInput, { target: { value: 'ITEM001' } });
     
-    const descriptionInput = screen.getAllByDisplayValue('')[1];
+    const descriptionInput = screen.getByLabelText(/Description/);
     fireEvent.change(descriptionInput, { target: { value: 'Test Item' } });
     
-    const uomInput = screen.getAllByDisplayValue('')[2];
-    fireEvent.change(uomInput, { target: { value: 'PCS' } });
+    const uomInput = screen.getAllByRole('combobox')[1];
+    fireEvent.change(uomInput, { target: { value: 'EA' } });
     
     // Submit form
     fireEvent.click(screen.getByText('Submit Material Request'));
@@ -91,7 +94,7 @@ describe('MaterialRequestForm', () => {
           expect.objectContaining({
             itemCode: 'ITEM001',
             description: 'Test Item',
-            uom: 'PCS'
+            uom: 'EA'
           })
         ]),
         attachments: []
@@ -102,7 +105,8 @@ describe('MaterialRequestForm', () => {
   it('handles file uploads', () => {
     render(<MaterialRequestForm projects={mockProjects} onSubmit={mockOnSubmit} />);
     
-    const fileInput = screen.getByRole('button', { name: /file/i });
+    // Get the hidden file input for line items
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(['test content'], 'test.pdf', { type: 'application/pdf' });
     
     fireEvent.change(fileInput, { target: { files: [file] } });
@@ -113,7 +117,8 @@ describe('MaterialRequestForm', () => {
   it('allows removing uploaded files', () => {
     render(<MaterialRequestForm projects={mockProjects} onSubmit={mockOnSubmit} />);
     
-    const fileInput = screen.getByRole('button', { name: /file/i });
+    // Get the hidden file input for line items
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(['test content'], 'test.pdf', { type: 'application/pdf' });
     
     fireEvent.change(fileInput, { target: { files: [file] } });

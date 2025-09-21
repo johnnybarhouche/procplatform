@@ -7,15 +7,20 @@ export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
   hint?: string;
   error?: string;
+  labelClassName?: string;
+  hideLabel?: boolean;
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ className, label, hint, error, id, required, children, ...props }, ref) => {
+  ({ className, label, hint, error, id, required, children, labelClassName, hideLabel, ...props }, ref) => {
     const selectId = id ?? props.name;
     return (
-      <label className="flex w-full flex-col space-y-1 text-sm text-brand-text/80" htmlFor={selectId}>
+      <label
+        className={cn('flex w-full flex-col space-y-1 text-sm text-brand-text/80', labelClassName)}
+        htmlFor={selectId}
+      >
         {label && (
-          <span className="font-medium text-brand-text">
+          <span className={cn('font-medium text-brand-text', hideLabel && 'sr-only')}>
             {label}
             {required ? ' *' : ''}
           </span>
