@@ -194,3 +194,4 @@ class MockDatabase {
 
 // Export singleton instance
 export const db = new MockDatabase();
+

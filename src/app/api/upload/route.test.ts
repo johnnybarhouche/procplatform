@@ -87,3 +87,4 @@ describe('/api/upload', () => {
     expect(data.error).toBe('No files provided');
   });
 });
+

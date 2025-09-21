@@ -263,3 +263,4 @@ export default function SupplierApprovalForm({ supplier, onApprovalSubmitted, on
     </div>
   );
 }
+
