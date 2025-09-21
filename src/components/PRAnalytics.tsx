@@ -61,7 +61,7 @@ export default function PRAnalytics({ userRole }: PRAnalyticsProps) {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading PR analytics...</p>
+          <p className="mt-4 text-brand-text/70">Loading PR analytics...</p>
         </div>
       </div>
     );
@@ -73,7 +73,7 @@ export default function PRAnalytics({ userRole }: PRAnalyticsProps) {
         <div className="flex">
           <div className="ml-3">
             <h3 className="text-sm font-medium text-red-800">Error loading PR analytics</h3>
-            <div className="mt-2 text-sm text-red-700">
+            <div className="mt-2 text-sm text-status-danger">
               <p>{error}</p>
             </div>
           </div>
@@ -85,7 +85,7 @@ export default function PRAnalytics({ userRole }: PRAnalyticsProps) {
   if (!analytics) {
     return (
       <div className="text-center py-8">
-        <p className="text-gray-500">No PR analytics data available</p>
+        <p className="text-brand-text/60">No PR analytics data available</p>
       </div>
     );
   }
@@ -95,12 +95,12 @@ export default function PRAnalytics({ userRole }: PRAnalyticsProps) {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-xl font-bold text-gray-900">PR Analytics</h2>
-          <p className="text-gray-600">Purchase Requisition performance metrics</p>
+          <h2 className="text-xl font-bold text-brand-text">PR Analytics</h2>
+          <p className="text-brand-text/70">Purchase Requisition performance metrics</p>
         </div>
         <button
           onClick={fetchPRAnalytics}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500"
+          className="bg-brand-primary text-white px-4 py-2 rounded-md hover:bg-brand-primary/90 focus:ring-2 focus:ring-brand-primary"
         >
           Refresh
         </button>
@@ -108,28 +108,28 @@ export default function PRAnalytics({ userRole }: PRAnalyticsProps) {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-lg shadow-sm border">
-          <div className="text-2xl font-bold text-blue-600">{analytics.totalPRs}</div>
-          <div className="text-sm text-gray-600">Total PRs</div>
+        <div className="bg-brand-surface p-4 rounded-lg shadow-sm border">
+          <div className="text-2xl font-bold text-brand-primary">{analytics.totalPRs}</div>
+          <div className="text-sm text-brand-text/70">Total PRs</div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm border">
-          <div className="text-2xl font-bold text-yellow-600">{analytics.pendingPRs}</div>
-          <div className="text-sm text-gray-600">Pending</div>
+        <div className="bg-brand-surface p-4 rounded-lg shadow-sm border">
+          <div className="text-2xl font-bold text-status-warning">{analytics.pendingPRs}</div>
+          <div className="text-sm text-brand-text/70">Pending</div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm border">
-          <div className="text-2xl font-bold text-green-600">{analytics.approvedPRs}</div>
-          <div className="text-sm text-gray-600">Approved</div>
+        <div className="bg-brand-surface p-4 rounded-lg shadow-sm border">
+          <div className="text-2xl font-bold text-status-success">{analytics.approvedPRs}</div>
+          <div className="text-sm text-brand-text/70">Approved</div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm border">
-          <div className="text-2xl font-bold text-red-600">{analytics.rejectedPRs}</div>
-          <div className="text-sm text-gray-600">Rejected</div>
+        <div className="bg-brand-surface p-4 rounded-lg shadow-sm border">
+          <div className="text-2xl font-bold text-status-danger">{analytics.rejectedPRs}</div>
+          <div className="text-sm text-brand-text/70">Rejected</div>
         </div>
       </div>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly PR Trends</h3>
+        <div className="bg-brand-surface p-6 rounded-lg shadow-sm border">
+          <h3 className="text-lg font-semibold text-brand-text mb-4">Monthly PR Trends</h3>
           <AnalyticsChart
             data={analytics.monthlyTrends as unknown as ChartDataItem[]}
             type="line"
@@ -143,8 +143,8 @@ export default function PRAnalytics({ userRole }: PRAnalyticsProps) {
           />
         </div>
         
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">PR Status Distribution</h3>
+        <div className="bg-brand-surface p-6 rounded-lg shadow-sm border">
+          <h3 className="text-lg font-semibold text-brand-text mb-4">PR Status Distribution</h3>
           <AnalyticsChart
             data={[
               { label: 'Approved', value: analytics.approvedPRs },
@@ -162,27 +162,27 @@ export default function PRAnalytics({ userRole }: PRAnalyticsProps) {
       </div>
 
       {/* Top Requesters */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Requesters</h3>
+      <div className="bg-brand-surface p-6 rounded-lg shadow-sm border">
+        <h3 className="text-lg font-semibold text-brand-text mb-4">Top Requesters</h3>
         <div className="space-y-3">
           {analytics.topRequesters.map((requester, index) => (
-            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div key={index} className="flex items-center justify-between p-3 bg-brand-surface rounded-lg">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-blue-600 font-semibold text-sm">
+                <div className="w-8 h-8 bg-brand-primary/10 rounded-full flex items-center justify-center">
+                  <span className="text-brand-primary font-semibold text-sm">
                     {requester.name.charAt(0)}
                   </span>
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">{requester.name}</p>
-                  <p className="text-sm text-gray-600">{requester.count} PRs</p>
+                  <p className="font-medium text-brand-text">{requester.name}</p>
+                  <p className="text-sm text-brand-text/70">{requester.count} PRs</p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="font-semibold text-gray-900">
+                <p className="font-semibold text-brand-text">
                   ${(requester.totalValue / 1000).toFixed(0)}K
                 </p>
-                <p className="text-sm text-gray-600">Total Value</p>
+                <p className="text-sm text-brand-text/70">Total Value</p>
               </div>
             </div>
           ))}
@@ -190,24 +190,24 @@ export default function PRAnalytics({ userRole }: PRAnalyticsProps) {
       </div>
 
       {/* Processing Time */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Processing Performance</h3>
+      <div className="bg-brand-surface p-6 rounded-lg shadow-sm border">
+        <h3 className="text-lg font-semibold text-brand-text mb-4">Processing Performance</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="text-center">
-            <div className="text-3xl font-bold text-blue-600">{analytics.avgProcessingTime}</div>
-            <div className="text-sm text-gray-600">Avg Processing Time (days)</div>
+            <div className="text-3xl font-bold text-brand-primary">{analytics.avgProcessingTime}</div>
+            <div className="text-sm text-brand-text/70">Avg Processing Time (days)</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-green-600">
+            <div className="text-3xl font-bold text-status-success">
               {((analytics.approvedPRs / analytics.totalPRs) * 100).toFixed(1)}%
             </div>
-            <div className="text-sm text-gray-600">Approval Rate</div>
+            <div className="text-sm text-brand-text/70">Approval Rate</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-yellow-600">
+            <div className="text-3xl font-bold text-status-warning">
               {((analytics.pendingPRs / analytics.totalPRs) * 100).toFixed(1)}%
             </div>
-            <div className="text-sm text-gray-600">Pending Rate</div>
+            <div className="text-sm text-brand-text/70">Pending Rate</div>
           </div>
         </div>
       </div>

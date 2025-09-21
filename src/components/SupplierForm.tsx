@@ -152,9 +152,9 @@ export default function SupplierForm({ supplier, onSave, onCancel }: SupplierFor
   };
 
   return (
-    <div className="max-w-4xl mx-auto bg-white shadow rounded-lg">
-      <div className="px-6 py-4 border-b border-gray-200">
-        <h2 className="text-lg font-medium text-gray-900">
+    <div className="max-w-4xl mx-auto bg-brand-surface shadow rounded-lg">
+      <div className="px-6 py-4 border-b border-brand-text/10">
+        <h2 className="text-lg font-medium text-brand-text">
           {supplier ? 'Edit Supplier' : 'Add New Supplier'}
         </h2>
       </div>
@@ -173,7 +173,7 @@ export default function SupplierForm({ supplier, onSave, onCancel }: SupplierFor
                 <h3 className="text-sm font-medium text-yellow-800">
                   Modification Restricted
                 </h3>
-                <div className="mt-2 text-sm text-yellow-700">
+                <div className="mt-2 text-sm text-status-warning">
                   <p>This supplier has been used in procurement transactions and cannot be modified or deleted.</p>
                 </div>
               </div>
@@ -183,10 +183,10 @@ export default function SupplierForm({ supplier, onSave, onCancel }: SupplierFor
 
         {/* Basic Information */}
         <div>
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Basic Information</h3>
+          <h3 className="text-lg font-medium text-brand-text mb-4">Basic Information</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-brand-text/80 mb-1">
                 Supplier Code *
               </label>
               <input
@@ -195,15 +195,15 @@ export default function SupplierForm({ supplier, onSave, onCancel }: SupplierFor
                 onChange={(e) => setFormData(prev => ({ ...prev, supplier_code: e.target.value }))}
                 disabled={supplier?.has_been_used}
                 className={`w-full border rounded-md px-3 py-2 ${
-                  errors.supplier_code ? 'border-red-300' : 'border-gray-300'
-                } ${supplier?.has_been_used ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                  errors.supplier_code ? 'border-red-300' : 'border-brand-text/20'
+                } ${supplier?.has_been_used ? 'bg-brand-surface cursor-not-allowed' : ''}`}
                 placeholder="Enter supplier code (e.g., SUP-001)"
               />
               {errors.supplier_code && <p className="text-red-500 text-sm mt-1">{errors.supplier_code}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-brand-text/80 mb-1">
                 Supplier Name *
               </label>
               <input
@@ -211,7 +211,7 @@ export default function SupplierForm({ supplier, onSave, onCancel }: SupplierFor
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                 className={`w-full border rounded-md px-3 py-2 ${
-                  errors.name ? 'border-red-300' : 'border-gray-300'
+                  errors.name ? 'border-red-300' : 'border-brand-text/20'
                 }`}
                 placeholder="Enter supplier name"
               />
@@ -219,7 +219,7 @@ export default function SupplierForm({ supplier, onSave, onCancel }: SupplierFor
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-brand-text/80 mb-1">
                 Email *
               </label>
               <input
@@ -227,7 +227,7 @@ export default function SupplierForm({ supplier, onSave, onCancel }: SupplierFor
                 value={formData.email}
                 onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                 className={`w-full border rounded-md px-3 py-2 ${
-                  errors.email ? 'border-red-300' : 'border-gray-300'
+                  errors.email ? 'border-red-300' : 'border-brand-text/20'
                 }`}
                 placeholder="Enter email address"
               />
@@ -235,27 +235,27 @@ export default function SupplierForm({ supplier, onSave, onCancel }: SupplierFor
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-brand-text/80 mb-1">
                 Phone
               </label>
               <input
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                className="w-full border border-brand-text/20 rounded-md px-3 py-2"
                 placeholder="Enter phone number"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-brand-text/80 mb-1">
                 Category *
               </label>
               <select
                 value={formData.category}
                 onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
                 className={`w-full border rounded-md px-3 py-2 ${
-                  errors.category ? 'border-red-300' : 'border-gray-300'
+                  errors.category ? 'border-red-300' : 'border-brand-text/20'
                 }`}
               >
                 <option value="">Select category</option>
@@ -271,13 +271,13 @@ export default function SupplierForm({ supplier, onSave, onCancel }: SupplierFor
           </div>
 
           <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-brand-text/80 mb-1">
               Address
             </label>
             <textarea
               value={formData.address}
               onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-              className="w-full border border-gray-300 rounded-md px-3 py-2"
+              className="w-full border border-brand-text/20 rounded-md px-3 py-2"
               rows={3}
               placeholder="Enter supplier address"
             />
@@ -286,57 +286,57 @@ export default function SupplierForm({ supplier, onSave, onCancel }: SupplierFor
 
         {/* Contacts */}
         <div>
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Contacts</h3>
+          <h3 className="text-lg font-medium text-brand-text mb-4">Contacts</h3>
           
           {/* Add New Contact */}
-          <div className="bg-gray-50 p-4 rounded-lg mb-4">
-            <h4 className="font-medium text-gray-900 mb-3">Add New Contact</h4>
+          <div className="bg-brand-surface p-4 rounded-lg mb-4">
+            <h4 className="font-medium text-brand-text mb-3">Add New Contact</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-brand-text/80 mb-1">
                   Contact Name *
                 </label>
                 <input
                   type="text"
                   value={newContact.name}
                   onChange={(e) => setNewContact(prev => ({ ...prev, name: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2"
+                  className="w-full border border-brand-text/20 rounded-md px-3 py-2"
                   placeholder="Enter contact name"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-brand-text/80 mb-1">
                   Email *
                 </label>
                 <input
                   type="email"
                   value={newContact.email}
                   onChange={(e) => setNewContact(prev => ({ ...prev, email: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2"
+                  className="w-full border border-brand-text/20 rounded-md px-3 py-2"
                   placeholder="Enter contact email"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-brand-text/80 mb-1">
                   Phone
                 </label>
                 <input
                   type="tel"
                   value={newContact.phone}
                   onChange={(e) => setNewContact(prev => ({ ...prev, phone: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2"
+                  className="w-full border border-brand-text/20 rounded-md px-3 py-2"
                   placeholder="Enter contact phone"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-brand-text/80 mb-1">
                   Position *
                 </label>
                 <input
                   type="text"
                   value={newContact.position}
                   onChange={(e) => setNewContact(prev => ({ ...prev, position: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2"
+                  className="w-full border border-brand-text/20 rounded-md px-3 py-2"
                   placeholder="Enter position"
                 />
               </div>
@@ -347,16 +347,16 @@ export default function SupplierForm({ supplier, onSave, onCancel }: SupplierFor
                 id="is_primary"
                 checked={newContact.is_primary}
                 onChange={(e) => setNewContact(prev => ({ ...prev, is_primary: e.target.checked }))}
-                className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                className="h-4 w-4 text-brand-primary border-brand-text/20 rounded"
               />
-              <label htmlFor="is_primary" className="ml-2 text-sm text-gray-700">
+              <label htmlFor="is_primary" className="ml-2 text-sm text-brand-text/80">
                 Primary contact
               </label>
             </div>
             <button
               type="button"
               onClick={addContact}
-              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              className="mt-4 px-4 py-2 bg-brand-primary text-white rounded-md hover:bg-brand-primary/90"
             >
               Add Contact
             </button>
@@ -365,17 +365,17 @@ export default function SupplierForm({ supplier, onSave, onCancel }: SupplierFor
           {/* Existing Contacts */}
           <div className="space-y-3">
             {formData.contacts.map((contact) => (
-              <div key={contact.id} className="border border-gray-200 rounded-lg p-4">
+              <div key={contact.id} className="border border-brand-text/10 rounded-lg p-4">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h4 className="font-medium text-gray-900">{contact.name}</h4>
-                    <p className="text-sm text-gray-500">{contact.position}</p>
-                    <p className="text-sm text-gray-700">{contact.email}</p>
-                    {contact.phone && <p className="text-sm text-gray-700">{contact.phone}</p>}
+                    <h4 className="font-medium text-brand-text">{contact.name}</h4>
+                    <p className="text-sm text-brand-text/60">{contact.position}</p>
+                    <p className="text-sm text-brand-text/80">{contact.email}</p>
+                    {contact.phone && <p className="text-sm text-brand-text/80">{contact.phone}</p>}
                   </div>
                   <div className="flex items-center space-x-2">
                     {contact.is_primary && (
-                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-brand-primary/10 text-blue-800">
                         Primary
                       </span>
                     )}
@@ -383,7 +383,7 @@ export default function SupplierForm({ supplier, onSave, onCancel }: SupplierFor
                       <button
                         type="button"
                         onClick={() => setPrimaryContact(contact.id)}
-                        className="text-blue-600 hover:text-blue-900 text-sm"
+                        className="text-brand-primary hover:text-blue-900 text-sm"
                       >
                         Set Primary
                       </button>
@@ -391,7 +391,7 @@ export default function SupplierForm({ supplier, onSave, onCancel }: SupplierFor
                     <button
                       type="button"
                       onClick={() => removeContact(contact.id)}
-                      className="text-red-600 hover:text-red-900 text-sm"
+                      className="text-status-danger hover:text-red-900 text-sm"
                     >
                       Remove
                     </button>
@@ -400,7 +400,7 @@ export default function SupplierForm({ supplier, onSave, onCancel }: SupplierFor
               </div>
             ))}
             {formData.contacts.length === 0 && (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-brand-text/60">
                 No contacts added yet.
               </div>
             )}
@@ -408,18 +408,18 @@ export default function SupplierForm({ supplier, onSave, onCancel }: SupplierFor
         </div>
 
         {/* Form Actions */}
-        <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+        <div className="flex justify-end space-x-3 pt-6 border-t border-brand-text/10">
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            className="px-4 py-2 border border-brand-text/20 rounded-md text-brand-text/80 hover:bg-brand-surface"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={loading || (supplier?.has_been_used)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+            className="px-4 py-2 bg-brand-primary text-white rounded-md hover:bg-brand-primary/90 disabled:opacity-50"
           >
             {loading ? 'Saving...' : (supplier ? 'Update Supplier' : 'Create Supplier')}
           </button>

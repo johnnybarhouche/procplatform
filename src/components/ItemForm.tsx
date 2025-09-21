@@ -171,9 +171,9 @@ export default function ItemForm({ item, onSave, onCancel }: ItemFormProps) {
   };
 
   return (
-    <div className="max-w-4xl mx-auto bg-white shadow rounded-lg">
-      <div className="px-6 py-4 border-b border-gray-200">
-        <h2 className="text-lg font-medium text-gray-900">
+    <div className="max-w-4xl mx-auto bg-brand-surface shadow rounded-lg">
+      <div className="px-6 py-4 border-b border-brand-text/10">
+        <h2 className="text-lg font-medium text-brand-text">
           {item ? 'Edit Item' : 'Add New Item'}
         </h2>
       </div>
@@ -181,10 +181,10 @@ export default function ItemForm({ item, onSave, onCancel }: ItemFormProps) {
       <form onSubmit={handleSubmit} className="p-6 space-y-6">
         {/* Basic Information */}
         <div>
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Basic Information</h3>
+          <h3 className="text-lg font-medium text-brand-text mb-4">Basic Information</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-brand-text/80 mb-1">
                 Item Code *
               </label>
               <input
@@ -193,7 +193,7 @@ export default function ItemForm({ item, onSave, onCancel }: ItemFormProps) {
                 value={formData.item_code}
                 onChange={handleInputChange}
                 className={`w-full border rounded-md px-3 py-2 ${
-                  errors.item_code ? 'border-red-300' : 'border-gray-300'
+                  errors.item_code ? 'border-red-300' : 'border-brand-text/20'
                 }`}
                 placeholder="Enter item code (e.g., ITM-001)"
               />
@@ -201,7 +201,7 @@ export default function ItemForm({ item, onSave, onCancel }: ItemFormProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-brand-text/80 mb-1">
                 Category *
               </label>
               <select
@@ -209,7 +209,7 @@ export default function ItemForm({ item, onSave, onCancel }: ItemFormProps) {
                 value={formData.category}
                 onChange={handleInputChange}
                 className={`w-full border rounded-md px-3 py-2 ${
-                  errors.category ? 'border-red-300' : 'border-gray-300'
+                  errors.category ? 'border-red-300' : 'border-brand-text/20'
                 }`}
               >
                 <option value="">Select Category</option>
@@ -221,7 +221,7 @@ export default function ItemForm({ item, onSave, onCancel }: ItemFormProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-brand-text/80 mb-1">
                 Description *
               </label>
               <textarea
@@ -230,7 +230,7 @@ export default function ItemForm({ item, onSave, onCancel }: ItemFormProps) {
                 onChange={handleInputChange}
                 rows={3}
                 className={`w-full border rounded-md px-3 py-2 ${
-                  errors.description ? 'border-red-300' : 'border-gray-300'
+                  errors.description ? 'border-red-300' : 'border-brand-text/20'
                 }`}
                 placeholder="Enter item description"
               />
@@ -238,7 +238,7 @@ export default function ItemForm({ item, onSave, onCancel }: ItemFormProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-brand-text/80 mb-1">
                 Unit of Measure *
               </label>
               <select
@@ -246,7 +246,7 @@ export default function ItemForm({ item, onSave, onCancel }: ItemFormProps) {
                 value={formData.uom}
                 onChange={handleInputChange}
                 className={`w-full border rounded-md px-3 py-2 ${
-                  errors.uom ? 'border-red-300' : 'border-gray-300'
+                  errors.uom ? 'border-red-300' : 'border-brand-text/20'
                 }`}
               >
                 <option value="">Select UOM</option>
@@ -258,7 +258,7 @@ export default function ItemForm({ item, onSave, onCancel }: ItemFormProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-brand-text/80 mb-1">
                 Brand
               </label>
               <input
@@ -266,13 +266,13 @@ export default function ItemForm({ item, onSave, onCancel }: ItemFormProps) {
                 name="brand"
                 value={formData.brand}
                 onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                className="w-full border border-brand-text/20 rounded-md px-3 py-2"
                 placeholder="Enter brand name"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-brand-text/80 mb-1">
                 Model
               </label>
               <input
@@ -280,7 +280,7 @@ export default function ItemForm({ item, onSave, onCancel }: ItemFormProps) {
                 name="model"
                 value={formData.model}
                 onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                className="w-full border border-brand-text/20 rounded-md px-3 py-2"
                 placeholder="Enter model number"
               />
             </div>
@@ -290,11 +290,11 @@ export default function ItemForm({ item, onSave, onCancel }: ItemFormProps) {
         {/* Specifications */}
         <div>
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-medium text-gray-900">Specifications</h3>
+            <h3 className="text-lg font-medium text-brand-text">Specifications</h3>
             <button
               type="button"
               onClick={addSpecification}
-              className="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700"
+              className="bg-brand-primary text-white px-3 py-1 rounded-md hover:bg-brand-primary/90"
             >
               Add Specification
             </button>
@@ -309,7 +309,7 @@ export default function ItemForm({ item, onSave, onCancel }: ItemFormProps) {
                       type="text"
                       value={spec.key}
                       onChange={(e) => updateSpecification(index, 'key', e.target.value)}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2"
+                      className="w-full border border-brand-text/20 rounded-md px-3 py-2"
                       placeholder="Specification name (e.g., Diameter)"
                     />
                   </div>
@@ -318,14 +318,14 @@ export default function ItemForm({ item, onSave, onCancel }: ItemFormProps) {
                       type="text"
                       value={spec.value}
                       onChange={(e) => updateSpecification(index, 'value', e.target.value)}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2"
+                      className="w-full border border-brand-text/20 rounded-md px-3 py-2"
                       placeholder="Specification value (e.g., 12mm)"
                     />
                   </div>
                   <button
                     type="button"
                     onClick={() => removeSpecification(index)}
-                    className="bg-red-600 text-white px-3 py-2 rounded-md hover:bg-red-700"
+                    className="bg-status-danger text-white px-3 py-2 rounded-md hover:bg-status-danger/90"
                   >
                     Remove
                   </button>
@@ -333,7 +333,7 @@ export default function ItemForm({ item, onSave, onCancel }: ItemFormProps) {
               ))}
             </div>
           ) : (
-                      <p className="text-gray-500 text-sm">No specifications added yet. Click &quot;Add Specification&quot; to add some.</p>
+                      <p className="text-brand-text/60 text-sm">No specifications added yet. Click &quot;Add Specification&quot; to add some.</p>
           )}
         </div>
 
@@ -348,7 +348,7 @@ export default function ItemForm({ item, onSave, onCancel }: ItemFormProps) {
               </div>
               <div className="ml-3">
                 <h3 className="text-sm font-medium text-red-800">Error</h3>
-                <div className="mt-2 text-sm text-red-700">
+                <div className="mt-2 text-sm text-status-danger">
                   <p>{errors.submit}</p>
                 </div>
               </div>
@@ -357,18 +357,18 @@ export default function ItemForm({ item, onSave, onCancel }: ItemFormProps) {
         )}
 
         {/* Form Actions */}
-        <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+        <div className="flex justify-end space-x-3 pt-6 border-t border-brand-text/10">
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            className="px-4 py-2 border border-brand-text/20 rounded-md text-brand-text/80 hover:bg-brand-surface"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+            className="px-4 py-2 bg-brand-primary text-white rounded-md hover:bg-brand-primary/90 disabled:opacity-50"
           >
             {loading ? 'Saving...' : (item ? 'Update Item' : 'Create Item')}
           </button>

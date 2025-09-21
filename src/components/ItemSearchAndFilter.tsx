@@ -56,7 +56,7 @@ export default function ItemSearchAndFilter({ onFiltersChanged, onSearch }: Item
   const hasActiveFilters = Object.values(filters).some(value => value !== undefined && value !== '');
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow">
+    <div className="bg-brand-surface p-6 rounded-lg shadow">
       {/* Basic Search */}
       <div className="space-y-4">
         <div className="flex space-x-4">
@@ -66,7 +66,7 @@ export default function ItemSearchAndFilter({ onFiltersChanged, onSearch }: Item
               placeholder="Search items by code, description, brand..."
               value={searchTerm}
               onChange={handleSearchChange}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full border border-brand-text/20 rounded-md px-3 py-2 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary"
             />
           </div>
           <button
@@ -83,8 +83,8 @@ export default function ItemSearchAndFilter({ onFiltersChanged, onSearch }: Item
             onClick={() => handleFilterChange('approval_status', 'approved')}
             className={`px-3 py-1 rounded-full text-sm ${
               filters.approval_status === 'approved'
-                ? 'bg-green-100 text-green-800'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-status-success/10 text-green-800'
+                : 'bg-brand-surface text-brand-text/80 hover:bg-brand-surface'
             }`}
           >
             Approved
@@ -93,8 +93,8 @@ export default function ItemSearchAndFilter({ onFiltersChanged, onSearch }: Item
             onClick={() => handleFilterChange('approval_status', 'pending')}
             className={`px-3 py-1 rounded-full text-sm ${
               filters.approval_status === 'pending'
-                ? 'bg-yellow-100 text-yellow-800'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-status-warning/10 text-yellow-800'
+                : 'bg-brand-surface text-brand-text/80 hover:bg-brand-surface'
             }`}
           >
             Pending
@@ -103,8 +103,8 @@ export default function ItemSearchAndFilter({ onFiltersChanged, onSearch }: Item
             onClick={() => handleFilterChange('is_active', true)}
             className={`px-3 py-1 rounded-full text-sm ${
               filters.is_active === true
-                ? 'bg-blue-100 text-blue-800'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-brand-primary/10 text-blue-800'
+                : 'bg-brand-surface text-brand-text/80 hover:bg-brand-surface'
             }`}
           >
             Active
@@ -113,8 +113,8 @@ export default function ItemSearchAndFilter({ onFiltersChanged, onSearch }: Item
             onClick={() => handleFilterChange('is_active', false)}
             className={`px-3 py-1 rounded-full text-sm ${
               filters.is_active === false
-                ? 'bg-red-100 text-red-800'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-status-danger/10 text-red-800'
+                : 'bg-brand-surface text-brand-text/80 hover:bg-brand-surface'
             }`}
           >
             Inactive
@@ -124,24 +124,24 @@ export default function ItemSearchAndFilter({ onFiltersChanged, onSearch }: Item
         {/* Active Filters Display */}
         {hasActiveFilters && (
           <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-500">Active filters:</span>
+            <span className="text-sm text-brand-text/60">Active filters:</span>
             {filters.category && (
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-brand-primary/10 text-blue-800">
                 Category: {filters.category}
                 <button
                   onClick={() => handleFilterChange('category', undefined)}
-                  className="ml-1 text-blue-600 hover:text-blue-800"
+                  className="ml-1 text-brand-primary hover:text-blue-800"
                 >
                   ×
                 </button>
               </span>
             )}
             {filters.approval_status && (
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-status-success/10 text-green-800">
                 Status: {filters.approval_status}
                 <button
                   onClick={() => handleFilterChange('approval_status', undefined)}
-                  className="ml-1 text-green-600 hover:text-green-800"
+                  className="ml-1 text-status-success hover:text-green-800"
                 >
                   ×
                 </button>
@@ -160,7 +160,7 @@ export default function ItemSearchAndFilter({ onFiltersChanged, onSearch }: Item
             )}
             <button
               onClick={clearFilters}
-              className="text-sm text-gray-500 hover:text-gray-700 underline"
+              className="text-sm text-brand-text/60 hover:text-brand-text/80 underline"
             >
               Clear all
             </button>
@@ -170,15 +170,15 @@ export default function ItemSearchAndFilter({ onFiltersChanged, onSearch }: Item
 
       {/* Advanced Filters */}
       {showAdvanced && (
-        <div className="mt-6 pt-6 border-t border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Advanced Filters</h3>
+        <div className="mt-6 pt-6 border-t border-brand-text/10">
+          <h3 className="text-lg font-medium text-brand-text mb-4">Advanced Filters</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+              <label className="block text-sm font-medium text-brand-text/80 mb-1">Category</label>
               <select
                 value={filters.category || ''}
                 onChange={(e) => handleFilterChange('category', e.target.value || undefined)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                className="w-full border border-brand-text/20 rounded-md px-3 py-2"
               >
                 <option value="">All Categories</option>
                 {categories.map(category => (
@@ -188,11 +188,11 @@ export default function ItemSearchAndFilter({ onFiltersChanged, onSearch }: Item
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Approval Status</label>
+              <label className="block text-sm font-medium text-brand-text/80 mb-1">Approval Status</label>
               <select
                 value={filters.approval_status || ''}
                 onChange={(e) => handleFilterChange('approval_status', e.target.value || undefined)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                className="w-full border border-brand-text/20 rounded-md px-3 py-2"
               >
                 <option value="">All Status</option>
                 <option value="approved">Approved</option>
@@ -202,13 +202,13 @@ export default function ItemSearchAndFilter({ onFiltersChanged, onSearch }: Item
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Active Status</label>
+              <label className="block text-sm font-medium text-brand-text/80 mb-1">Active Status</label>
               <select
                 value={filters.is_active?.toString() || ''}
                 onChange={(e) => handleFilterChange('is_active', 
                   e.target.value === '' ? undefined : e.target.value === 'true'
                 )}
-                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                className="w-full border border-brand-text/20 rounded-md px-3 py-2"
               >
                 <option value="">All</option>
                 <option value="true">Active</option>
@@ -217,7 +217,7 @@ export default function ItemSearchAndFilter({ onFiltersChanged, onSearch }: Item
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Price Range</label>
+              <label className="block text-sm font-medium text-brand-text/80 mb-1">Price Range</label>
               <div className="flex space-x-2">
                 <input
                   type="number"
@@ -226,7 +226,7 @@ export default function ItemSearchAndFilter({ onFiltersChanged, onSearch }: Item
                   onChange={(e) => handleFilterChange('price_min', 
                     e.target.value ? parseFloat(e.target.value) : undefined
                   )}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2"
+                  className="w-full border border-brand-text/20 rounded-md px-3 py-2"
                 />
                 <input
                   type="number"
@@ -235,7 +235,7 @@ export default function ItemSearchAndFilter({ onFiltersChanged, onSearch }: Item
                   onChange={(e) => handleFilterChange('price_max', 
                     e.target.value ? parseFloat(e.target.value) : undefined
                   )}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2"
+                  className="w-full border border-brand-text/20 rounded-md px-3 py-2"
                 />
               </div>
             </div>
@@ -244,7 +244,7 @@ export default function ItemSearchAndFilter({ onFiltersChanged, onSearch }: Item
           <div className="mt-4 flex justify-end">
             <button
               onClick={clearFilters}
-              className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300"
+              className="bg-brand-surface text-brand-text/80 px-4 py-2 rounded-md hover:bg-brand-primary/10"
             >
               Clear All Filters
             </button>

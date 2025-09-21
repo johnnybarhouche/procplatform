@@ -61,7 +61,7 @@ export default function ItemPriceTrends({ userRole }: ItemPriceTrendsProps) {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading price trends...</p>
+          <p className="mt-4 text-brand-text/70">Loading price trends...</p>
         </div>
       </div>
     );
@@ -73,7 +73,7 @@ export default function ItemPriceTrends({ userRole }: ItemPriceTrendsProps) {
         <div className="flex">
           <div className="ml-3">
             <h3 className="text-sm font-medium text-red-800">Error loading price trends</h3>
-            <div className="mt-2 text-sm text-red-700">
+            <div className="mt-2 text-sm text-status-danger">
               <p>{error}</p>
             </div>
           </div>
@@ -85,7 +85,7 @@ export default function ItemPriceTrends({ userRole }: ItemPriceTrendsProps) {
   if (!trends || trends.length === 0) {
     return (
       <div className="text-center py-8">
-        <p className="text-gray-500">No price trends data available</p>
+        <p className="text-brand-text/60">No price trends data available</p>
       </div>
     );
   }
@@ -95,12 +95,12 @@ export default function ItemPriceTrends({ userRole }: ItemPriceTrendsProps) {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Item Price Trends</h2>
-          <p className="text-gray-600">Historical pricing analysis and trends</p>
+          <h2 className="text-xl font-bold text-brand-text">Item Price Trends</h2>
+          <p className="text-brand-text/70">Historical pricing analysis and trends</p>
         </div>
         <button
           onClick={fetchPriceTrends}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500"
+          className="bg-brand-primary text-white px-4 py-2 rounded-md hover:bg-brand-primary/90 focus:ring-2 focus:ring-brand-primary"
         >
           Refresh
         </button>
@@ -108,49 +108,49 @@ export default function ItemPriceTrends({ userRole }: ItemPriceTrendsProps) {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-lg shadow-sm border">
-          <div className="text-2xl font-bold text-blue-600">{trends.length}</div>
-          <div className="text-sm text-gray-600">Items Tracked</div>
+        <div className="bg-brand-surface p-4 rounded-lg shadow-sm border">
+          <div className="text-2xl font-bold text-brand-primary">{trends.length}</div>
+          <div className="text-sm text-brand-text/70">Items Tracked</div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm border">
-          <div className="text-2xl font-bold text-green-600">
+        <div className="bg-brand-surface p-4 rounded-lg shadow-sm border">
+          <div className="text-2xl font-bold text-status-success">
             {trends.filter(t => t.priceChange > 0).length}
           </div>
-          <div className="text-sm text-gray-600">Price Increases</div>
+          <div className="text-sm text-brand-text/70">Price Increases</div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm border">
-          <div className="text-2xl font-bold text-red-600">
+        <div className="bg-brand-surface p-4 rounded-lg shadow-sm border">
+          <div className="text-2xl font-bold text-status-danger">
             {trends.filter(t => t.priceChange < 0).length}
           </div>
-          <div className="text-sm text-gray-600">Price Decreases</div>
+          <div className="text-sm text-brand-text/70">Price Decreases</div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm border">
-          <div className="text-2xl font-bold text-yellow-600">
+        <div className="bg-brand-surface p-4 rounded-lg shadow-sm border">
+          <div className="text-2xl font-bold text-status-warning">
             {trends.filter(t => t.priceChange === 0).length}
           </div>
-          <div className="text-sm text-gray-600">Stable Prices</div>
+          <div className="text-sm text-brand-text/70">Stable Prices</div>
         </div>
       </div>
 
       {/* Price Trend Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {trends.slice(0, 4).map((trend, index) => (
-          <div key={index} className="bg-white p-6 rounded-lg shadow-sm border">
+          <div key={index} className="bg-brand-surface p-6 rounded-lg shadow-sm border">
             <div className="flex justify-between items-start mb-4">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">{trend.itemName}</h3>
-                <p className="text-sm text-gray-600">{trend.itemCode}</p>
+                <h3 className="text-lg font-semibold text-brand-text">{trend.itemName}</h3>
+                <p className="text-sm text-brand-text/70">{trend.itemCode}</p>
               </div>
               <div className="text-right">
                 <div className={`text-lg font-bold ${
-                  trend.priceChange > 0 ? 'text-red-600' : 
-                  trend.priceChange < 0 ? 'text-green-600' : 'text-gray-600'
+                  trend.priceChange > 0 ? 'text-status-danger' : 
+                  trend.priceChange < 0 ? 'text-status-success' : 'text-brand-text/70'
                 }`}>
                   ${trend.currentPrice}
                 </div>
                 <div className={`text-sm ${
-                  trend.priceChange > 0 ? 'text-red-600' : 
-                  trend.priceChange < 0 ? 'text-green-600' : 'text-gray-600'
+                  trend.priceChange > 0 ? 'text-status-danger' : 
+                  trend.priceChange < 0 ? 'text-status-success' : 'text-brand-text/70'
                 }`}>
                   {trend.priceChangePercent > 0 ? '+' : ''}{trend.priceChangePercent.toFixed(1)}%
                 </div>
@@ -172,45 +172,45 @@ export default function ItemPriceTrends({ userRole }: ItemPriceTrendsProps) {
       </div>
 
       {/* All Items Table */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">All Items Price Analysis</h3>
+      <div className="bg-brand-surface p-6 rounded-lg shadow-sm border">
+        <h3 className="text-lg font-semibold text-brand-text mb-4">All Items Price Analysis</h3>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+            <thead className="bg-brand-surface">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                   Item
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                   Current Price
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                   Change
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                   Trend
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                   Data Points
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-brand-surface divide-y divide-gray-200">
               {trends.map((trend, index) => (
-                <tr key={index} className="hover:bg-gray-50">
+                <tr key={index} className="hover:bg-brand-surface">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
-                      <div className="text-sm font-medium text-gray-900">{trend.itemName}</div>
-                      <div className="text-sm text-gray-500">{trend.itemCode}</div>
+                      <div className="text-sm font-medium text-brand-text">{trend.itemName}</div>
+                      <div className="text-sm text-brand-text/60">{trend.itemCode}</div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">${trend.currentPrice}</div>
+                    <div className="text-sm font-medium text-brand-text">${trend.currentPrice}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className={`text-sm font-medium ${
-                      trend.priceChange > 0 ? 'text-red-600' : 
-                      trend.priceChange < 0 ? 'text-green-600' : 'text-gray-600'
+                      trend.priceChange > 0 ? 'text-status-danger' : 
+                      trend.priceChange < 0 ? 'text-status-success' : 'text-brand-text/70'
                     }`}>
                       {trend.priceChange > 0 ? '+' : ''}${trend.priceChange} ({trend.priceChangePercent > 0 ? '+' : ''}{trend.priceChangePercent.toFixed(1)}%)
                     </div>
@@ -218,16 +218,16 @@ export default function ItemPriceTrends({ userRole }: ItemPriceTrendsProps) {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       {trend.priceChange > 0 ? (
-                        <span className="text-red-600">↗️ Rising</span>
+                        <span className="text-status-danger">↗️ Rising</span>
                       ) : trend.priceChange < 0 ? (
-                        <span className="text-green-600">↘️ Falling</span>
+                        <span className="text-status-success">↘️ Falling</span>
                       ) : (
-                        <span className="text-gray-600">→ Stable</span>
+                        <span className="text-brand-text/70">→ Stable</span>
                       )}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{trend.priceHistory.length}</div>
+                    <div className="text-sm text-brand-text">{trend.priceHistory.length}</div>
                   </td>
                 </tr>
               ))}

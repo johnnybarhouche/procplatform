@@ -62,7 +62,7 @@ export default function RFQAnalytics({ userRole }: RFQAnalyticsProps) {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading RFQ analytics...</p>
+          <p className="mt-4 text-brand-text/70">Loading RFQ analytics...</p>
         </div>
       </div>
     );
@@ -74,7 +74,7 @@ export default function RFQAnalytics({ userRole }: RFQAnalyticsProps) {
         <div className="flex">
           <div className="ml-3">
             <h3 className="text-sm font-medium text-red-800">Error loading RFQ analytics</h3>
-            <div className="mt-2 text-sm text-red-700">
+            <div className="mt-2 text-sm text-status-danger">
               <p>{error}</p>
             </div>
           </div>
@@ -86,7 +86,7 @@ export default function RFQAnalytics({ userRole }: RFQAnalyticsProps) {
   if (!analytics) {
     return (
       <div className="text-center py-8">
-        <p className="text-gray-500">No RFQ analytics data available</p>
+        <p className="text-brand-text/60">No RFQ analytics data available</p>
       </div>
     );
   }
@@ -96,12 +96,12 @@ export default function RFQAnalytics({ userRole }: RFQAnalyticsProps) {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-xl font-bold text-gray-900">RFQ Analytics</h2>
-          <p className="text-gray-600">Request for Quote performance and supplier engagement</p>
+          <h2 className="text-xl font-bold text-brand-text">RFQ Analytics</h2>
+          <p className="text-brand-text/70">Request for Quote performance and supplier engagement</p>
         </div>
         <button
           onClick={fetchRFQAnalytics}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500"
+          className="bg-brand-primary text-white px-4 py-2 rounded-md hover:bg-brand-primary/90 focus:ring-2 focus:ring-brand-primary"
         >
           Refresh
         </button>
@@ -109,32 +109,32 @@ export default function RFQAnalytics({ userRole }: RFQAnalyticsProps) {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-lg shadow-sm border">
-          <div className="text-2xl font-bold text-blue-600">{analytics.totalRFQs}</div>
-          <div className="text-sm text-gray-600">Total RFQs</div>
+        <div className="bg-brand-surface p-4 rounded-lg shadow-sm border">
+          <div className="text-2xl font-bold text-brand-primary">{analytics.totalRFQs}</div>
+          <div className="text-sm text-brand-text/70">Total RFQs</div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm border">
-          <div className="text-2xl font-bold text-green-600">
+        <div className="bg-brand-surface p-4 rounded-lg shadow-sm border">
+          <div className="text-2xl font-bold text-status-success">
             {(analytics.avgResponseRate * 100).toFixed(1)}%
           </div>
-          <div className="text-sm text-gray-600">Avg Response Rate</div>
+          <div className="text-sm text-brand-text/70">Avg Response Rate</div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm border">
-          <div className="text-2xl font-bold text-yellow-600">{analytics.avgResponseTime}</div>
-          <div className="text-sm text-gray-600">Avg Response Time (days)</div>
+        <div className="bg-brand-surface p-4 rounded-lg shadow-sm border">
+          <div className="text-2xl font-bold text-status-warning">{analytics.avgResponseTime}</div>
+          <div className="text-sm text-brand-text/70">Avg Response Time (days)</div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm border">
+        <div className="bg-brand-surface p-4 rounded-lg shadow-sm border">
           <div className="text-2xl font-bold text-purple-600">
             {analytics.supplierEngagement.length}
           </div>
-          <div className="text-sm text-gray-600">Active Suppliers</div>
+          <div className="text-sm text-brand-text/70">Active Suppliers</div>
         </div>
       </div>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly RFQ Performance</h3>
+        <div className="bg-brand-surface p-6 rounded-lg shadow-sm border">
+          <h3 className="text-lg font-semibold text-brand-text mb-4">Monthly RFQ Performance</h3>
           <AnalyticsChart
             data={analytics.monthlyPerformance as unknown as ChartDataItem[]}
             type="line"
@@ -148,8 +148,8 @@ export default function RFQAnalytics({ userRole }: RFQAnalyticsProps) {
           />
         </div>
         
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Response Time Trends</h3>
+        <div className="bg-brand-surface p-6 rounded-lg shadow-sm border">
+          <h3 className="text-lg font-semibold text-brand-text mb-4">Response Time Trends</h3>
           <AnalyticsChart
             data={analytics.monthlyPerformance as unknown as ChartDataItem[]}
             type="bar"
@@ -165,27 +165,27 @@ export default function RFQAnalytics({ userRole }: RFQAnalyticsProps) {
       </div>
 
       {/* Supplier Engagement */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Supplier Engagement</h3>
+      <div className="bg-brand-surface p-6 rounded-lg shadow-sm border">
+        <h3 className="text-lg font-semibold text-brand-text mb-4">Supplier Engagement</h3>
         <div className="space-y-3">
           {analytics.supplierEngagement.map((supplier, index) => (
-            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div key={index} className="flex items-center justify-between p-3 bg-brand-surface rounded-lg">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-blue-600 font-semibold text-sm">
+                <div className="w-8 h-8 bg-brand-primary/10 rounded-full flex items-center justify-center">
+                  <span className="text-brand-primary font-semibold text-sm">
                     {supplier.supplierName.charAt(0)}
                   </span>
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">{supplier.supplierName}</p>
-                  <p className="text-sm text-gray-600">{supplier.quoteCount} quotes</p>
+                  <p className="font-medium text-brand-text">{supplier.supplierName}</p>
+                  <p className="text-sm text-brand-text/70">{supplier.quoteCount} quotes</p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="font-semibold text-gray-900">
+                <p className="font-semibold text-brand-text">
                   {(supplier.responseRate * 100).toFixed(1)}%
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-brand-text/70">
                   {supplier.avgResponseTime} days avg
                 </p>
               </div>
@@ -195,26 +195,26 @@ export default function RFQAnalytics({ userRole }: RFQAnalyticsProps) {
       </div>
 
       {/* Performance Metrics */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance Metrics</h3>
+      <div className="bg-brand-surface p-6 rounded-lg shadow-sm border">
+        <h3 className="text-lg font-semibold text-brand-text mb-4">Performance Metrics</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="text-center">
-            <div className="text-3xl font-bold text-blue-600">
+            <div className="text-3xl font-bold text-brand-primary">
               {analytics.totalRFQs}
             </div>
-            <div className="text-sm text-gray-600">Total RFQs Sent</div>
+            <div className="text-sm text-brand-text/70">Total RFQs Sent</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-green-600">
+            <div className="text-3xl font-bold text-status-success">
               {(analytics.avgResponseRate * 100).toFixed(1)}%
             </div>
-            <div className="text-sm text-gray-600">Overall Response Rate</div>
+            <div className="text-sm text-brand-text/70">Overall Response Rate</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-yellow-600">
+            <div className="text-3xl font-bold text-status-warning">
               {analytics.avgResponseTime}
             </div>
-            <div className="text-sm text-gray-600">Avg Response Time (days)</div>
+            <div className="text-sm text-brand-text/70">Avg Response Time (days)</div>
           </div>
         </div>
       </div>

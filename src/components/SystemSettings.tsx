@@ -136,39 +136,39 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ userRole }) => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">System Settings</h2>
+        <h2 className="text-2xl font-bold text-brand-text">System Settings</h2>
         <button
           onClick={() => setShowForm(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+          className="bg-brand-primary text-white px-4 py-2 rounded-md hover:bg-brand-primary/90"
         >
           Add New Setting
         </button>
       </div>
 
       {showForm && (
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div className="bg-brand-surface p-6 rounded-lg shadow">
           <h3 className="text-lg font-semibold mb-4">
             {editingSetting ? 'Edit Setting' : 'Add New Setting'}
           </h3>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Setting Key</label>
+                <label className="block text-sm font-medium text-brand-text/80">Setting Key</label>
                 <input
                   type="text"
                   value={formData.setting_key}
                   onChange={(e) => setFormData({ ...formData, setting_key: e.target.value })}
-                  className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                  className="mt-1 block w-full border border-brand-text/20 rounded-md px-3 py-2"
                   required
                   disabled={!!editingSetting}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Setting Type</label>
+                <label className="block text-sm font-medium text-brand-text/80">Setting Type</label>
                 <select
                   value={formData.setting_type}
                   onChange={(e) => setFormData({ ...formData, setting_type: e.target.value as 'string' | 'number' | 'boolean' })}
-                  className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                  className="mt-1 block w-full border border-brand-text/20 rounded-md px-3 py-2"
                   required
                 >
                   <option value="string">String</option>
@@ -178,12 +178,12 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ userRole }) => {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Setting Value</label>
+              <label className="block text-sm font-medium text-brand-text/80">Setting Value</label>
               {formData.setting_type === 'boolean' ? (
                 <select
                   value={formData.setting_value}
                   onChange={(e) => setFormData({ ...formData, setting_value: e.target.value })}
-                  className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                  className="mt-1 block w-full border border-brand-text/20 rounded-md px-3 py-2"
                   required
                 >
                   <option value="true">True</option>
@@ -194,31 +194,31 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ userRole }) => {
                   type={getInputType(formData.setting_type)}
                   value={formData.setting_value}
                   onChange={(e) => setFormData({ ...formData, setting_value: e.target.value })}
-                  className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                  className="mt-1 block w-full border border-brand-text/20 rounded-md px-3 py-2"
                   required
                 />
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Description</label>
+              <label className="block text-sm font-medium text-brand-text/80">Description</label>
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                className="mt-1 block w-full border border-brand-text/20 rounded-md px-3 py-2"
                 rows={3}
               />
             </div>
             <div className="flex space-x-4">
               <button
                 type="submit"
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                className="bg-brand-primary text-white px-4 py-2 rounded-md hover:bg-brand-primary/90"
               >
                 {editingSetting ? 'Update Setting' : 'Create Setting'}
               </button>
               <button
                 type="button"
                 onClick={resetForm}
-                className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400"
+                className="bg-brand-primary/10 text-brand-text/80 px-4 py-2 rounded-md hover:bg-gray-400"
               >
                 Cancel
               </button>
@@ -227,10 +227,10 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ userRole }) => {
         </div>
       )}
 
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
+      <div className="bg-brand-surface shadow overflow-hidden sm:rounded-md">
         <div className="px-4 py-5 sm:px-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900">Settings</h3>
-          <p className="mt-1 max-w-2xl text-sm text-gray-500">
+          <h3 className="text-lg leading-6 font-medium text-brand-text">Settings</h3>
+          <p className="mt-1 max-w-2xl text-sm text-brand-text/60">
             Manage system configuration settings
           </p>
         </div>
@@ -240,30 +240,30 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ userRole }) => {
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <div className="flex items-center">
-                    <p className="text-sm font-medium text-gray-900">{setting.setting_key}</p>
-                    <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                    <p className="text-sm font-medium text-brand-text">{setting.setting_key}</p>
+                    <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-surface text-brand-text/90">
                       {setting.setting_type}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-500">{setting.description}</p>
+                  <p className="text-sm text-brand-text/60">{setting.description}</p>
                   <div className="mt-2 flex items-center space-x-4">
                     <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-500">Value:</span>
+                      <span className="text-sm text-brand-text/60">Value:</span>
                       {setting.setting_type === 'boolean' ? (
                         <span className={`text-sm font-medium ${
-                          setting.setting_value === 'true' ? 'text-green-600' : 'text-red-600'
+                          setting.setting_value === 'true' ? 'text-status-success' : 'text-status-danger'
                         }`}>
                           {setting.setting_value === 'true' ? 'Enabled' : 'Disabled'}
                         </span>
                       ) : (
-                        <span className="text-sm font-medium text-gray-900">
+                        <span className="text-sm font-medium text-brand-text">
                           {setting.setting_value}
                         </span>
                       )}
                     </div>
                     <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-500">Updated:</span>
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-brand-text/60">Updated:</span>
+                      <span className="text-sm text-brand-text/60">
                         {new Date(setting.updated_at).toLocaleDateString()}
                       </span>
                     </div>
@@ -272,7 +272,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ userRole }) => {
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => handleEdit(setting)}
-                    className="px-3 py-1 text-xs font-medium text-blue-600 hover:text-blue-800"
+                    className="px-3 py-1 text-xs font-medium text-brand-primary hover:text-blue-800"
                   >
                     Edit
                   </button>

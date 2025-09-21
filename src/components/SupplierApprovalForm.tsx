@@ -53,12 +53,12 @@ export default function SupplierApprovalForm({ supplier, onApprovalSubmitted, on
 
   const getStatusBadge = (status: string) => {
     const statusClasses = {
-      pending: 'bg-yellow-100 text-yellow-800',
-      approved: 'bg-green-100 text-green-800',
-      suspended: 'bg-red-100 text-red-800',
-      inactive: 'bg-gray-100 text-gray-800'
+      pending: 'bg-status-warning/10 text-yellow-800',
+      approved: 'bg-status-success/10 text-green-800',
+      suspended: 'bg-status-danger/10 text-red-800',
+      inactive: 'bg-brand-surface text-brand-text/90'
     };
-    return statusClasses[status as keyof typeof statusClasses] || 'bg-gray-100 text-gray-800';
+    return statusClasses[status as keyof typeof statusClasses] || 'bg-brand-surface text-brand-text/90';
   };
 
   const formatDate = (dateString: string) => {
@@ -70,26 +70,26 @@ export default function SupplierApprovalForm({ supplier, onApprovalSubmitted, on
   };
 
   return (
-    <div className="max-w-4xl mx-auto bg-white shadow rounded-lg">
-      <div className="px-6 py-4 border-b border-gray-200">
-        <h2 className="text-lg font-medium text-gray-900">Approve Supplier</h2>
-        <p className="text-sm text-gray-500">Review and approve supplier for active use</p>
+    <div className="max-w-4xl mx-auto bg-brand-surface shadow rounded-lg">
+      <div className="px-6 py-4 border-b border-brand-text/10">
+        <h2 className="text-lg font-medium text-brand-text">Approve Supplier</h2>
+        <p className="text-sm text-brand-text/60">Review and approve supplier for active use</p>
       </div>
 
       <div className="p-6">
         {/* Supplier Information */}
         <div className="mb-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Supplier Information</h3>
-          <div className="bg-gray-50 p-4 rounded-lg">
+          <h3 className="text-lg font-medium text-brand-text mb-4">Supplier Information</h3>
+          <div className="bg-brand-surface p-4 rounded-lg">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <h4 className="font-medium text-gray-900">{supplier.name}</h4>
-                <p className="text-sm text-gray-500">{supplier.email}</p>
-                <p className="text-sm text-gray-500">{supplier.phone}</p>
+                <h4 className="font-medium text-brand-text">{supplier.name}</h4>
+                <p className="text-sm text-brand-text/60">{supplier.email}</p>
+                <p className="text-sm text-brand-text/60">{supplier.phone}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Category: {supplier.category}</p>
-                <p className="text-sm text-gray-500">Created: {formatDate(supplier.created_at)}</p>
+                <p className="text-sm text-brand-text/60">Category: {supplier.category}</p>
+                <p className="text-sm text-brand-text/60">Created: {formatDate(supplier.created_at)}</p>
                 <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadge(supplier.status)}`}>
                   {supplier.status}
                 </span>
@@ -97,7 +97,7 @@ export default function SupplierApprovalForm({ supplier, onApprovalSubmitted, on
             </div>
             {supplier.address && (
               <div className="mt-3">
-                <p className="text-sm text-gray-700">Address: {supplier.address}</p>
+                <p className="text-sm text-brand-text/80">Address: {supplier.address}</p>
               </div>
             )}
           </div>
@@ -105,19 +105,19 @@ export default function SupplierApprovalForm({ supplier, onApprovalSubmitted, on
 
         {/* Compliance Documents */}
         <div className="mb-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Compliance Documents</h3>
+          <h3 className="text-lg font-medium text-brand-text mb-4">Compliance Documents</h3>
           {supplier.compliance_docs.length > 0 ? (
             <div className="space-y-3">
               {supplier.compliance_docs.map((doc) => (
-                <div key={doc.id} className="border border-gray-200 rounded-lg p-4">
+                <div key={doc.id} className="border border-brand-text/10 rounded-lg p-4">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h4 className="font-medium text-gray-900">{doc.name}</h4>
-                      <p className="text-sm text-gray-500">
+                      <h4 className="font-medium text-brand-text">{doc.name}</h4>
+                      <p className="text-sm text-brand-text/60">
                         Expires: {formatDate(doc.expiry_date)}
                       </p>
-                      <p className="text-sm text-gray-700">
-                        Status: <span className={doc.is_valid ? 'text-green-600' : 'text-red-600'}>
+                      <p className="text-sm text-brand-text/80">
+                        Status: <span className={doc.is_valid ? 'text-status-success' : 'text-status-danger'}>
                           {doc.is_valid ? 'Valid' : 'Expired'}
                         </span>
                       </p>
@@ -126,7 +126,7 @@ export default function SupplierApprovalForm({ supplier, onApprovalSubmitted, on
                       href={doc.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-900 text-sm"
+                      className="text-brand-primary hover:text-blue-900 text-sm"
                     >
                       View Document
                     </a>
@@ -135,7 +135,7 @@ export default function SupplierApprovalForm({ supplier, onApprovalSubmitted, on
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
+            <div className="text-center py-8 text-brand-text/60 bg-brand-surface rounded-lg">
               No compliance documents uploaded yet.
             </div>
           )}
@@ -144,7 +144,7 @@ export default function SupplierApprovalForm({ supplier, onApprovalSubmitted, on
         {/* Approval Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Approval Checklist</h3>
+            <h3 className="text-lg font-medium text-brand-text mb-4">Approval Checklist</h3>
             <div className="space-y-4">
               <div className="flex items-start">
                 <input
@@ -152,15 +152,15 @@ export default function SupplierApprovalForm({ supplier, onApprovalSubmitted, on
                   id="compliance_verified"
                   checked={approvalData.compliance_verified}
                   onChange={(e) => setApprovalData(prev => ({ ...prev, compliance_verified: e.target.checked }))}
-                  className={`h-4 w-4 mt-1 text-blue-600 border-gray-300 rounded ${
+                  className={`h-4 w-4 mt-1 text-brand-primary border-brand-text/20 rounded ${
                     errors.compliance_verified ? 'border-red-300' : ''
                   }`}
                 />
                 <div className="ml-3">
-                  <label htmlFor="compliance_verified" className="text-sm font-medium text-gray-700">
+                  <label htmlFor="compliance_verified" className="text-sm font-medium text-brand-text/80">
                     Compliance documents verified and valid
                   </label>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-brand-text/60">
                     All required compliance documents are present and not expired
                   </p>
                   {errors.compliance_verified && (
@@ -175,15 +175,15 @@ export default function SupplierApprovalForm({ supplier, onApprovalSubmitted, on
                   id="financial_stability_verified"
                   checked={approvalData.financial_stability_verified}
                   onChange={(e) => setApprovalData(prev => ({ ...prev, financial_stability_verified: e.target.checked }))}
-                  className={`h-4 w-4 mt-1 text-blue-600 border-gray-300 rounded ${
+                  className={`h-4 w-4 mt-1 text-brand-primary border-brand-text/20 rounded ${
                     errors.financial_stability_verified ? 'border-red-300' : ''
                   }`}
                 />
                 <div className="ml-3">
-                  <label htmlFor="financial_stability_verified" className="text-sm font-medium text-gray-700">
+                  <label htmlFor="financial_stability_verified" className="text-sm font-medium text-brand-text/80">
                     Financial stability verified
                   </label>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-brand-text/60">
                     Financial background check completed and satisfactory
                   </p>
                   {errors.financial_stability_verified && (
@@ -198,13 +198,13 @@ export default function SupplierApprovalForm({ supplier, onApprovalSubmitted, on
                   id="quality_certifications_verified"
                   checked={approvalData.quality_certifications_verified}
                   onChange={(e) => setApprovalData(prev => ({ ...prev, quality_certifications_verified: e.target.checked }))}
-                  className="h-4 w-4 mt-1 text-blue-600 border-gray-300 rounded"
+                  className="h-4 w-4 mt-1 text-brand-primary border-brand-text/20 rounded"
                 />
                 <div className="ml-3">
-                  <label htmlFor="quality_certifications_verified" className="text-sm font-medium text-gray-700">
+                  <label htmlFor="quality_certifications_verified" className="text-sm font-medium text-brand-text/80">
                     Quality certifications verified (optional)
                   </label>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-brand-text/60">
                     Quality management certifications reviewed
                   </p>
                 </div>
@@ -213,7 +213,7 @@ export default function SupplierApprovalForm({ supplier, onApprovalSubmitted, on
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-brand-text/80 mb-1">
               Approver Name *
             </label>
             <input
@@ -221,7 +221,7 @@ export default function SupplierApprovalForm({ supplier, onApprovalSubmitted, on
               value={approvalData.approved_by}
               onChange={(e) => setApprovalData(prev => ({ ...prev, approved_by: e.target.value }))}
               className={`w-full border rounded-md px-3 py-2 ${
-                errors.approved_by ? 'border-red-300' : 'border-gray-300'
+                errors.approved_by ? 'border-red-300' : 'border-brand-text/20'
               }`}
               placeholder="Enter your name"
             />
@@ -229,31 +229,31 @@ export default function SupplierApprovalForm({ supplier, onApprovalSubmitted, on
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-brand-text/80 mb-1">
               Approval Notes
             </label>
             <textarea
               value={approvalData.approval_notes}
               onChange={(e) => setApprovalData(prev => ({ ...prev, approval_notes: e.target.value }))}
-              className="w-full border border-gray-300 rounded-md px-3 py-2"
+              className="w-full border border-brand-text/20 rounded-md px-3 py-2"
               rows={4}
               placeholder="Add any additional notes about the approval decision..."
             />
           </div>
 
           {/* Form Actions */}
-          <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+          <div className="flex justify-end space-x-3 pt-6 border-t border-brand-text/10">
             <button
               type="button"
               onClick={onCancel}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              className="px-4 py-2 border border-brand-text/20 rounded-md text-brand-text/80 hover:bg-brand-surface"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
+              className="px-4 py-2 bg-status-success text-white rounded-md hover:bg-status-success/90 disabled:opacity-50"
             >
               {loading ? 'Approving...' : 'Approve Supplier'}
             </button>

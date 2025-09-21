@@ -97,17 +97,17 @@ export default function QuoteApprovalForm({ approval, onApprovalSubmitted, onCan
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="px-6 py-4 border-b border-gray-200">
+      <div className="bg-brand-surface rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="px-6 py-4 border-b border-brand-text/10">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Quote Approval</h2>
-              <p className="text-gray-600">MR: {approval.quote_pack.rfq.material_request.mrn}</p>
-              <p className="text-gray-600">Project: {approval.quote_pack.rfq.material_request.project_name}</p>
+              <h2 className="text-2xl font-bold text-brand-text">Quote Approval</h2>
+              <p className="text-brand-text/70">MR: {approval.quote_pack.rfq.material_request.mrn}</p>
+              <p className="text-brand-text/70">Project: {approval.quote_pack.rfq.material_request.project_name}</p>
             </div>
             <button
               onClick={onCancel}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-brand-text/50 hover:text-brand-text/70"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -120,17 +120,17 @@ export default function QuoteApprovalForm({ approval, onApprovalSubmitted, onCan
           {/* Summary Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <div className="bg-blue-50 p-4 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600">{approval.quote_pack.quotes.length}</div>
+              <div className="text-2xl font-bold text-brand-primary">{approval.quote_pack.quotes.length}</div>
               <div className="text-sm text-blue-800">Total Quotes</div>
             </div>
             <div className="bg-green-50 p-4 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">
+              <div className="text-2xl font-bold text-status-success">
                 {approval.quote_pack.quotes.reduce((sum, q) => sum + q.total_amount, 0).toLocaleString()} AED
               </div>
               <div className="text-sm text-green-800">Total Value</div>
             </div>
             <div className="bg-yellow-50 p-4 rounded-lg">
-              <div className="text-2xl font-bold text-yellow-600">
+              <div className="text-2xl font-bold text-status-warning">
                 {calculateTotalSavings().toLocaleString()} AED
               </div>
               <div className="text-sm text-yellow-800">Potential Savings</div>
@@ -145,14 +145,14 @@ export default function QuoteApprovalForm({ approval, onApprovalSubmitted, onCan
 
           {/* Line Item Decisions */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">Line Item Decisions</h3>
+            <h3 className="text-lg font-semibold text-brand-text">Line Item Decisions</h3>
             {lineItemDecisions.map((decision, index) => (
-              <div key={decision.mr_line_item_id} className="border border-gray-200 rounded-lg p-4">
+              <div key={decision.mr_line_item_id} className="border border-brand-text/10 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h4 className="font-medium text-gray-900">{decision.mr_line_item.item_code}</h4>
-                    <p className="text-sm text-gray-600">{decision.mr_line_item.description}</p>
-                    <p className="text-sm text-gray-600">
+                    <h4 className="font-medium text-brand-text">{decision.mr_line_item.item_code}</h4>
+                    <p className="text-sm text-brand-text/70">{decision.mr_line_item.description}</p>
+                    <p className="text-sm text-brand-text/70">
                       Qty: {decision.mr_line_item.quantity} {decision.mr_line_item.uom}
                     </p>
                   </div>
@@ -166,7 +166,7 @@ export default function QuoteApprovalForm({ approval, onApprovalSubmitted, onCan
                         onChange={() => updateLineItemDecision(decision.mr_line_item_id, 'decision', 'approved')}
                         className="mr-2"
                       />
-                      <span className="text-sm text-green-600">Approve</span>
+                      <span className="text-sm text-status-success">Approve</span>
                     </label>
                     <label className="flex items-center">
                       <input
@@ -177,7 +177,7 @@ export default function QuoteApprovalForm({ approval, onApprovalSubmitted, onCan
                         onChange={() => updateLineItemDecision(decision.mr_line_item_id, 'decision', 'rejected')}
                         className="mr-2"
                       />
-                      <span className="text-sm text-red-600">Reject</span>
+                      <span className="text-sm text-status-danger">Reject</span>
                     </label>
                   </div>
                 </div>
@@ -185,7 +185,7 @@ export default function QuoteApprovalForm({ approval, onApprovalSubmitted, onCan
                 {decision.decision === 'approved' && (
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-brand-text/80 mb-2">
                         Select Supplier Quote
                       </label>
                       <select
@@ -197,7 +197,7 @@ export default function QuoteApprovalForm({ approval, onApprovalSubmitted, onCan
                             updateLineItemDecision(decision.mr_line_item_id, 'selected_quote', quote);
                           }
                         }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                        className="w-full px-3 py-2 border border-brand-text/20 rounded-md text-sm"
                       >
                         <option value="">Select a quote</option>
                         {approval.quote_pack.quotes
@@ -215,7 +215,7 @@ export default function QuoteApprovalForm({ approval, onApprovalSubmitted, onCan
                     </div>
 
                     {decision.selected_quote_id && (
-                      <div className="bg-gray-50 p-3 rounded-md">
+                      <div className="bg-brand-surface p-3 rounded-md">
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
                             <span className="font-medium">Total Amount:</span> {decision.selected_quote.total_amount?.toLocaleString()} AED
@@ -234,14 +234,14 @@ export default function QuoteApprovalForm({ approval, onApprovalSubmitted, onCan
                     )}
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-brand-text/80 mb-2">
                         Comments (Optional)
                       </label>
                       <textarea
                         value={decision.comments || ''}
                         onChange={(e) => updateLineItemDecision(decision.mr_line_item_id, 'comments', e.target.value)}
                         rows={2}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                        className="w-full px-3 py-2 border border-brand-text/20 rounded-md text-sm"
                         placeholder="Add any comments about this decision..."
                       />
                     </div>
@@ -250,14 +250,14 @@ export default function QuoteApprovalForm({ approval, onApprovalSubmitted, onCan
 
                 {decision.decision === 'rejected' && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-brand-text/80 mb-2">
                       Rejection Reason
                     </label>
                     <textarea
                       value={decision.comments || ''}
                       onChange={(e) => updateLineItemDecision(decision.mr_line_item_id, 'comments', e.target.value)}
                       rows={2}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                      className="w-full px-3 py-2 border border-brand-text/20 rounded-md text-sm"
                       placeholder="Please provide a reason for rejection..."
                     />
                   </div>
@@ -268,37 +268,37 @@ export default function QuoteApprovalForm({ approval, onApprovalSubmitted, onCan
 
           {/* Overall Comments */}
           <div className="mt-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-brand-text/80 mb-2">
               Overall Comments
             </label>
             <textarea
               value={comments}
               onChange={(e) => setComments(e.target.value)}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+              className="w-full px-3 py-2 border border-brand-text/20 rounded-md text-sm"
               placeholder="Add any overall comments about this approval decision..."
             />
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200 mt-8">
+          <div className="flex justify-end space-x-4 pt-6 border-t border-brand-text/10 mt-8">
             <button
               onClick={onCancel}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              className="px-4 py-2 text-sm font-medium text-brand-text/80 bg-brand-surface border border-brand-text/20 rounded-md hover:bg-brand-surface"
             >
               Cancel
             </button>
             <button
               onClick={() => handleSubmit('rejected')}
               disabled={loading}
-              className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 disabled:opacity-50"
+              className="px-4 py-2 text-sm font-medium text-white bg-status-danger border border-transparent rounded-md hover:bg-status-danger/90 disabled:opacity-50"
             >
               Reject All
             </button>
             <button
               onClick={() => handleSubmit('approved')}
               disabled={loading || !allDecisionsMade}
-              className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm font-medium text-white bg-status-success border border-transparent rounded-md hover:bg-status-success/90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Processing...' : 'Approve Selected'}
             </button>

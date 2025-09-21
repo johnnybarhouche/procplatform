@@ -75,12 +75,12 @@ export default function PRDetailView({ prId, userRole }: PRDetailViewProps) {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'draft': return 'bg-gray-100 text-gray-800';
-      case 'submitted': return 'bg-blue-100 text-blue-800';
-      case 'under_review': return 'bg-yellow-100 text-yellow-800';
-      case 'approved': return 'bg-green-100 text-green-800';
-      case 'rejected': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'draft': return 'bg-brand-surface text-brand-text/90';
+      case 'submitted': return 'bg-brand-primary/10 text-blue-800';
+      case 'under_review': return 'bg-status-warning/10 text-yellow-800';
+      case 'approved': return 'bg-status-success/10 text-green-800';
+      case 'rejected': return 'bg-status-danger/10 text-red-800';
+      default: return 'bg-brand-surface text-brand-text/90';
     }
   };
 
@@ -95,18 +95,18 @@ export default function PRDetailView({ prId, userRole }: PRDetailViewProps) {
   if (!pr) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">Purchase Requisition not found</p>
+        <p className="text-brand-text/60">Purchase Requisition not found</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="mx-auto max-w-6xl px-4 py-5 sm:px-6 lg:px-6">
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{pr.pr_number}</h1>
-            <p className="mt-2 text-gray-600">Purchase Requisition Details</p>
+            <h1 className="text-3xl font-bold text-brand-text">{pr.pr_number}</h1>
+            <p className="mt-2 text-brand-text/70">Purchase Requisition Details</p>
           </div>
           <div className="flex items-center space-x-4">
             <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getStatusColor(pr.status)}`}>
@@ -116,13 +116,13 @@ export default function PRDetailView({ prId, userRole }: PRDetailViewProps) {
               <div className="flex space-x-2">
                 <button
                   onClick={() => setShowApprovalForm(true)}
-                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="px-4 py-2 bg-status-success text-white rounded-md hover:bg-status-success/90 focus:outline-none focus:ring-2 focus:ring-green-500"
                 >
                   Approve
                 </button>
                 <button
                   onClick={() => setShowRejectionForm(true)}
-                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                  className="px-4 py-2 bg-status-danger text-white rounded-md hover:bg-status-danger/90 focus:outline-none focus:ring-2 focus:ring-red-500"
                 >
                   Reject
                 </button>
@@ -136,88 +136,88 @@ export default function PRDetailView({ prId, userRole }: PRDetailViewProps) {
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
           {/* PR Information */}
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">PR Information</h2>
+          <div className="bg-brand-surface p-6 rounded-lg shadow-sm border">
+            <h2 className="text-xl font-semibold text-brand-text mb-4">PR Information</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">PR Number</label>
-                <p className="mt-1 text-sm text-gray-900">{pr.pr_number}</p>
+                <label className="block text-sm font-medium text-brand-text/80">PR Number</label>
+                <p className="mt-1 text-sm text-brand-text">{pr.pr_number}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Project</label>
-                <p className="mt-1 text-sm text-gray-900">{pr.project_name}</p>
+                <label className="block text-sm font-medium text-brand-text/80">Project</label>
+                <p className="mt-1 text-sm text-brand-text">{pr.project_name}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Supplier</label>
-                <p className="mt-1 text-sm text-gray-900">{pr.supplier.name}</p>
+                <label className="block text-sm font-medium text-brand-text/80">Supplier</label>
+                <p className="mt-1 text-sm text-brand-text">{pr.supplier.name}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Total Value</label>
-                <p className="mt-1 text-sm text-gray-900">{pr.total_value.toLocaleString()} {pr.currency}</p>
+                <label className="block text-sm font-medium text-brand-text/80">Total Value</label>
+                <p className="mt-1 text-sm text-brand-text">{pr.total_value.toLocaleString()} {pr.currency}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Created By</label>
-                <p className="mt-1 text-sm text-gray-900">{pr.created_by_name}</p>
+                <label className="block text-sm font-medium text-brand-text/80">Created By</label>
+                <p className="mt-1 text-sm text-brand-text">{pr.created_by_name}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Created Date</label>
-                <p className="mt-1 text-sm text-gray-900">{new Date(pr.created_at).toLocaleDateString()}</p>
+                <label className="block text-sm font-medium text-brand-text/80">Created Date</label>
+                <p className="mt-1 text-sm text-brand-text">{new Date(pr.created_at).toLocaleDateString()}</p>
               </div>
             </div>
             {pr.comments && (
               <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700">Comments</label>
-                <p className="mt-1 text-sm text-gray-900">{pr.comments}</p>
+                <label className="block text-sm font-medium text-brand-text/80">Comments</label>
+                <p className="mt-1 text-sm text-brand-text">{pr.comments}</p>
               </div>
             )}
           </div>
 
           {/* Line Items */}
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Line Items</h2>
+          <div className="bg-brand-surface p-6 rounded-lg shadow-sm border">
+            <h2 className="text-xl font-semibold text-brand-text mb-4">Line Items</h2>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+                <thead className="bg-brand-surface">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                       Item Code
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                       Description
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                       Quantity
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                       Unit Price
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                       Total Price
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                       Lead Time
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-brand-surface divide-y divide-gray-200">
                   {pr.line_items.map((item) => (
                     <tr key={item.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-brand-text">
                         {item.mr_line_item.item_code}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-brand-text">
                         {item.mr_line_item.description}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-brand-text">
                         {item.quantity}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-brand-text">
                         {item.unit_price.toLocaleString()} {pr.currency}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-brand-text">
                         {item.total_price.toLocaleString()} {pr.currency}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-brand-text">
                         {item.lead_time_days} days
                       </td>
                     </tr>
@@ -229,23 +229,23 @@ export default function PRDetailView({ prId, userRole }: PRDetailViewProps) {
 
           {/* Approval History */}
           {pr.approvals.length > 0 && (
-            <div className="bg-white p-6 rounded-lg shadow-sm border">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Approval History</h2>
+            <div className="bg-brand-surface p-6 rounded-lg shadow-sm border">
+              <h2 className="text-xl font-semibold text-brand-text mb-4">Approval History</h2>
               <div className="space-y-4">
                 {pr.approvals.map((approval) => (
                   <div key={approval.id} className="border-l-4 border-blue-200 pl-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{approval.approver_name}</p>
-                        <p className="text-sm text-gray-500">Level {approval.approval_level}</p>
+                        <p className="text-sm font-medium text-brand-text">{approval.approver_name}</p>
+                        <p className="text-sm text-brand-text/60">Level {approval.approval_level}</p>
                       </div>
                       <div className="text-right">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          approval.status === 'approved' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          approval.status === 'approved' ? 'bg-status-success/10 text-green-800' : 'bg-status-danger/10 text-red-800'
                         }`}>
                           {approval.status.toUpperCase()}
                         </span>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-brand-text/60">
                           {approval.approved_at ? new Date(approval.approved_at).toLocaleDateString() : 
                            approval.rejected_at ? new Date(approval.rejected_at).toLocaleDateString() : 
                            new Date(approval.created_at).toLocaleDateString()}
@@ -253,7 +253,7 @@ export default function PRDetailView({ prId, userRole }: PRDetailViewProps) {
                       </div>
                     </div>
                     {approval.comments && (
-                      <p className="mt-2 text-sm text-gray-600">{approval.comments}</p>
+                      <p className="mt-2 text-sm text-brand-text/70">{approval.comments}</p>
                     )}
                   </div>
                 ))}
@@ -265,39 +265,39 @@ export default function PRDetailView({ prId, userRole }: PRDetailViewProps) {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Supplier Information */}
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Supplier Information</h3>
+          <div className="bg-brand-surface p-6 rounded-lg shadow-sm border">
+            <h3 className="text-lg font-semibold text-brand-text mb-4">Supplier Information</h3>
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Name</label>
-                <p className="text-sm text-gray-900">{pr.supplier.name}</p>
+                <label className="block text-sm font-medium text-brand-text/80">Name</label>
+                <p className="text-sm text-brand-text">{pr.supplier.name}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Email</label>
-                <p className="text-sm text-gray-900">{pr.supplier.email}</p>
+                <label className="block text-sm font-medium text-brand-text/80">Email</label>
+                <p className="text-sm text-brand-text">{pr.supplier.email}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Category</label>
-                <p className="text-sm text-gray-900">{pr.supplier.category}</p>
+                <label className="block text-sm font-medium text-brand-text/80">Category</label>
+                <p className="text-sm text-brand-text">{pr.supplier.category}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Rating</label>
-                <p className="text-sm text-gray-900">{pr.supplier.rating}/5</p>
+                <label className="block text-sm font-medium text-brand-text/80">Rating</label>
+                <p className="text-sm text-brand-text">{pr.supplier.rating}/5</p>
               </div>
             </div>
           </div>
 
           {/* Quick Actions */}
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+          <div className="bg-brand-surface p-6 rounded-lg shadow-sm border">
+            <h3 className="text-lg font-semibold text-brand-text mb-4">Quick Actions</h3>
             <div className="space-y-2">
-              <button className="w-full px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100">
+              <button className="w-full px-4 py-2 text-sm font-medium text-brand-primary bg-blue-50 rounded-md hover:bg-brand-primary/10">
                 Download PDF
               </button>
-              <button className="w-full px-4 py-2 text-sm font-medium text-green-600 bg-green-50 rounded-md hover:bg-green-100">
+              <button className="w-full px-4 py-2 text-sm font-medium text-status-success bg-green-50 rounded-md hover:bg-status-success/10">
                 Generate PO
               </button>
-              <button className="w-full px-4 py-2 text-sm font-medium text-gray-600 bg-gray-50 rounded-md hover:bg-gray-100">
+              <button className="w-full px-4 py-2 text-sm font-medium text-brand-text/70 bg-brand-surface rounded-md hover:bg-brand-surface">
                 Print
               </button>
             </div>
@@ -308,19 +308,19 @@ export default function PRDetailView({ prId, userRole }: PRDetailViewProps) {
       {/* Approval Form Modal */}
       {showApprovalForm && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Approve Purchase Requisition</h3>
+          <div className="bg-brand-surface p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold text-brand-text mb-4">Approve Purchase Requisition</h3>
             <form onSubmit={(e) => {
               e.preventDefault();
               const formData = new FormData(e.currentTarget);
               handleApprove('approver-001', formData.get('comments') as string);
             }}>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Comments (Optional)</label>
+                <label className="block text-sm font-medium text-brand-text/80 mb-2">Comments (Optional)</label>
                 <textarea
                   name="comments"
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-brand-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
                   placeholder="Add any comments about this approval..."
                 />
               </div>
@@ -328,13 +328,13 @@ export default function PRDetailView({ prId, userRole }: PRDetailViewProps) {
                 <button
                   type="button"
                   onClick={() => setShowApprovalForm(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                  className="px-4 py-2 text-sm font-medium text-brand-text/80 bg-brand-surface rounded-md hover:bg-brand-surface"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
+                  className="px-4 py-2 text-sm font-medium text-white bg-status-success rounded-md hover:bg-status-success/90"
                 >
                   Approve
                 </button>
@@ -347,19 +347,19 @@ export default function PRDetailView({ prId, userRole }: PRDetailViewProps) {
       {/* Rejection Form Modal */}
       {showRejectionForm && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Reject Purchase Requisition</h3>
+          <div className="bg-brand-surface p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold text-brand-text mb-4">Reject Purchase Requisition</h3>
             <form onSubmit={(e) => {
               e.preventDefault();
               const formData = new FormData(e.currentTarget);
               handleReject('approver-001', formData.get('reason') as string, formData.get('comments') as string);
             }}>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Reason for Rejection *</label>
+                <label className="block text-sm font-medium text-brand-text/80 mb-2">Reason for Rejection *</label>
                 <select
                   name="reason"
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-brand-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
                 >
                   <option value="">Select a reason</option>
                   <option value="budget_exceeded">Budget Exceeded</option>
@@ -370,11 +370,11 @@ export default function PRDetailView({ prId, userRole }: PRDetailViewProps) {
                 </select>
               </div>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Additional Comments</label>
+                <label className="block text-sm font-medium text-brand-text/80 mb-2">Additional Comments</label>
                 <textarea
                   name="comments"
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-brand-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
                   placeholder="Provide additional details about the rejection..."
                 />
               </div>
@@ -382,13 +382,13 @@ export default function PRDetailView({ prId, userRole }: PRDetailViewProps) {
                 <button
                   type="button"
                   onClick={() => setShowRejectionForm(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                  className="px-4 py-2 text-sm font-medium text-brand-text/80 bg-brand-surface rounded-md hover:bg-brand-surface"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                  className="px-4 py-2 text-sm font-medium text-white bg-status-danger rounded-md hover:bg-status-danger/90"
                 >
                   Reject
                 </button>

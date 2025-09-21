@@ -42,9 +42,9 @@ export default function ItemPicker({ onItemSelect, onClose }: ItemPickerProps) {
   if (loading) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-hidden">
+        <div className="bg-brand-surface rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-hidden">
           <div className="flex justify-center items-center h-64">
-            <div className="text-gray-500">Loading items...</div>
+            <div className="text-brand-text/60">Loading items...</div>
           </div>
         </div>
       </div>
@@ -53,12 +53,12 @@ export default function ItemPicker({ onItemSelect, onClose }: ItemPickerProps) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-hidden">
+      <div className="bg-brand-surface rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-hidden">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Select Item from Catalog</h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-brand-text/60 hover:text-brand-text/80"
           >
             ✕
           </button>
@@ -67,7 +67,7 @@ export default function ItemPicker({ onItemSelect, onClose }: ItemPickerProps) {
         {/* Search and Filter */}
         <div className="mb-4 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-brand-text/80 mb-1">
               Search Items
             </label>
             <input
@@ -75,17 +75,17 @@ export default function ItemPicker({ onItemSelect, onClose }: ItemPickerProps) {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search by item code or description..."
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 border border-brand-text/20 rounded-md focus:ring-2 focus:ring-brand-primary focus:border-brand-primary"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-brand-text/80 mb-1">
               Category
             </label>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 border border-brand-text/20 rounded-md focus:ring-2 focus:ring-brand-primary focus:border-brand-primary"
             >
               <option value="">All Categories</option>
               {categories.map(category => (
@@ -98,7 +98,7 @@ export default function ItemPicker({ onItemSelect, onClose }: ItemPickerProps) {
         {/* Items List */}
         <div className="max-h-96 overflow-y-auto">
           {filteredItems.length === 0 ? (
-            <div className="text-center text-gray-500 py-8">
+            <div className="text-center text-brand-text/60 py-8">
               No items found matching your criteria.
             </div>
           ) : (
@@ -106,18 +106,18 @@ export default function ItemPicker({ onItemSelect, onClose }: ItemPickerProps) {
               {filteredItems.map(item => (
                 <div
                   key={item.id}
-                  className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
+                  className="border border-brand-text/10 rounded-lg p-4 hover:bg-brand-surface cursor-pointer"
                   onClick={() => onItemSelect(item)}
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <div className="flex items-center space-x-2">
-                        <span className="font-medium text-gray-900">{item.item_code}</span>
-                        <span className="text-sm text-gray-500">•</span>
-                        <span className="text-sm text-gray-500">{item.category}</span>
+                        <span className="font-medium text-brand-text">{item.item_code}</span>
+                        <span className="text-sm text-brand-text/60">•</span>
+                        <span className="text-sm text-brand-text/60">{item.category}</span>
                       </div>
-                      <p className="text-gray-700 mt-1">{item.description}</p>
-                      <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+                      <p className="text-brand-text/80 mt-1">{item.description}</p>
+                      <div className="flex items-center space-x-4 mt-2 text-sm text-brand-text/60">
                         <span>UoM: {item.uom}</span>
                         {item.brand && <span>Brand: {item.brand}</span>}
                         {item.model && <span>Model: {item.model}</span>}
@@ -125,7 +125,7 @@ export default function ItemPicker({ onItemSelect, onClose }: ItemPickerProps) {
                     </div>
                     <button
                       onClick={() => onItemSelect(item)}
-                      className="ml-4 px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
+                      className="ml-4 px-3 py-1 bg-brand-primary text-white text-sm rounded-md hover:bg-brand-primary/90"
                     >
                       Select
                     </button>

@@ -117,14 +117,14 @@ export default function PODetailView({ poId, userRole }: PODetailViewProps) {
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
-      case 'draft': return 'bg-gray-100 text-gray-800';
-      case 'sent': return 'bg-blue-100 text-blue-800';
-      case 'acknowledged': return 'bg-yellow-100 text-yellow-800';
+      case 'draft': return 'bg-brand-surface text-brand-text/90';
+      case 'sent': return 'bg-brand-primary/10 text-blue-800';
+      case 'acknowledged': return 'bg-status-warning/10 text-yellow-800';
       case 'in_progress': return 'bg-orange-100 text-orange-800';
-      case 'delivered': return 'bg-green-100 text-green-800';
+      case 'delivered': return 'bg-status-success/10 text-green-800';
       case 'invoiced': return 'bg-purple-100 text-purple-800';
       case 'paid': return 'bg-emerald-100 text-emerald-800';
-      default: return 'bg-gray-100 text-gray-800';
+      default: return 'bg-brand-surface text-brand-text/90';
     }
   };
 
@@ -139,7 +139,7 @@ export default function PODetailView({ poId, userRole }: PODetailViewProps) {
   if (!po) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">Purchase Order not found</p>
+        <p className="text-brand-text/60">Purchase Order not found</p>
       </div>
     );
   }
@@ -149,8 +149,8 @@ export default function PODetailView({ poId, userRole }: PODetailViewProps) {
       {/* Header */}
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{po.po_number}</h1>
-          <p className="text-gray-600">{po.project_name}</p>
+          <h1 className="text-2xl font-bold text-brand-text">{po.po_number}</h1>
+          <p className="text-brand-text/70">{po.project_name}</p>
         </div>
         <div className="flex items-center space-x-4">
           <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getStatusBadgeColor(po.status)}`}>
@@ -158,7 +158,7 @@ export default function PODetailView({ poId, userRole }: PODetailViewProps) {
           </span>
           <button
             onClick={() => fetchPO()}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-brand-primary/90"
           >
             Refresh
           </button>
@@ -168,65 +168,65 @@ export default function PODetailView({ poId, userRole }: PODetailViewProps) {
       {/* PO Details */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Basic Information */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h2>
+        <div className="bg-brand-surface p-6 rounded-lg shadow">
+          <h2 className="text-lg font-semibold text-brand-text mb-4">Basic Information</h2>
           <dl className="space-y-3">
             <div>
-              <dt className="text-sm font-medium text-gray-500">PO Number</dt>
-              <dd className="text-sm text-gray-900">{po.po_number}</dd>
+              <dt className="text-sm font-medium text-brand-text/60">PO Number</dt>
+              <dd className="text-sm text-brand-text">{po.po_number}</dd>
             </div>
             <div>
-              <dt className="text-sm font-medium text-gray-500">Project</dt>
-              <dd className="text-sm text-gray-900">{po.project_name}</dd>
+              <dt className="text-sm font-medium text-brand-text/60">Project</dt>
+              <dd className="text-sm text-brand-text">{po.project_name}</dd>
             </div>
             <div>
-              <dt className="text-sm font-medium text-gray-500">Supplier</dt>
-              <dd className="text-sm text-gray-900">{po.supplier.name}</dd>
+              <dt className="text-sm font-medium text-brand-text/60">Supplier</dt>
+              <dd className="text-sm text-brand-text">{po.supplier.name}</dd>
             </div>
             <div>
-              <dt className="text-sm font-medium text-gray-500">Total Value</dt>
-              <dd className="text-sm text-gray-900">{po.total_value.toLocaleString()} {po.currency}</dd>
+              <dt className="text-sm font-medium text-brand-text/60">Total Value</dt>
+              <dd className="text-sm text-brand-text">{po.total_value.toLocaleString()} {po.currency}</dd>
             </div>
             <div>
-              <dt className="text-sm font-medium text-gray-500">Payment Terms</dt>
-              <dd className="text-sm text-gray-900">{po.payment_terms}</dd>
+              <dt className="text-sm font-medium text-brand-text/60">Payment Terms</dt>
+              <dd className="text-sm text-brand-text">{po.payment_terms}</dd>
             </div>
             <div>
-              <dt className="text-sm font-medium text-gray-500">Delivery Address</dt>
-              <dd className="text-sm text-gray-900">{po.delivery_address}</dd>
+              <dt className="text-sm font-medium text-brand-text/60">Delivery Address</dt>
+              <dd className="text-sm text-brand-text">{po.delivery_address}</dd>
             </div>
             {po.delivery_date && (
               <div>
-                <dt className="text-sm font-medium text-gray-500">Delivery Date</dt>
-                <dd className="text-sm text-gray-900">{new Date(po.delivery_date).toLocaleDateString()}</dd>
+                <dt className="text-sm font-medium text-brand-text/60">Delivery Date</dt>
+                <dd className="text-sm text-brand-text">{new Date(po.delivery_date).toLocaleDateString()}</dd>
               </div>
             )}
             {po.comments && (
               <div>
-                <dt className="text-sm font-medium text-gray-500">Comments</dt>
-                <dd className="text-sm text-gray-900">{po.comments}</dd>
+                <dt className="text-sm font-medium text-brand-text/60">Comments</dt>
+                <dd className="text-sm text-brand-text">{po.comments}</dd>
               </div>
             )}
           </dl>
         </div>
 
         {/* Timeline */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Timeline</h2>
+        <div className="bg-brand-surface p-6 rounded-lg shadow">
+          <h2 className="text-lg font-semibold text-brand-text mb-4">Timeline</h2>
           <div className="space-y-4">
             <div className="flex items-center">
               <div className="flex-shrink-0 w-2 h-2 bg-green-400 rounded-full"></div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-900">Created</p>
-                <p className="text-sm text-gray-500">{new Date(po.created_at).toLocaleString()}</p>
+                <p className="text-sm font-medium text-brand-text">Created</p>
+                <p className="text-sm text-brand-text/60">{new Date(po.created_at).toLocaleString()}</p>
               </div>
             </div>
             {po.sent_at && (
               <div className="flex items-center">
                 <div className="flex-shrink-0 w-2 h-2 bg-blue-400 rounded-full"></div>
                 <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-900">Sent to Supplier</p>
-                  <p className="text-sm text-gray-500">{new Date(po.sent_at).toLocaleString()}</p>
+                  <p className="text-sm font-medium text-brand-text">Sent to Supplier</p>
+                  <p className="text-sm text-brand-text/60">{new Date(po.sent_at).toLocaleString()}</p>
                 </div>
               </div>
             )}
@@ -234,8 +234,8 @@ export default function PODetailView({ poId, userRole }: PODetailViewProps) {
               <div className="flex items-center">
                 <div className="flex-shrink-0 w-2 h-2 bg-yellow-400 rounded-full"></div>
                 <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-900">Acknowledged</p>
-                  <p className="text-sm text-gray-500">{new Date(po.acknowledged_at).toLocaleString()}</p>
+                  <p className="text-sm font-medium text-brand-text">Acknowledged</p>
+                  <p className="text-sm text-brand-text/60">{new Date(po.acknowledged_at).toLocaleString()}</p>
                 </div>
               </div>
             )}
@@ -243,8 +243,8 @@ export default function PODetailView({ poId, userRole }: PODetailViewProps) {
               <div className="flex items-center">
                 <div className="flex-shrink-0 w-2 h-2 bg-green-400 rounded-full"></div>
                 <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-900">Delivered</p>
-                  <p className="text-sm text-gray-500">{new Date(po.delivered_at).toLocaleString()}</p>
+                  <p className="text-sm font-medium text-brand-text">Delivered</p>
+                  <p className="text-sm text-brand-text/60">{new Date(po.delivered_at).toLocaleString()}</p>
                 </div>
               </div>
             )}
@@ -253,51 +253,51 @@ export default function PODetailView({ poId, userRole }: PODetailViewProps) {
       </div>
 
       {/* Line Items */}
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Line Items</h2>
+      <div className="bg-brand-surface p-6 rounded-lg shadow">
+        <h2 className="text-lg font-semibold text-brand-text mb-4">Line Items</h2>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+            <thead className="bg-brand-surface">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                   Item Code
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                   Description
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                   Quantity
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                   Unit Price
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                   Total Price
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                   Delivery Date
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-brand-surface divide-y divide-gray-200">
               {po.line_items.map((item) => (
                 <tr key={item.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-brand-text">
                     {item.pr_line_item.mr_line_item.item_code}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
+                  <td className="px-6 py-4 text-sm text-brand-text">
                     {item.pr_line_item.mr_line_item.description}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-brand-text">
                     {item.quantity}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-brand-text">
                     {item.unit_price.toLocaleString()} {po.currency}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-brand-text">
                     {item.total_price.toLocaleString()} {po.currency}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-brand-text">
                     {item.delivery_date ? new Date(item.delivery_date).toLocaleDateString() : 'TBD'}
                   </td>
                 </tr>
@@ -308,13 +308,13 @@ export default function PODetailView({ poId, userRole }: PODetailViewProps) {
       </div>
 
       {/* Actions */}
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Actions</h2>
+      <div className="bg-brand-surface p-6 rounded-lg shadow">
+        <h2 className="text-lg font-semibold text-brand-text mb-4">Actions</h2>
         <div className="flex space-x-4">
           {po.status === 'draft' && (
             <button
               onClick={handleSendToSupplier}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              className="px-4 py-2 bg-status-success text-white rounded-lg hover:bg-status-success/90"
             >
               Send to Supplier
             </button>
@@ -322,7 +322,7 @@ export default function PODetailView({ poId, userRole }: PODetailViewProps) {
           {po.status === 'sent' && (
             <button
               onClick={() => setShowAcknowledgeForm(true)}
-              className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700"
+              className="px-4 py-2 bg-status-warning text-white rounded-lg hover:bg-yellow-700"
             >
               Acknowledge Receipt
             </button>
@@ -330,7 +330,7 @@ export default function PODetailView({ poId, userRole }: PODetailViewProps) {
           {(po.status === 'acknowledged' || po.status === 'in_progress') && (
             <button
               onClick={() => setShowStatusForm(true)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-brand-primary/90"
             >
               Update Status
             </button>
@@ -341,8 +341,8 @@ export default function PODetailView({ poId, userRole }: PODetailViewProps) {
       {/* Status Update Form */}
       {showStatusForm && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Update Status</h3>
+          <div className="bg-brand-surface p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h3 className="text-lg font-semibold text-brand-text mb-4">Update Status</h3>
             <form onSubmit={(e) => {
               e.preventDefault();
               const formData = new FormData(e.target as HTMLFormElement);
@@ -354,11 +354,11 @@ export default function PODetailView({ poId, userRole }: PODetailViewProps) {
             }}>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Status</label>
+                  <label className="block text-sm font-medium text-brand-text/80">Status</label>
                   <select
                     name="status"
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-brand-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
                   >
                     <option value="in_progress">In Progress</option>
                     <option value="delivered">Delivered</option>
@@ -367,19 +367,19 @@ export default function PODetailView({ poId, userRole }: PODetailViewProps) {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Comments</label>
+                  <label className="block text-sm font-medium text-brand-text/80">Comments</label>
                   <textarea
                     name="comments"
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-brand-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Delivery Date</label>
+                  <label className="block text-sm font-medium text-brand-text/80">Delivery Date</label>
                   <input
                     type="date"
                     name="delivery_date"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-brand-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
                   />
                 </div>
               </div>
@@ -387,13 +387,13 @@ export default function PODetailView({ poId, userRole }: PODetailViewProps) {
                 <button
                   type="button"
                   onClick={() => setShowStatusForm(false)}
-                  className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300"
+                  className="px-4 py-2 text-brand-text/80 bg-brand-surface rounded-lg hover:bg-brand-primary/10"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-brand-primary/90"
                 >
                   Update Status
                 </button>
@@ -406,8 +406,8 @@ export default function PODetailView({ poId, userRole }: PODetailViewProps) {
       {/* Acknowledge Form */}
       {showAcknowledgeForm && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Acknowledge Receipt</h3>
+          <div className="bg-brand-surface p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h3 className="text-lg font-semibold text-brand-text mb-4">Acknowledge Receipt</h3>
             <form onSubmit={(e) => {
               e.preventDefault();
               const formData = new FormData(e.target as HTMLFormElement);
@@ -420,37 +420,37 @@ export default function PODetailView({ poId, userRole }: PODetailViewProps) {
             }}>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Acknowledged By</label>
+                  <label className="block text-sm font-medium text-brand-text/80">Acknowledged By</label>
                   <input
                     type="text"
                     name="acknowledged_by"
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-brand-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Acknowledgment Date</label>
+                  <label className="block text-sm font-medium text-brand-text/80">Acknowledgment Date</label>
                   <input
                     type="datetime-local"
                     name="acknowledgment_date"
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-brand-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Estimated Delivery Date</label>
+                  <label className="block text-sm font-medium text-brand-text/80">Estimated Delivery Date</label>
                   <input
                     type="date"
                     name="estimated_delivery_date"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-brand-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Comments</label>
+                  <label className="block text-sm font-medium text-brand-text/80">Comments</label>
                   <textarea
                     name="comments"
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-brand-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
                   />
                 </div>
               </div>
@@ -458,13 +458,13 @@ export default function PODetailView({ poId, userRole }: PODetailViewProps) {
                 <button
                   type="button"
                   onClick={() => setShowAcknowledgeForm(false)}
-                  className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300"
+                  className="px-4 py-2 text-brand-text/80 bg-brand-surface rounded-lg hover:bg-brand-primary/10"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700"
+                  className="px-4 py-2 bg-status-warning text-white rounded-lg hover:bg-yellow-700"
                 >
                   Acknowledge
                 </button>

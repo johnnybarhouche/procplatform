@@ -84,28 +84,28 @@ export default function QuotePackForm({ rfq, selectedQuotes, onQuotePackCreated,
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900">Create Quote Pack</h2>
-          <p className="text-gray-600">RFQ: {rfq.rfq_number} | {selectedQuotes.length} quotes selected</p>
+      <div className="bg-brand-surface rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="px-6 py-4 border-b border-brand-text/10">
+          <h2 className="text-2xl font-bold text-brand-text">Create Quote Pack</h2>
+          <p className="text-brand-text/70">RFQ: {rfq.rfq_number} | {selectedQuotes.length} quotes selected</p>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Selected Quotes Summary */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Selected Quotes</h3>
+            <h3 className="text-lg font-semibold text-brand-text mb-4">Selected Quotes</h3>
             <div className="space-y-3">
               {selectedQuotes.map((quote) => (
-                <div key={quote.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div key={quote.id} className="flex items-center justify-between p-3 bg-brand-surface rounded-lg">
                   <div>
-                    <div className="font-medium text-gray-900">{quote.supplier.name}</div>
-                    <div className="text-sm text-gray-600">{quote.supplier.category}</div>
+                    <div className="font-medium text-brand-text">{quote.supplier.name}</div>
+                    <div className="text-sm text-brand-text/70">{quote.supplier.category}</div>
                   </div>
                   <div className="text-right">
-                    <div className="font-medium text-gray-900">
+                    <div className="font-medium text-brand-text">
                       {quote.total_amount.toLocaleString()} AED
                     </div>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-brand-text/70">
                       Valid until: {new Date(quote.valid_until).toLocaleDateString()}
                     </div>
                   </div>
@@ -116,28 +116,28 @@ export default function QuotePackForm({ rfq, selectedQuotes, onQuotePackCreated,
 
           {/* Comparison Analysis */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Comparison Analysis</h3>
+            <h3 className="text-lg font-semibold text-brand-text mb-4">Comparison Analysis</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-brand-text/80 mb-2">
                   Total Savings Potential
                 </label>
                 <input
                   type="text"
                   value={`${comparisonData.totalSavings.toLocaleString()} AED`}
                   readOnly
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
+                  className="w-full px-3 py-2 border border-brand-text/20 rounded-md bg-brand-surface"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-brand-text/80 mb-2">
                   Recommended Suppliers
                 </label>
                 <input
                   type="text"
                   value={comparisonData.recommendedSuppliers.join(', ')}
                   readOnly
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
+                  className="w-full px-3 py-2 border border-brand-text/20 rounded-md bg-brand-surface"
                 />
               </div>
             </div>
@@ -145,14 +145,14 @@ export default function QuotePackForm({ rfq, selectedQuotes, onQuotePackCreated,
 
           {/* Key Differences */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-brand-text/80 mb-2">
               Key Differences
             </label>
             <div className="space-y-2">
               {comparisonData.keyDifferences.map((difference, index) => (
                 <div key={index} className="flex items-center space-x-2">
-                  <span className="text-sm text-gray-600">•</span>
-                  <span className="text-sm text-gray-900">{difference}</span>
+                  <span className="text-sm text-brand-text/70">•</span>
+                  <span className="text-sm text-brand-text">{difference}</span>
                 </div>
               ))}
             </div>
@@ -160,48 +160,48 @@ export default function QuotePackForm({ rfq, selectedQuotes, onQuotePackCreated,
 
           {/* Risk Assessment */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-brand-text/80 mb-2">
               Risk Assessment
             </label>
             <textarea
               value={comparisonData.riskAssessment}
               onChange={(e) => setComparisonData(prev => ({ ...prev, riskAssessment: e.target.value }))}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-brand-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
               placeholder="Enter risk assessment details..."
             />
           </div>
 
           {/* Quote Pack Preview */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Quote Pack Preview</h3>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <div className="text-sm text-gray-600 mb-2">This quote pack will be sent to:</div>
-              <div className="text-sm font-medium text-gray-900">
+            <h3 className="text-lg font-semibold text-brand-text mb-4">Quote Pack Preview</h3>
+            <div className="bg-brand-surface p-4 rounded-lg">
+              <div className="text-sm text-brand-text/70 mb-2">This quote pack will be sent to:</div>
+              <div className="text-sm font-medium text-brand-text">
                 {rfq.material_request.requester_name} ({rfq.material_request.requester_id})
               </div>
-              <div className="text-sm text-gray-600 mt-1">
+              <div className="text-sm text-brand-text/70 mt-1">
                 Project: {rfq.material_request.project_name}
               </div>
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-brand-text/70">
                 Material Request: {rfq.material_request.mrn}
               </div>
             </div>
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+          <div className="flex justify-end space-x-4 pt-4 border-t border-brand-text/10">
             <button
               type="button"
               onClick={onCancel}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              className="px-4 py-2 text-sm font-medium text-brand-text/80 bg-brand-surface border border-brand-text/20 rounded-md hover:bg-brand-surface"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm font-medium text-white bg-brand-primary border border-transparent rounded-md hover:bg-brand-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Creating...' : 'Create & Send Quote Pack'}
             </button>

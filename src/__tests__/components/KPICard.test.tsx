@@ -43,7 +43,7 @@ describe('KPICard', () => {
     );
 
     const trendElement = screen.getByText('5%');
-    expect(trendElement).toHaveClass('text-green-600');
+    expect(trendElement).toHaveClass('text-status-success');
   });
 
   it('displays down trend with red color', () => {
@@ -57,7 +57,7 @@ describe('KPICard', () => {
     );
 
     const trendElement = screen.getByText('3%');
-    expect(trendElement).toHaveClass('text-red-600');
+    expect(trendElement).toHaveClass('text-status-danger');
   });
 
   it('displays neutral trend with gray color', () => {
@@ -71,7 +71,7 @@ describe('KPICard', () => {
     );
 
     const trendElement = screen.getByText('0%');
-    expect(trendElement).toHaveClass('text-gray-600');
+    expect(trendElement).toHaveClass('text-brand-text/70');
   });
 
   it('handles click when onClick is provided', () => {

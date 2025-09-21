@@ -92,14 +92,14 @@ export default function SupplierContactManager({
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
+    <div className="bg-brand-surface p-6 rounded-lg shadow-md">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">Supplier Contacts</h3>
+        <h3 className="text-lg font-semibold text-brand-text">Supplier Contacts</h3>
         <div className="flex gap-2">
           {!isEditing ? (
             <button
               onClick={() => setIsEditing(true)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              className="px-4 py-2 bg-brand-primary text-white rounded-md hover:bg-brand-primary/90 transition-colors"
             >
               Edit Contacts
             </button>
@@ -107,7 +107,7 @@ export default function SupplierContactManager({
             <div className="flex gap-2">
               <button
                 onClick={handleSaveContacts}
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                className="px-4 py-2 bg-status-success text-white rounded-md hover:bg-status-success/90 transition-colors"
               >
                 Save
               </button>
@@ -125,18 +125,18 @@ export default function SupplierContactManager({
       {/* Contact List */}
       <div className="space-y-4">
         {localContacts.map((contact) => (
-          <div key={contact.id} className="border rounded-lg p-4 bg-gray-50">
+          <div key={contact.id} className="border rounded-lg p-4 bg-brand-surface">
             <div className="flex justify-between items-start">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <h4 className="font-medium text-gray-900">{contact.name}</h4>
+                  <h4 className="font-medium text-brand-text">{contact.name}</h4>
                   {contact.is_primary && (
-                    <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                    <span className="px-2 py-1 bg-brand-primary/10 text-blue-800 text-xs rounded-full">
                       Primary
                     </span>
                   )}
                 </div>
-                <div className="space-y-1 text-sm text-gray-600">
+                <div className="space-y-1 text-sm text-brand-text/70">
                   <p><strong>Email:</strong> {contact.email}</p>
                   {contact.phone && <p><strong>Phone:</strong> {contact.phone}</p>}
                   {contact.position && <p><strong>Position:</strong> {contact.position}</p>}
@@ -147,14 +147,14 @@ export default function SupplierContactManager({
                   {!contact.is_primary && (
                     <button
                       onClick={() => handleSetPrimary(contact.id)}
-                      className="px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded hover:bg-blue-200 transition-colors"
+                      className="px-3 py-1 bg-brand-primary/10 text-brand-primary text-sm rounded hover:bg-blue-200 transition-colors"
                     >
                       Set Primary
                     </button>
                   )}
                   <button
                     onClick={() => handleRemoveContact(contact.id)}
-                    className="px-3 py-1 bg-red-100 text-red-700 text-sm rounded hover:bg-red-200 transition-colors"
+                    className="px-3 py-1 bg-status-danger/10 text-status-danger text-sm rounded hover:bg-red-200 transition-colors"
                   >
                     Remove
                   </button>
@@ -167,54 +167,54 @@ export default function SupplierContactManager({
 
       {/* Add New Contact Form */}
       {isEditing && (
-        <div className="mt-6 p-4 border-2 border-dashed border-gray-300 rounded-lg">
-          <h4 className="font-medium text-gray-900 mb-4">Add New Contact</h4>
+        <div className="mt-6 p-4 border-2 border-dashed border-brand-text/20 rounded-lg">
+          <h4 className="font-medium text-brand-text mb-4">Add New Contact</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-brand-text/80 mb-1">
                 Name *
               </label>
               <input
                 type="text"
                 value={newContact.name}
                 onChange={(e) => setNewContact({ ...newContact, name: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-brand-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
                 placeholder="Contact name"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-brand-text/80 mb-1">
                 Email *
               </label>
               <input
                 type="email"
                 value={newContact.email}
                 onChange={(e) => setNewContact({ ...newContact, email: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-brand-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
                 placeholder="contact@example.com"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-brand-text/80 mb-1">
                 Phone
               </label>
               <input
                 type="tel"
                 value={newContact.phone}
                 onChange={(e) => setNewContact({ ...newContact, phone: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-brand-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
                 placeholder="+971-4-123-4567"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-brand-text/80 mb-1">
                 Position
               </label>
               <input
                 type="text"
                 value={newContact.position}
                 onChange={(e) => setNewContact({ ...newContact, position: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-brand-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
                 placeholder="Sales Manager"
               />
             </div>
@@ -225,15 +225,15 @@ export default function SupplierContactManager({
               id="is_primary"
               checked={newContact.is_primary}
               onChange={(e) => setNewContact({ ...newContact, is_primary: e.target.checked })}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-4 w-4 text-brand-primary focus:ring-brand-primary border-brand-text/20 rounded"
             />
-            <label htmlFor="is_primary" className="ml-2 text-sm text-gray-700">
+            <label htmlFor="is_primary" className="ml-2 text-sm text-brand-text/80">
               Set as primary contact
             </label>
           </div>
           <button
             onClick={handleAddContact}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            className="mt-4 px-4 py-2 bg-brand-primary text-white rounded-md hover:bg-brand-primary/90 transition-colors"
           >
             Add Contact
           </button>

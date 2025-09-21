@@ -240,7 +240,7 @@ export default function AnalyticsChart({ data, type, config }: AnalyticsChartPro
         return renderPieChart();
       default:
         return (
-          <div className="flex items-center justify-center h-full text-gray-500">
+          <div className="flex items-center justify-center h-full text-brand-text/60">
             Chart type not supported
           </div>
         );
@@ -250,7 +250,7 @@ export default function AnalyticsChart({ data, type, config }: AnalyticsChartPro
   return (
     <div className="w-full">
       {config.title && (
-        <h4 className="text-sm font-medium text-gray-700 mb-2">{config.title}</h4>
+        <h4 className="text-sm font-medium text-brand-text/80 mb-2">{config.title}</h4>
       )}
       <div className="w-full">
         {renderChart()}

@@ -100,13 +100,13 @@ const MRFieldConfiguration: React.FC<MRFieldConfigurationProps> = ({ fields, onU
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">MR Field Configuration</h3>
-          <p className="text-sm text-gray-600">Configure which fields are visible, required, and their display order</p>
+          <h3 className="text-lg font-semibold text-brand-text">MR Field Configuration</h3>
+          <p className="text-sm text-brand-text/70">Configure which fields are visible, required, and their display order</p>
         </div>
         <button
           onClick={handleSave}
           disabled={loading}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 bg-brand-primary text-white rounded-md hover:bg-brand-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? 'Saving...' : 'Save Configuration'}
         </button>
@@ -122,9 +122,9 @@ const MRFieldConfiguration: React.FC<MRFieldConfigurationProps> = ({ fields, onU
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <div className="grid grid-cols-12 gap-4 text-sm font-medium text-gray-500">
+      <div className="bg-brand-surface rounded-lg shadow">
+        <div className="px-6 py-4 border-b border-brand-text/10">
+          <div className="grid grid-cols-12 gap-4 text-sm font-medium text-brand-text/60">
             <div className="col-span-1">Order</div>
             <div className="col-span-3">Field</div>
             <div className="col-span-2">Type</div>
@@ -143,7 +143,7 @@ const MRFieldConfiguration: React.FC<MRFieldConfigurationProps> = ({ fields, onU
                   <select
                     value={field.display_order}
                     onChange={(e) => handleOrderChange(field.id, parseInt(e.target.value))}
-                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                    className="w-full px-2 py-1 border border-brand-text/20 rounded text-sm"
                   >
                     {localFields.map((_, i) => (
                       <option key={i + 1} value={i + 1}>{i + 1}</option>
@@ -154,13 +154,13 @@ const MRFieldConfiguration: React.FC<MRFieldConfigurationProps> = ({ fields, onU
                   <div className="flex items-center space-x-2">
                     <span className="text-lg">{getFieldTypeIcon(field.field_type)}</span>
                     <div>
-                      <div className="font-medium text-gray-900">{field.field_label}</div>
-                      <div className="text-sm text-gray-500">{field.field_name}</div>
+                      <div className="font-medium text-brand-text">{field.field_label}</div>
+                      <div className="text-sm text-brand-text/60">{field.field_name}</div>
                     </div>
                   </div>
                 </div>
                 <div className="col-span-2">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-primary/10 text-blue-800">
                     {field.field_type}
                   </span>
                 </div>
@@ -170,9 +170,9 @@ const MRFieldConfiguration: React.FC<MRFieldConfigurationProps> = ({ fields, onU
                       type="checkbox"
                       checked={field.is_visible}
                       onChange={(e) => handleFieldUpdate(field.id, { is_visible: e.target.checked })}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-brand-primary focus:ring-brand-primary border-brand-text/20 rounded"
                     />
-                    <span className="ml-2 text-sm text-gray-700">Visible</span>
+                    <span className="ml-2 text-sm text-brand-text/80">Visible</span>
                   </label>
                 </div>
                 <div className="col-span-2">
@@ -181,9 +181,9 @@ const MRFieldConfiguration: React.FC<MRFieldConfigurationProps> = ({ fields, onU
                       type="checkbox"
                       checked={field.is_required}
                       onChange={(e) => handleFieldUpdate(field.id, { is_required: e.target.checked })}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-brand-primary focus:ring-brand-primary border-brand-text/20 rounded"
                     />
-                    <span className="ml-2 text-sm text-gray-700">Required</span>
+                    <span className="ml-2 text-sm text-brand-text/80">Required</span>
                   </label>
                 </div>
                 <div className="col-span-2">
@@ -194,7 +194,7 @@ const MRFieldConfiguration: React.FC<MRFieldConfigurationProps> = ({ fields, onU
                         handleOrderChange(field.id, newOrder);
                       }}
                       disabled={field.display_order === 1}
-                      className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="p-1 text-brand-text/50 hover:text-brand-text/70 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       ↑
                     </button>
@@ -204,7 +204,7 @@ const MRFieldConfiguration: React.FC<MRFieldConfigurationProps> = ({ fields, onU
                         handleOrderChange(field.id, newOrder);
                       }}
                       disabled={field.display_order === localFields.length}
-                      className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="p-1 text-brand-text/50 hover:text-brand-text/70 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       ↓
                     </button>
@@ -216,23 +216,23 @@ const MRFieldConfiguration: React.FC<MRFieldConfigurationProps> = ({ fields, onU
         </div>
       </div>
 
-      <div className="bg-gray-50 rounded-lg p-4">
-        <h4 className="text-sm font-medium text-gray-900 mb-2">Configuration Summary</h4>
+      <div className="bg-brand-surface rounded-lg p-4">
+        <h4 className="text-sm font-medium text-brand-text mb-2">Configuration Summary</h4>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
           <div>
-            <span className="text-gray-600">Total Fields:</span>
+            <span className="text-brand-text/70">Total Fields:</span>
             <span className="ml-2 font-medium">{localFields.length}</span>
           </div>
           <div>
-            <span className="text-gray-600">Visible Fields:</span>
+            <span className="text-brand-text/70">Visible Fields:</span>
             <span className="ml-2 font-medium">{localFields.filter(f => f.is_visible).length}</span>
           </div>
           <div>
-            <span className="text-gray-600">Required Fields:</span>
+            <span className="text-brand-text/70">Required Fields:</span>
             <span className="ml-2 font-medium">{localFields.filter(f => f.is_required).length}</span>
           </div>
           <div>
-            <span className="text-gray-600">Field Types:</span>
+            <span className="text-brand-text/70">Field Types:</span>
             <span className="ml-2 font-medium">{new Set(localFields.map(f => f.field_type)).size}</span>
           </div>
         </div>

@@ -104,12 +104,12 @@ const AuthorizationMatrixManager: React.FC<AuthorizationMatrixManagerProps> = ({
 
   const getRoleColor = (role: string) => {
     switch (role.toLowerCase()) {
-      case 'requester': return 'bg-blue-100 text-blue-800';
-      case 'procurement_manager': return 'bg-green-100 text-green-800';
+      case 'requester': return 'bg-brand-primary/10 text-blue-800';
+      case 'procurement_manager': return 'bg-status-success/10 text-green-800';
       case 'department_head': return 'bg-purple-100 text-purple-800';
-      case 'finance_director': return 'bg-yellow-100 text-yellow-800';
-      case 'ceo': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'finance_director': return 'bg-status-warning/10 text-yellow-800';
+      case 'ceo': return 'bg-status-danger/10 text-red-800';
+      default: return 'bg-brand-surface text-brand-text/90';
     }
   };
 
@@ -125,20 +125,20 @@ const AuthorizationMatrixManager: React.FC<AuthorizationMatrixManagerProps> = ({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Authorization Matrix</h3>
-          <p className="text-sm text-gray-600">Configure approval thresholds and routing rules for Project {projectId}</p>
+          <h3 className="text-lg font-semibold text-brand-text">Authorization Matrix</h3>
+          <p className="text-sm text-brand-text/70">Configure approval thresholds and routing rules for Project {projectId}</p>
         </div>
         <div className="flex space-x-3">
           <button
             onClick={() => setShowAddForm(!showAddForm)}
-            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+            className="px-4 py-2 bg-status-success text-white rounded-md hover:bg-status-success/90"
           >
             Add Rule
           </button>
           <button
             onClick={handleSave}
             disabled={loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-brand-primary text-white rounded-md hover:bg-brand-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Saving...' : 'Save Matrix'}
           </button>
@@ -157,15 +157,15 @@ const AuthorizationMatrixManager: React.FC<AuthorizationMatrixManagerProps> = ({
 
       {/* Add New Entry Form */}
       {showAddForm && (
-        <div className="bg-white rounded-lg shadow p-6">
-          <h4 className="text-md font-semibold text-gray-900 mb-4">Add New Authorization Rule</h4>
+        <div className="bg-brand-surface rounded-lg shadow p-6">
+          <h4 className="text-md font-semibold text-brand-text mb-4">Add New Authorization Rule</h4>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+              <label className="block text-sm font-medium text-brand-text/80 mb-1">Role</label>
               <select
                 value={newEntry.role || ''}
                 onChange={(e) => setNewEntry({ ...newEntry, role: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-brand-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
               >
                 <option value="">Select Role</option>
                 <option value="requester">Requester</option>
@@ -176,23 +176,23 @@ const AuthorizationMatrixManager: React.FC<AuthorizationMatrixManagerProps> = ({
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Threshold Amount (AED)</label>
+              <label className="block text-sm font-medium text-brand-text/80 mb-1">Threshold Amount (AED)</label>
               <input
                 type="number"
                 value={newEntry.threshold_amount || 0}
                 onChange={(e) => setNewEntry({ ...newEntry, threshold_amount: parseFloat(e.target.value) || 0 })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-brand-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
                 min="0"
                 step="0.01"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Approval Level</label>
+              <label className="block text-sm font-medium text-brand-text/80 mb-1">Approval Level</label>
               <input
                 type="number"
                 value={newEntry.approval_level || 1}
                 onChange={(e) => setNewEntry({ ...newEntry, approval_level: parseInt(e.target.value) || 1 })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-brand-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
                 min="1"
               />
             </div>
@@ -202,19 +202,19 @@ const AuthorizationMatrixManager: React.FC<AuthorizationMatrixManagerProps> = ({
                   type="checkbox"
                   checked={newEntry.is_active ?? true}
                   onChange={(e) => setNewEntry({ ...newEntry, is_active: e.target.checked })}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-brand-primary focus:ring-brand-primary border-brand-text/20 rounded"
                 />
-                <span className="ml-2 text-sm text-gray-700">Active</span>
+                <span className="ml-2 text-sm text-brand-text/80">Active</span>
               </label>
               <button
                 onClick={handleAddEntry}
-                className="px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                className="px-3 py-2 bg-brand-primary text-white rounded-md hover:bg-brand-primary/90"
               >
                 Add
               </button>
               <button
                 onClick={() => setShowAddForm(false)}
-                className="px-3 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                className="px-3 py-2 bg-brand-primary/10 text-brand-text/80 rounded-md hover:bg-gray-400"
               >
                 Cancel
               </button>
@@ -224,9 +224,9 @@ const AuthorizationMatrixManager: React.FC<AuthorizationMatrixManagerProps> = ({
       )}
 
       {/* Authorization Matrix Table */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <div className="grid grid-cols-12 gap-4 text-sm font-medium text-gray-500">
+      <div className="bg-brand-surface rounded-lg shadow">
+        <div className="px-6 py-4 border-b border-brand-text/10">
+          <div className="grid grid-cols-12 gap-4 text-sm font-medium text-brand-text/60">
             <div className="col-span-3">Role</div>
             <div className="col-span-2">Threshold</div>
             <div className="col-span-2">Approval Level</div>
@@ -246,18 +246,18 @@ const AuthorizationMatrixManager: React.FC<AuthorizationMatrixManagerProps> = ({
                   </span>
                 </div>
                 <div className="col-span-2">
-                  <span className="text-sm font-medium text-gray-900">
+                  <span className="text-sm font-medium text-brand-text">
                     {formatCurrency(entry.threshold_amount)}
                   </span>
                 </div>
                 <div className="col-span-2">
-                  <span className="text-sm text-gray-900">Level {entry.approval_level}</span>
+                  <span className="text-sm text-brand-text">Level {entry.approval_level}</span>
                 </div>
                 <div className="col-span-2">
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                     entry.is_active 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
+                      ? 'bg-status-success/10 text-green-800' 
+                      : 'bg-status-danger/10 text-red-800'
                   }`}>
                     {entry.is_active ? 'Active' : 'Inactive'}
                   </span>
@@ -266,13 +266,13 @@ const AuthorizationMatrixManager: React.FC<AuthorizationMatrixManagerProps> = ({
                   <div className="flex space-x-2">
                     <button
                       onClick={() => handleMatrixUpdate(entry.id, { is_active: !entry.is_active })}
-                      className="text-sm text-blue-600 hover:text-blue-800"
+                      className="text-sm text-brand-primary hover:text-blue-800"
                     >
                       {entry.is_active ? 'Deactivate' : 'Activate'}
                     </button>
                     <button
                       onClick={() => handleRemoveEntry(entry.id)}
-                      className="text-sm text-red-600 hover:text-red-800"
+                      className="text-sm text-status-danger hover:text-red-800"
                     >
                       Remove
                     </button>
@@ -285,23 +285,23 @@ const AuthorizationMatrixManager: React.FC<AuthorizationMatrixManagerProps> = ({
       </div>
 
       {/* Matrix Summary */}
-      <div className="bg-gray-50 rounded-lg p-4">
-        <h4 className="text-sm font-medium text-gray-900 mb-2">Authorization Matrix Summary</h4>
+      <div className="bg-brand-surface rounded-lg p-4">
+        <h4 className="text-sm font-medium text-brand-text mb-2">Authorization Matrix Summary</h4>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
           <div>
-            <span className="text-gray-600">Total Rules:</span>
+            <span className="text-brand-text/70">Total Rules:</span>
             <span className="ml-2 font-medium">{localMatrix.length}</span>
           </div>
           <div>
-            <span className="text-gray-600">Active Rules:</span>
+            <span className="text-brand-text/70">Active Rules:</span>
             <span className="ml-2 font-medium">{localMatrix.filter(e => e.is_active).length}</span>
           </div>
           <div>
-            <span className="text-gray-600">Max Threshold:</span>
+            <span className="text-brand-text/70">Max Threshold:</span>
             <span className="ml-2 font-medium">{formatCurrency(Math.max(...localMatrix.map(e => e.threshold_amount)))}</span>
           </div>
           <div>
-            <span className="text-gray-600">Max Level:</span>
+            <span className="text-brand-text/70">Max Level:</span>
             <span className="ml-2 font-medium">{Math.max(...localMatrix.map(e => e.approval_level))}</span>
           </div>
         </div>

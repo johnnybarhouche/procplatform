@@ -1,181 +1,133 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import MaterialRequestForm from '@/components/MaterialRequestForm';
-import ProcurementDashboard from '@/components/ProcurementDashboard';
-import QuoteApprovalDashboard from '@/components/QuoteApprovalDashboard';
-import PRDashboard from '@/components/PRDashboard';
-import PODashboard from '@/components/PODashboard';
-import SupplierDashboard from '@/components/SupplierDashboard';
-import ItemMasterDashboard from '@/components/ItemMasterDashboard';
-import AnalyticsDashboard from '@/components/AnalyticsDashboard';
-import AdminDashboard from '@/components/AdminDashboard';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import MaterialRequestForm from "@/components/MaterialRequestForm";
+import ProcurementDashboard from "@/components/ProcurementDashboard";
+import QuoteApprovalDashboard from "@/components/QuoteApprovalDashboard";
+import PRDashboard from "@/components/PRDashboard";
+import PODashboard from "@/components/PODashboard";
+import SupplierDashboard from "@/components/SupplierDashboard";
+import ItemMasterDashboard from "@/components/ItemMasterDashboard";
+import AnalyticsDashboard from "@/components/AnalyticsDashboard";
+import AdminDashboard from "@/components/AdminDashboard";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { NAV_ITEMS, NavItem } from "@/components/layout/navConfig";
+
+const PROJECTS = [
+  { id: "1", name: "Project Alpha" },
+  { id: "2", name: "Project Beta" },
+];
+
+type ViewId =
+  | "mr-form"
+  | "procurement-dashboard"
+  | "quote-approval"
+  | "pr-dashboard"
+  | "po-dashboard"
+  | "supplier-dashboard"
+  | "item-database"
+  | "analytics"
+  | "admin";
+
+type RoleId = "requester" | "procurement" | "approver" | "admin";
+
+const DEFAULT_VIEW: ViewId = "mr-form";
 
 export default function Home() {
-  const [currentView, setCurrentView] = useState<'mr-form' | 'procurement-dashboard' | 'quote-approval' | 'pr-dashboard' | 'po-dashboard' | 'supplier-dashboard' | 'item-database' | 'analytics' | 'admin'>('mr-form');
-  const [userRole, setUserRole] = useState<'requester' | 'procurement' | 'approver' | 'admin'>('requester');
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  // Mock projects data - in real app this would come from API
-  const projects = [
-    { id: '1', name: 'Project Alpha' },
-    { id: '2', name: 'Project Beta' }
-  ];
+  const initialView = useMemo(() => {
+    const view = searchParams.get("view") as ViewId | null;
+    return view ?? DEFAULT_VIEW;
+  }, [searchParams]);
 
+  const [currentView, setCurrentView] = useState<ViewId>(initialView);
+  const [userRole, setUserRole] = useState<RoleId>("requester");
+  const [selectedProjectId, setSelectedProjectId] = useState(PROJECTS[0]?.id ?? "");
+
+  useEffect(() => {
+    if (userRole !== "admin" && currentView === "admin") {
+      setCurrentView("mr-form");
+      router.push("/?view=mr-form", { scroll: false });
+    }
+  }, [userRole, currentView, router]);
+
+  const navItems = useMemo(
+    () =>
+      NAV_ITEMS.filter((item) => {
+        if (!item.roles) return true;
+        return item.roles.includes(userRole);
+      }),
+    [userRole]
+  );
+
+  useEffect(() => {
+    const view = searchParams.get("view") as ViewId | null;
+    if (view && view !== currentView) {
+      setCurrentView(view);
+    }
+  }, [searchParams, currentView]);
+
+  const handleNavigate = useCallback(
+    (item: NavItem) => {
+      if (item.id === "ui-kit") {
+        router.push(item.href);
+        return;
+      }
+      const nextView = item.id as ViewId;
+      setCurrentView(nextView);
+      router.push(item.href, { scroll: false });
+    },
+    [router]
+  );
+
+  const renderedView = useMemo(() => {
+    switch (currentView) {
+      case "mr-form":
+        return <MaterialRequestForm projects={PROJECTS} />;
+      case "procurement-dashboard":
+        return (
+          <ProcurementDashboard
+            userRole={userRole === "procurement" ? "procurement" : "admin"}
+          />
+        );
+      case "quote-approval":
+        return (
+          <QuoteApprovalDashboard
+            userRole={userRole === "approver" ? "approver" : "requester"}
+          />
+        );
+      case "pr-dashboard":
+        return <PRDashboard userRole={userRole} />;
+      case "po-dashboard":
+        return <PODashboard userRole={userRole} />;
+      case "supplier-dashboard":
+        return <SupplierDashboard userRole={userRole} />;
+      case "item-database":
+        return <ItemMasterDashboard userRole={userRole} />;
+      case "analytics":
+        return <AnalyticsDashboard userRole={userRole} />;
+      case "admin":
+        return <AdminDashboard userRole={userRole} />;
+      default:
+        return null;
+    }
+  }, [currentView, userRole]);
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <h1 className="text-xl font-semibold text-gray-900">Procurement Platform</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <label className="text-sm font-medium text-gray-700">Role:</label>
-                <select
-                  value={userRole}
-                  onChange={(e) => setUserRole(e.target.value as 'requester' | 'procurement' | 'approver' | 'admin')}
-                  className="px-3 py-1 border border-gray-300 rounded-md text-sm"
-                >
-                  <option value="requester">Requester</option>
-                  <option value="procurement">Procurement</option>
-                  <option value="approver">Approver</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </div>
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => setCurrentView('mr-form')}
-                  className={`px-3 py-2 text-sm font-medium rounded-md ${
-                    currentView === 'mr-form'
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  Create MR
-                </button>
-                <button
-                  onClick={() => setCurrentView('procurement-dashboard')}
-                  className={`px-3 py-2 text-sm font-medium rounded-md ${
-                    currentView === 'procurement-dashboard'
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  Procurement Dashboard
-                </button>
-                <button
-                  onClick={() => setCurrentView('quote-approval')}
-                  className={`px-3 py-2 text-sm font-medium rounded-md ${
-                    currentView === 'quote-approval'
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  Quote Approvals
-                </button>
-                <button
-                  onClick={() => setCurrentView('pr-dashboard')}
-                  className={`px-3 py-2 text-sm font-medium rounded-md ${
-                    currentView === 'pr-dashboard'
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  Purchase Requisitions
-                </button>
-                <button
-                  onClick={() => setCurrentView('po-dashboard')}
-                  className={`px-3 py-2 text-sm font-medium rounded-md ${
-                    currentView === 'po-dashboard'
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  Purchase Orders
-                </button>
-                <button
-                  onClick={() => setCurrentView('supplier-dashboard')}
-                  className={`px-3 py-2 text-sm font-medium rounded-md ${
-                    currentView === 'supplier-dashboard'
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  Supplier Management
-                </button>
-                <button
-                  onClick={() => setCurrentView('item-database')}
-                  className={`px-3 py-2 text-sm font-medium rounded-md ${
-                    currentView === 'item-database'
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  Item Database
-                </button>
-                <button
-                  onClick={() => setCurrentView('analytics')}
-                  className={`px-3 py-2 text-sm font-medium rounded-md ${
-                    currentView === 'analytics'
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  Analytics
-                </button>
-                {userRole === 'admin' && (
-                  <button
-                    onClick={() => setCurrentView('admin')}
-                    className={`px-3 py-2 text-sm font-medium rounded-md ${
-                      currentView === 'admin'
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'text-gray-500 hover:text-gray-700'
-                    }`}
-                  >
-                    Admin
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Main Content */}
-      <main>
-        {currentView === 'mr-form' && (
-          <MaterialRequestForm 
-            projects={projects}
-          />
-        )}
-        {currentView === 'procurement-dashboard' && (
-          <ProcurementDashboard userRole={userRole === 'procurement' ? 'procurement' : 'admin'} />
-        )}
-        {currentView === 'quote-approval' && (
-          <QuoteApprovalDashboard userRole={userRole === 'approver' ? 'approver' : 'requester'} />
-        )}
-        {currentView === 'pr-dashboard' && (
-          <PRDashboard userRole={userRole} />
-        )}
-        {currentView === 'po-dashboard' && (
-          <PODashboard userRole={userRole} />
-        )}
-        {currentView === 'supplier-dashboard' && (
-          <SupplierDashboard userRole={userRole} />
-        )}
-        {currentView === 'item-database' && (
-          <ItemMasterDashboard userRole={userRole} />
-        )}
-        {currentView === 'analytics' && (
-          <AnalyticsDashboard userRole={userRole} />
-        )}
-        {currentView === 'admin' && userRole === 'admin' && (
-          <AdminDashboard userRole="admin" />
-        )}
-      </main>
-    </div>
+    <AppLayout
+      navItems={navItems}
+      activeNavId={currentView}
+      onNavigate={handleNavigate}
+      projects={PROJECTS}
+      selectedProjectId={selectedProjectId}
+      onProjectChange={(projectId) => setSelectedProjectId(projectId)}
+      userRole={userRole}
+      onRoleChange={setUserRole}
+    >
+      {renderedView}
+    </AppLayout>
   );
 }

@@ -107,9 +107,9 @@ export default function ItemMasterDashboard({ userRole: _userRole }: ItemMasterD
 
   const getStatusBadge = (status: string) => {
     const statusClasses = {
-      approved: 'bg-green-100 text-green-800',
-      pending: 'bg-yellow-100 text-yellow-800',
-      rejected: 'bg-red-100 text-red-800'
+      approved: 'bg-status-success/10 text-green-800',
+      pending: 'bg-status-warning/10 text-yellow-800',
+      rejected: 'bg-status-danger/10 text-red-800'
     };
     
     return (
@@ -132,19 +132,19 @@ export default function ItemMasterDashboard({ userRole: _userRole }: ItemMasterD
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Item Master Database</h1>
-          <p className="text-gray-600">Manage your item catalog and pricing</p>
+          <h1 className="text-2xl font-bold text-brand-text">Item Master Database</h1>
+          <p className="text-brand-text/70">Manage your item catalog and pricing</p>
         </div>
         <div className="flex space-x-3">
           <button
             onClick={() => {/* Navigate to add item */}}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            className="bg-brand-primary text-white px-4 py-2 rounded-md hover:bg-brand-primary/90"
           >
             Add Item
           </button>
           <button
             onClick={() => {/* Navigate to import */}}
-            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+            className="bg-status-success text-white px-4 py-2 rounded-md hover:bg-status-success/90"
           >
             Import Items
           </button>
@@ -158,7 +158,7 @@ export default function ItemMasterDashboard({ userRole: _userRole }: ItemMasterD
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-white p-6 rounded-lg shadow">
+      <div className="bg-brand-surface p-6 rounded-lg shadow">
         <form onSubmit={handleSearch} className="space-y-4">
           <div className="flex space-x-4">
             <div className="flex-1">
@@ -167,12 +167,12 @@ export default function ItemMasterDashboard({ userRole: _userRole }: ItemMasterD
                 placeholder="Search items by code, description, brand..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                className="w-full border border-brand-text/20 rounded-md px-3 py-2"
               />
             </div>
             <button
               type="submit"
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+              className="bg-brand-primary text-white px-4 py-2 rounded-md hover:bg-brand-primary/90"
             >
               Search
             </button>
@@ -180,11 +180,11 @@ export default function ItemMasterDashboard({ userRole: _userRole }: ItemMasterD
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+              <label className="block text-sm font-medium text-brand-text/80 mb-1">Category</label>
               <select
                 value={filters.category || ''}
                 onChange={(e) => handleFilterChange({ category: e.target.value || undefined })}
-                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                className="w-full border border-brand-text/20 rounded-md px-3 py-2"
               >
                 <option value="">All Categories</option>
                 {categories.map(category => (
@@ -194,11 +194,11 @@ export default function ItemMasterDashboard({ userRole: _userRole }: ItemMasterD
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+              <label className="block text-sm font-medium text-brand-text/80 mb-1">Status</label>
               <select
                 value={filters.approval_status || ''}
                 onChange={(e) => handleFilterChange({ approval_status: e.target.value || undefined })}
-                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                className="w-full border border-brand-text/20 rounded-md px-3 py-2"
               >
                 <option value="">All Status</option>
                 <option value="approved">Approved</option>
@@ -208,13 +208,13 @@ export default function ItemMasterDashboard({ userRole: _userRole }: ItemMasterD
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Active</label>
+              <label className="block text-sm font-medium text-brand-text/80 mb-1">Active</label>
               <select
                 value={filters.is_active?.toString() || ''}
                 onChange={(e) => handleFilterChange({ 
                   is_active: e.target.value === '' ? undefined : e.target.value === 'true' 
                 })}
-                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                className="w-full border border-brand-text/20 rounded-md px-3 py-2"
               >
                 <option value="">All</option>
                 <option value="true">Active</option>
@@ -229,7 +229,7 @@ export default function ItemMasterDashboard({ userRole: _userRole }: ItemMasterD
                   setFilters({});
                   setSearchTerm('');
                 }}
-                className="w-full bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300"
+                className="w-full bg-brand-surface text-brand-text/80 px-4 py-2 rounded-md hover:bg-brand-primary/10"
               >
                 Clear Filters
               </button>
@@ -242,19 +242,19 @@ export default function ItemMasterDashboard({ userRole: _userRole }: ItemMasterD
       {selectedItems.length > 0 && (
         <div className="bg-blue-50 p-4 rounded-lg">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-blue-700">
+            <span className="text-sm text-brand-primary">
               {selectedItems.length} item(s) selected
             </span>
             <div className="flex space-x-2">
               <button
                 onClick={() => handleBulkAction('approve')}
-                className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700"
+                className="bg-status-success text-white px-3 py-1 rounded text-sm hover:bg-status-success/90"
               >
                 Approve
               </button>
               <button
                 onClick={() => handleBulkAction('reject')}
-                className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
+                className="bg-status-danger text-white px-3 py-1 rounded text-sm hover:bg-status-danger/90"
               >
                 Reject
               </button>
@@ -270,62 +270,62 @@ export default function ItemMasterDashboard({ userRole: _userRole }: ItemMasterD
       )}
 
       {/* Items Table */}
-      <div className="bg-white shadow rounded-lg overflow-hidden">
+      <div className="bg-brand-surface shadow rounded-lg overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className="bg-brand-surface">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                 <input
                   type="checkbox"
                   checked={selectedItems.length === items.length && items.length > 0}
                   onChange={handleSelectAll}
-                  className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                  className="h-4 w-4 text-brand-primary border-brand-text/20 rounded"
                 />
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                 Item Code
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                 Description
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                 Category
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                 Brand/Model
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-brand-surface divide-y divide-gray-200">
             {items.map((item) => (
-              <tr key={item.id} className="hover:bg-gray-50">
+              <tr key={item.id} className="hover:bg-brand-surface">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <input
                     type="checkbox"
                     checked={selectedItems.includes(item.id)}
                     onChange={() => handleItemSelect(item.id)}
-                    className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                    className="h-4 w-4 text-brand-primary border-brand-text/20 rounded"
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">{item.item_code}</div>
+                  <div className="text-sm font-medium text-brand-text">{item.item_code}</div>
                 </td>
                 <td className="px-6 py-4">
-                  <div className="text-sm text-gray-900">{item.description}</div>
-                  <div className="text-sm text-gray-500">{item.uom}</div>
+                  <div className="text-sm text-brand-text">{item.description}</div>
+                  <div className="text-sm text-brand-text/60">{item.uom}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{item.category}</div>
+                  <div className="text-sm text-brand-text">{item.category}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{item.brand}</div>
-                  <div className="text-sm text-gray-500">{item.model}</div>
+                  <div className="text-sm text-brand-text">{item.brand}</div>
+                  <div className="text-sm text-brand-text/60">{item.model}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {getStatusBadge(item.approval_status)}
@@ -334,7 +334,7 @@ export default function ItemMasterDashboard({ userRole: _userRole }: ItemMasterD
                   <div className="flex space-x-2">
                     <button
                       onClick={() => {/* Navigate to item details */}}
-                      className="text-blue-600 hover:text-blue-900"
+                      className="text-brand-primary hover:text-blue-900"
                     >
                       View
                     </button>
@@ -347,7 +347,7 @@ export default function ItemMasterDashboard({ userRole: _userRole }: ItemMasterD
                     {item.approval_status === 'pending' && (
                       <button
                         onClick={() => {/* Handle approval */}}
-                        className="text-green-600 hover:text-green-900"
+                        className="text-status-success hover:text-green-900"
                       >
                         Approve
                       </button>
@@ -361,7 +361,7 @@ export default function ItemMasterDashboard({ userRole: _userRole }: ItemMasterD
 
         {items.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500">No items found</p>
+            <p className="text-brand-text/60">No items found</p>
           </div>
         )}
       </div>
@@ -369,21 +369,21 @@ export default function ItemMasterDashboard({ userRole: _userRole }: ItemMasterD
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-700">
+          <div className="text-sm text-brand-text/80">
             Showing page {currentPage} of {totalPages}
           </div>
           <div className="flex space-x-2">
             <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1 border border-gray-300 rounded-md disabled:opacity-50"
+              className="px-3 py-1 border border-brand-text/20 rounded-md disabled:opacity-50"
             >
               Previous
             </button>
             <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
-              className="px-3 py-1 border border-gray-300 rounded-md disabled:opacity-50"
+              className="px-3 py-1 border border-brand-text/20 rounded-md disabled:opacity-50"
             >
               Next
             </button>

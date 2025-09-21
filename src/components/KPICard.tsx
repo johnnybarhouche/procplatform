@@ -22,11 +22,11 @@ export default function KPICard({
   const getTrendColor = () => {
     switch (trend) {
       case 'up':
-        return 'text-green-600';
+        return 'text-status-success';
       case 'down':
-        return 'text-red-600';
+        return 'text-status-danger';
       default:
-        return 'text-gray-600';
+        return 'text-brand-text/70';
     }
   };
 
@@ -62,15 +62,15 @@ export default function KPICard({
 
   return (
     <div 
-      className={`bg-white p-6 rounded-lg shadow-sm border hover:shadow-md transition-shadow ${
+      className={`bg-brand-surface p-6 rounded-lg shadow-sm border hover:shadow-md transition-shadow ${
         onClick ? 'cursor-pointer' : ''
       }`}
       onClick={onClick}
     >
       <div className="flex items-center justify-between">
         <div className="flex-1">
-          <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
-          <p className="text-2xl font-bold text-gray-900">{formatValue(value)}</p>
+          <p className="text-sm font-medium text-brand-text/70 mb-1">{title}</p>
+          <p className="text-2xl font-bold text-brand-text">{formatValue(value)}</p>
         </div>
         
         {icon && (
@@ -87,7 +87,7 @@ export default function KPICard({
             {Math.abs(change)}%
           </span>
         </div>
-        <span className="ml-2 text-sm text-gray-500">
+        <span className="ml-2 text-sm text-brand-text/60">
           vs last period
         </span>
       </div>

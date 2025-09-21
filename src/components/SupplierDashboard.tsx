@@ -61,12 +61,12 @@ export default function SupplierDashboard({ userRole }: SupplierDashboardProps) 
 
   const getStatusBadge = (status: string) => {
     const statusClasses = {
-      pending: 'bg-yellow-100 text-yellow-800',
-      approved: 'bg-green-100 text-green-800',
-      suspended: 'bg-red-100 text-red-800',
-      inactive: 'bg-gray-100 text-gray-800'
+      pending: 'bg-status-warning/10 text-yellow-800',
+      approved: 'bg-status-success/10 text-green-800',
+      suspended: 'bg-status-danger/10 text-red-800',
+      inactive: 'bg-brand-surface text-brand-text/90'
     };
-    return statusClasses[status as keyof typeof statusClasses] || 'bg-gray-100 text-gray-800';
+    return statusClasses[status as keyof typeof statusClasses] || 'bg-brand-surface text-brand-text/90';
   };
 
   const getRatingStars = (rating: number) => {
@@ -87,7 +87,7 @@ export default function SupplierDashboard({ userRole }: SupplierDashboardProps) 
         <div className="text-red-800">Error: {error}</div>
         <button 
           onClick={fetchSuppliers}
-          className="mt-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+          className="mt-2 px-4 py-2 bg-status-danger text-white rounded-md hover:bg-status-danger/90"
         >
           Retry
         </button>
@@ -98,25 +98,25 @@ export default function SupplierDashboard({ userRole }: SupplierDashboardProps) 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">Supplier Management</h1>
+        <h1 className="text-2xl font-bold text-brand-text">Supplier Management</h1>
         {userRole === 'procurement' || userRole === 'admin' ? (
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+          <button className="px-4 py-2 bg-brand-primary text-white rounded-md hover:bg-brand-primary/90">
             Add Supplier
           </button>
         ) : null}
       </div>
 
       {/* Filters */}
-      <div className="bg-white p-4 rounded-lg shadow">
+      <div className="bg-brand-surface p-4 rounded-lg shadow">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-brand-text/80 mb-1">
               Category
             </label>
             <select
               value={filters.category}
               onChange={(e) => handleFilterChange('category', e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-3 py-2"
+              className="w-full border border-brand-text/20 rounded-md px-3 py-2"
             >
               <option value="">All Categories</option>
               <option value="Construction Materials">Construction Materials</option>
@@ -125,13 +125,13 @@ export default function SupplierDashboard({ userRole }: SupplierDashboardProps) 
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-brand-text/80 mb-1">
               Status
             </label>
             <select
               value={filters.status}
               onChange={(e) => handleFilterChange('status', e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-3 py-2"
+              className="w-full border border-brand-text/20 rounded-md px-3 py-2"
             >
               <option value="">All Status</option>
               <option value="pending">Pending</option>
@@ -141,13 +141,13 @@ export default function SupplierDashboard({ userRole }: SupplierDashboardProps) 
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-brand-text/80 mb-1">
               Active Status
             </label>
             <select
               value={filters.isActive}
               onChange={(e) => handleFilterChange('isActive', e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-3 py-2"
+              className="w-full border border-brand-text/20 rounded-md px-3 py-2"
             >
               <option value="">All</option>
               <option value="true">Active</option>
@@ -155,7 +155,7 @@ export default function SupplierDashboard({ userRole }: SupplierDashboardProps) 
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-brand-text/80 mb-1">
               Search
             </label>
             <input
@@ -163,54 +163,54 @@ export default function SupplierDashboard({ userRole }: SupplierDashboardProps) 
               value={filters.search}
               onChange={(e) => handleFilterChange('search', e.target.value)}
               placeholder="Search suppliers..."
-              className="w-full border border-gray-300 rounded-md px-3 py-2"
+              className="w-full border border-brand-text/20 rounded-md px-3 py-2"
             />
           </div>
         </div>
       </div>
 
       {/* Suppliers Table */}
-      <div className="bg-white shadow rounded-lg overflow-hidden">
+      <div className="bg-brand-surface shadow rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+            <thead className="bg-brand-surface">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                   Supplier Code
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                   Supplier
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                   Category
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                   Rating
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                   Performance
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-brand-surface divide-y divide-gray-200">
               {suppliers.map((supplier) => (
-                <tr key={supplier.id} className="hover:bg-gray-50">
+                <tr key={supplier.id} className="hover:bg-brand-surface">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{supplier.supplier_code}</div>
+                    <div className="text-sm font-medium text-brand-text">{supplier.supplier_code}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
-                      <div className="text-sm font-medium text-gray-900">{supplier.name}</div>
-                      <div className="text-sm text-gray-500">{supplier.email}</div>
+                      <div className="text-sm font-medium text-brand-text">{supplier.name}</div>
+                      <div className="text-sm text-brand-text/60">{supplier.email}</div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-brand-text">
                     {supplier.category}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -221,15 +221,15 @@ export default function SupplierDashboard({ userRole }: SupplierDashboardProps) 
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <span className="text-yellow-400">{getRatingStars(supplier.rating)}</span>
-                      <span className="ml-2 text-sm text-gray-900">{supplier.rating.toFixed(1)}</span>
+                      <span className="ml-2 text-sm text-brand-text">{supplier.rating.toFixed(1)}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-brand-text">
                     <div>Quotes: {supplier.quote_count}</div>
-                    <div className="text-xs text-gray-500">Avg Response: {supplier.avg_response_time}h</div>
+                    <div className="text-xs text-brand-text/60">Avg Response: {supplier.avg_response_time}h</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button className="text-blue-600 hover:text-blue-900 mr-3">
+                    <button className="text-brand-primary hover:text-blue-900 mr-3">
                       View
                     </button>
                     {(userRole === 'procurement' || userRole === 'admin') && (
@@ -246,26 +246,26 @@ export default function SupplierDashboard({ userRole }: SupplierDashboardProps) 
 
         {/* Pagination */}
         {pagination.total > pagination.limit && (
-          <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+          <div className="bg-brand-surface px-4 py-3 flex items-center justify-between border-t border-brand-text/10 sm:px-6">
             <div className="flex-1 flex justify-between sm:hidden">
               <button
                 onClick={() => handlePageChange(pagination.page - 1)}
                 disabled={pagination.page === 1}
-                className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                className="relative inline-flex items-center px-4 py-2 border border-brand-text/20 text-sm font-medium rounded-md text-brand-text/80 bg-brand-surface hover:bg-brand-surface disabled:opacity-50"
               >
                 Previous
               </button>
               <button
                 onClick={() => handlePageChange(pagination.page + 1)}
                 disabled={pagination.page * pagination.limit >= pagination.total}
-                className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                className="ml-3 relative inline-flex items-center px-4 py-2 border border-brand-text/20 text-sm font-medium rounded-md text-brand-text/80 bg-brand-surface hover:bg-brand-surface disabled:opacity-50"
               >
                 Next
               </button>
             </div>
             <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
               <div>
-                <p className="text-sm text-gray-700">
+                <p className="text-sm text-brand-text/80">
                   Showing{' '}
                   <span className="font-medium">{(pagination.page - 1) * pagination.limit + 1}</span>
                   {' '}to{' '}
@@ -282,14 +282,14 @@ export default function SupplierDashboard({ userRole }: SupplierDashboardProps) 
                   <button
                     onClick={() => handlePageChange(pagination.page - 1)}
                     disabled={pagination.page === 1}
-                    className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                    className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-brand-text/20 bg-brand-surface text-sm font-medium text-brand-text/60 hover:bg-brand-surface disabled:opacity-50"
                   >
                     Previous
                   </button>
                   <button
                     onClick={() => handlePageChange(pagination.page + 1)}
                     disabled={pagination.page * pagination.limit >= pagination.total}
-                    className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                    className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-brand-text/20 bg-brand-surface text-sm font-medium text-brand-text/60 hover:bg-brand-surface disabled:opacity-50"
                   >
                     Next
                   </button>

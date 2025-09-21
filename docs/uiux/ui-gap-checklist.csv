@@ -1,0 +1,11 @@
+flow,module,issue,severity,owner,fix_type,notes
+MR→RFQ,Global Shell,Top bar/left nav non-compliant with Deep Blue layout,Critical,Dev,Layout,"Replace nav in src/app/page.tsx with spec-aligned shell"
+MR→RFQ,Material Request,Missing status badges and traceability chips,High,Dev,UI Components,"Add state chips + MR↔PR↔PO chips per docs/front-end.md#4"
+MR→RFQ,RFQ Wizard,No multi-step wizard or dispatch confirmation,High,Design→Dev,UX Flow,"Design stepper, implement in ProcurementDashboard"
+Quote Approval,Quote Approval,Line-level selection + confirmation modal absent,High,Dev,Interaction,"Implement per-line radios + modal, enforce mandatory approval"
+PR,PR Detail,Approval matrix & audit trail missing,High,Dev,UI,"Add matrix visualization + audit tab"
+PO,PO Detail,Status timeline and PDF preview not implemented,High,Dev,UI,"Build timeline component + PDF template preview"
+Admin,PO Templates,Wizard steps missing,High,Design→Dev,Workflow,"Design/upload-preview wizard per spec"
+Cross-Cutting,UX Tokens,Brand colors/spacing not centralized,Critical,Design→Dev,Tokens,"Create Tailwind theme mapping DSV palette and 8px spacing"
+Cross-Cutting,Accessibility,Contrast/focus states unverified,Medium,Dev,QA,"Run WCAG AA pass once tokens applied"
+Analytics,Analytics Dashboard,KPI/Export styling off-brand,Medium,Dev,Styling,"Update cards/buttons with DSV palette"

@@ -94,37 +94,37 @@ export default function RFQCreationForm({ materialRequest, onRFQCreated, onCance
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900">Create RFQ</h2>
-          <p className="text-gray-600">Material Request: {materialRequest.mrn}</p>
+      <div className="bg-brand-surface rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="px-6 py-4 border-b border-brand-text/10">
+          <h2 className="text-2xl font-bold text-brand-text">Create RFQ</h2>
+          <p className="text-brand-text/70">Material Request: {materialRequest.mrn}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Line Items Grouping */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Line Items to Include</h3>
+            <h3 className="text-lg font-semibold text-brand-text mb-4">Line Items to Include</h3>
             <div className="space-y-4">
               {Object.entries(groupedLineItems).map(([category, items]) => (
-                <div key={category} className="border border-gray-200 rounded-lg p-4">
+                <div key={category} className="border border-brand-text/10 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium text-gray-900">{category}</h4>
+                    <h4 className="font-medium text-brand-text">{category}</h4>
                     <label className="flex items-center">
                       <input
                         type="checkbox"
                         defaultChecked
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        className="rounded border-brand-text/20 text-brand-primary focus:ring-brand-primary"
                       />
-                      <span className="ml-2 text-sm text-gray-600">Include all</span>
+                      <span className="ml-2 text-sm text-brand-text/70">Include all</span>
                     </label>
                   </div>
                   <div className="space-y-2">
                     {items.map((item) => (
                       <div key={item.id} className="flex items-center justify-between text-sm">
-                        <span className="text-gray-700">
+                        <span className="text-brand-text/80">
                           {item.item_code} - {item.description} ({item.quantity} {item.uom})
                         </span>
-                        <span className="font-medium text-gray-900">
+                        <span className="font-medium text-brand-text">
                           {item.quantity * item.unit_price} AED
                         </span>
                       </div>
@@ -137,7 +137,7 @@ export default function RFQCreationForm({ materialRequest, onRFQCreated, onCance
 
           {/* Supplier Selection */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Select Suppliers</h3>
+            <h3 className="text-lg font-semibold text-brand-text mb-4">Select Suppliers</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {suppliers.map((supplier) => (
                 <div
@@ -145,22 +145,22 @@ export default function RFQCreationForm({ materialRequest, onRFQCreated, onCance
                   className={`border rounded-lg p-4 cursor-pointer transition-colors ${
                     selectedSuppliers.includes(supplier.id)
                       ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                      : 'border-brand-text/10 hover:border-brand-text/20'
                   }`}
                   onClick={() => handleSupplierToggle(supplier.id)}
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="font-medium text-gray-900">{supplier.name}</h4>
-                      <p className="text-sm text-gray-600">{supplier.category}</p>
+                      <h4 className="font-medium text-brand-text">{supplier.name}</h4>
+                      <p className="text-sm text-brand-text/70">{supplier.category}</p>
                       <div className="flex items-center space-x-4 mt-2">
-                        <span className="text-sm text-gray-500">
+                        <span className="text-sm text-brand-text/60">
                           Rating: {supplier.rating}/5.0
                         </span>
-                        <span className="text-sm text-gray-500">
+                        <span className="text-sm text-brand-text/60">
                           {supplier.quote_count} quotes
                         </span>
-                        <span className="text-sm text-gray-500">
+                        <span className="text-sm text-brand-text/60">
                           Avg: {supplier.avg_response_time}h
                         </span>
                       </div>
@@ -169,7 +169,7 @@ export default function RFQCreationForm({ materialRequest, onRFQCreated, onCance
                       type="checkbox"
                       checked={selectedSuppliers.includes(supplier.id)}
                       onChange={() => handleSupplierToggle(supplier.id)}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="rounded border-brand-text/20 text-brand-primary focus:ring-brand-primary"
                     />
                   </div>
                 </div>
@@ -180,44 +180,44 @@ export default function RFQCreationForm({ materialRequest, onRFQCreated, onCance
           {/* RFQ Details */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-brand-text/80 mb-2">
                 Due Date
               </label>
               <input
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-brand-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-brand-text/80 mb-2">
                 Remarks (Optional)
               </label>
               <textarea
                 value={remarks}
                 onChange={(e) => setRemarks(e.target.value)}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-brand-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
                 placeholder="Additional notes for suppliers..."
               />
             </div>
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+          <div className="flex justify-end space-x-4 pt-4 border-t border-brand-text/10">
             <button
               type="button"
               onClick={onCancel}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              className="px-4 py-2 text-sm font-medium text-brand-text/80 bg-brand-surface border border-brand-text/20 rounded-md hover:bg-brand-surface"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || selectedSuppliers.length === 0}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm font-medium text-white bg-brand-primary border border-transparent rounded-md hover:bg-brand-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Creating...' : 'Create RFQ'}
             </button>
