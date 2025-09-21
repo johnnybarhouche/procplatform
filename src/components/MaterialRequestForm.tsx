@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useMemo, useRef, useState } from "react";
+import { ChangeEvent, FormEvent, useMemo, useState } from "react";
 import { Button, Card, Input, Select, Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow, Badge } from "@/components/ui";
 import { PageLayout } from "@/components/layout/PageLayout";
 import ItemPicker from "./ItemPicker";
@@ -27,10 +27,9 @@ interface LineAttachment {
   url?: string;
 }
 
-interface FormAttachment extends LineAttachment {}
-
 interface MaterialRequestFormProps {
   projects: Array<{ id: string; name: string }>;
+  selectedProjectId: string;
   onSubmit?: (data: any) => void;
 }
 
@@ -50,36 +49,27 @@ const createEmptyLineItem = (): MRLineItem => ({
   attachments: [],
 });
 
-export default function MaterialRequestForm({ projects, onSubmit }: MaterialRequestFormProps) {
-  const [selectedProjectId, setSelectedProjectId] = useState<string>(
-    projects.length === 1 ? projects[0].id : ""
-  );
+export default function MaterialRequestForm({ projects: _projects, selectedProjectId, onSubmit }: MaterialRequestFormProps) {
   const [lineItems, setLineItems] = useState<MRLineItem[]>([createEmptyLineItem()]);
-  const [formAttachments, setFormAttachments] = useState<FormAttachment[]>([]);
   const [showItemPicker, setShowItemPicker] = useState(false);
   const [activePickerLineId, setActivePickerLineId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const isFormValid = useMemo(() => {
-    const hasProject = Boolean(selectedProjectId);
     const lineItemValid = lineItems.every((item) =>
       item.itemCode.trim() &&
       item.description.trim() &&
       item.uom.trim() &&
       Number(item.qty) > 0
     );
-    return hasProject && lineItemValid;
+    return Boolean(selectedProjectId) && lineItemValid;
   }, [selectedProjectId, lineItems]);
 
   const validateForm = () => {
     const errors: Record<string, string> = {};
     
-    if (!selectedProjectId) {
-      errors.project = "Please select a project";
-    }
-    
-    lineItems.forEach((item, index) => {
+    lineItems.forEach((item) => {
       if (!item.itemCode.trim()) {
         errors[`itemCode-${item.id}`] = "Item code is required";
       }
@@ -176,24 +166,9 @@ export default function MaterialRequestForm({ projects, onSubmit }: MaterialRequ
     );
   };
 
-  const handleFormAttachmentChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files ?? []);
-    if (!files.length) return;
-    setFormAttachments((prev) => [
-      ...prev,
-      ...files.map((file) => ({ id: crypto.randomUUID(), file, status: "pending" as const })),
-    ]);
-    event.target.value = "";
-  };
-
-  const removeFormAttachment = (attachmentId: string) => {
-    setFormAttachments((prev) => prev.filter((attachment) => attachment.id !== attachmentId));
-  };
-
   const resetForm = () => {
     setLineItems([createEmptyLineItem()]);
-    setFormAttachments([]);
-    setSelectedProjectId(projects.length === 1 ? projects[0].id : "");
+    setValidationErrors({});
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -206,13 +181,23 @@ export default function MaterialRequestForm({ projects, onSubmit }: MaterialRequ
     setIsSubmitting(true);
 
     try {
+      const baseLineItems = lineItems.map((item) => ({
+        id: item.id,
+        itemCode: item.itemCode,
+        description: item.description,
+        uom: item.uom,
+        qty: item.qty,
+        remarks: item.remarks,
+        location: item.location,
+        brandAsset: item.brandAsset,
+        serialChassisEngineNo: item.serialChassisEngineNo,
+        modelYear: item.modelYear,
+        attachments: item.attachments.map((attachment) => attachment.file.name),
+      }));
+
       const payload = {
         projectId: selectedProjectId,
-        lineItems: lineItems.map((item) => ({
-          ...item,
-          attachments: item.attachments.map((attachment) => attachment.file.name),
-        })),
-        attachments: formAttachments.map((attachment) => attachment.file.name),
+        lineItems: baseLineItems,
       };
 
       // If onSubmit prop is provided, use it for testing
@@ -238,14 +223,22 @@ export default function MaterialRequestForm({ projects, onSubmit }: MaterialRequ
         return (uploadData.files ?? []).map((file: { url: string }) => file.url);
       };
 
-      const allLineAttachments = lineItems.flatMap((item) => item.attachments);
-      const formAttachmentUrls = await uploadAll(formAttachments);
-      const lineAttachmentUrls = await uploadAll(allLineAttachments);
+      const uploadedLineAttachments = await Promise.all(
+        lineItems.map(async (item) => ({
+          lineId: item.id,
+          urls: await uploadAll(item.attachments),
+        }))
+      );
 
       const apiPayload = {
         ...payload,
-        attachments: formAttachmentUrls,
-        lineItemAttachmentUrls,
+        lineItems: payload.lineItems.map((item) => {
+          const uploaded = uploadedLineAttachments.find((entry) => entry.lineId === item.id);
+          return {
+            ...item,
+            attachments: uploaded?.urls ?? [],
+          };
+        }),
       };
 
       const response = await fetch("/api/mrs", {
@@ -276,49 +269,39 @@ export default function MaterialRequestForm({ projects, onSubmit }: MaterialRequ
       description="Submit a new material request for your project"
     >
         <form onSubmit={handleSubmit} className="space-y-6">
-          <Card header="Request Details">
-            {projects.length === 1 ? (
-              <p className="text-brand-text/80">
-                <strong>Project:</strong> {projects[0].name}
-              </p>
-            ) : (
-              <div className="space-y-2">
-                <Select
-                  label="Project"
-                  required
-                  value={selectedProjectId}
-                  onChange={(event) => {
-                    setSelectedProjectId(event.target.value);
-                    if (validationErrors.project) {
-                      setValidationErrors((prev) => {
-                        const newErrors = { ...prev };
-                        delete newErrors.project;
-                        return newErrors;
-                      });
-                    }
-                  }}
-                  error={validationErrors.project}
-                >
-                  <option value="">Select a project</option>
-                  {projects.map((project) => (
-                    <option key={project.id} value={project.id}>
-                      {project.name}
-                    </option>
-                  ))}
-                </Select>
-                {validationErrors.project && (
-                  <p className="text-sm text-status-danger">{validationErrors.project}</p>
-                )}
-              </div>
-            )}
-          </Card>
-
           <Card
             header="Line Items"
             actions={
-              <Button type="button" onClick={handleAddLineItem} size="sm">
-                Add Line Item
-              </Button>
+              <div className="flex w-full flex-col gap-2 sm:w-[420px] sm:flex-row">
+                {/* TODO: Wire up Excel import once backend endpoint is available */}
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="flex-1"
+                  disabled
+                  title="Excel import coming soon"
+                >
+                  Import from Excel
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleAddLineItem}
+                  size="sm"
+                  className="flex-1"
+                >
+                  Add Line Item
+                </Button>
+                <Button
+                  type="submit"
+                  size="sm"
+                  className="flex-1"
+                  disabled={!isFormValid || isSubmitting}
+                  isLoading={isSubmitting}
+                >
+                  Submit Material Request
+                </Button>
+              </div>
             }
           >
             <Table>
@@ -531,93 +514,6 @@ export default function MaterialRequestForm({ projects, onSubmit }: MaterialRequ
             </Table>
           </Card>
 
-          <Card header="Attachments">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <p className="text-sm text-brand-text/80 font-medium">
-                  Request-Level Attachments
-                </p>
-                <p className="text-xs text-brand-text/60">
-                  Upload supporting documents that apply to the entire material request.
-                </p>
-              </div>
-              
-              <div className="flex flex-wrap gap-3">
-                <input
-                  id="form-attachments-input"
-                  type="file"
-                  className="hidden"
-                  multiple
-                  accept="image/*,.pdf,.doc,.docx"
-                  onChange={handleFormAttachmentChange}
-                />
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => document.getElementById('form-attachments-input')?.click()}
-                  className="flex items-center gap-2"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  Add Files
-                </Button>
-              </div>
-              
-              <div className="space-y-3">
-                {formAttachments.map((attachment) => (
-                  <div
-                    key={attachment.id}
-                    className="flex items-center justify-between rounded-lg border border-brand-text/10 bg-brand-surface/50 px-4 py-3 text-sm transition hover:bg-brand-surface"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Badge 
-                        variant={attachment.status === "uploaded" ? "success" : "primary"}
-                        className="text-xs"
-                      >
-                        {attachment.status === "uploaded" ? "Uploaded" : "Pending"}
-                      </Badge>
-                      <div className="flex flex-col">
-                        <span className="text-brand-text/90 font-medium">
-                          {attachment.file.name}
-                        </span>
-                        <span className="text-xs text-brand-text/60">
-                          {(attachment.file.size / 1024).toFixed(1)} KB
-                        </span>
-                      </div>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="text-status-danger hover:text-status-danger hover:bg-status-danger/10 transition-colors"
-                      onClick={() => removeFormAttachment(attachment.id)}
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                ))}
-                {!formAttachments.length && (
-                  <div className="text-center py-6 border-2 border-dashed border-brand-text/20 rounded-lg">
-                    <div className="flex flex-col items-center gap-2">
-                      <svg className="w-8 h-8 text-brand-text/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                      </svg>
-                      <p className="text-sm text-brand-text/60">No request-level attachments yet.</p>
-                      <p className="text-xs text-brand-text/50">Click "Add Files" to upload supporting documents.</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </Card>
-
-          <div className="flex justify-end">
-            <Button type="submit" size="lg" disabled={!isFormValid || isSubmitting} isLoading={isSubmitting}>
-              Submit Material Request
-            </Button>
-          </div>
         </form>
 
       {showItemPicker && (

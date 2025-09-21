@@ -11,8 +11,15 @@ import MaterialRequestForm from '@/components/MaterialRequestForm';
 global.fetch = jest.fn();
 
 describe('Material Request E2E Flow', () => {
+  let alertSpy: jest.SpyInstance;
+
   beforeEach(() => {
     (fetch as jest.Mock).mockClear();
+    alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    alertSpy.mockRestore();
   });
 
   it('completes full MR creation flow with file upload', async () => {
@@ -43,7 +50,7 @@ describe('Material Request E2E Flow', () => {
         })
       });
 
-    render(<MaterialRequestForm projects={mockProjects} />);
+    render(<MaterialRequestForm projects={mockProjects} selectedProjectId="1" />);
 
     // 1. Select project
     const projectSelect = screen.getByRole('combobox');
@@ -92,16 +99,16 @@ describe('Material Request E2E Flow', () => {
           expect.objectContaining({
             itemCode: 'ITEM001',
             description: 'Test Item Description',
-            uom: 'PCS'
+            uom: 'PCS',
+            attachments: ['https://mock-storage.com/test.pdf']
           })
-        ]),
-        attachments: ['https://mock-storage.com/test.pdf']
+        ])
       })
     });
 
-    // 6. Verify success message
+    // 6. Verify success alert
     await waitFor(() => {
-      expect(screen.getByText(/Material Request created successfully/)).toBeInTheDocument();
+      expect(alertSpy).toHaveBeenCalledWith(expect.stringContaining('Material Request created successfully'));
     });
 
     // 7. Verify form is reset
@@ -117,7 +124,7 @@ describe('Material Request E2E Flow', () => {
       json: async () => ({ error: 'Project not found' })
     });
 
-    render(<MaterialRequestForm projects={mockProjects} />);
+    render(<MaterialRequestForm projects={mockProjects} selectedProjectId="1" />);
 
     // Fill form and submit
     const itemCodeInput = screen.getByDisplayValue('');
@@ -129,23 +136,23 @@ describe('Material Request E2E Flow', () => {
 
     fireEvent.click(screen.getByText('Submit Material Request'));
 
-    // Verify error handling
+    // Verify error handling via alert
     await waitFor(() => {
-      expect(screen.getByText(/Error: Project not found/)).toBeInTheDocument();
+      expect(alertSpy).toHaveBeenCalledWith(expect.stringContaining('Project not found'));
     });
   });
 
   it('validates required fields before submission', async () => {
     const mockProjects = [{ id: '1', name: 'Project Alpha' }];
 
-    render(<MaterialRequestForm projects={mockProjects} />);
+    render(<MaterialRequestForm projects={mockProjects} selectedProjectId="1" />);
 
     // Try to submit without filling required fields
     fireEvent.click(screen.getByText('Submit Material Request'));
 
-    // Should show validation error
+    // Should show validation error near item code
     await waitFor(() => {
-      expect(screen.getByText('Please fill in all required fields')).toBeInTheDocument();
+      expect(screen.getByText('Item code is required')).toBeInTheDocument();
     });
 
     // API should not be called
@@ -160,7 +167,7 @@ describe('Material Request E2E Flow', () => {
       json: async () => ({ success: true, mrId: 'mr-123', mrn: 'MR-001' })
     });
 
-    render(<MaterialRequestForm projects={mockProjects} />);
+    render(<MaterialRequestForm projects={mockProjects} selectedProjectId="1" />);
 
     // Add a second line item
     fireEvent.click(screen.getByText('Add Line Item'));
@@ -187,8 +194,7 @@ describe('Material Request E2E Flow', () => {
           lineItems: expect.arrayContaining([
             expect.objectContaining({ itemCode: 'ITEM001' }),
             expect.objectContaining({ itemCode: 'ITEM002' })
-          ]),
-          attachments: []
+          ])
         })
       });
     });

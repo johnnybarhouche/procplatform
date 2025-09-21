@@ -86,7 +86,7 @@ export default function Home() {
   const renderedView = useMemo(() => {
     switch (currentView) {
       case "mr-form":
-        return <MaterialRequestForm projects={PROJECTS} />;
+        return <MaterialRequestForm projects={PROJECTS} selectedProjectId={selectedProjectId} />;
       case "procurement-dashboard":
         return (
           <ProcurementDashboard
@@ -114,7 +114,7 @@ export default function Home() {
       default:
         return null;
     }
-  }, [currentView, userRole]);
+  }, [currentView, userRole, selectedProjectId]);
 
   return (
     <AppLayout
