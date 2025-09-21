@@ -116,6 +116,8 @@ export interface RFQ {
   updated_at: string;
   sent_at?: string;
   due_date?: string;
+  terms?: string;
+  remarks?: string;
   suppliers: RFQSupplier[];
   quotes: Quote[];
   created_by: string;

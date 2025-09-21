@@ -7,16 +7,17 @@ interface BottomNavProps {
   navItems: NavItem[];
   activeNavId: string;
   onNavigate?: (item: NavItem) => void;
+  innerClassName?: string;
 }
 
-export function BottomNav({ navItems, activeNavId, onNavigate }: BottomNavProps) {
+export function BottomNav({ navItems, activeNavId, onNavigate, innerClassName }: BottomNavProps) {
   if (navItems.length === 0) {
     return null;
   }
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-brand-text/10 bg-brand-surface/95 backdrop-blur lg:hidden">
-      <div className="mx-auto flex max-w-6xl items-center justify-around px-4 py-2">
+      <div className={cn('mx-auto flex w-full items-center justify-around px-4 py-2', innerClassName)}>
         {navItems.map((item) => {
           const isActive = item.id === activeNavId;
           return (

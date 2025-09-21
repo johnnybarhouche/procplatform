@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { MaterialRequest, Supplier } from "@/types/procurement";
+import { MaterialRequest, RFQ, Supplier } from "@/types/procurement";
 import {
   Badge,
   Button,
@@ -13,6 +13,7 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@/components/ui";
+import RFQWizard from "@/components/RFQWizard";
 
 interface ProcurementDashboardProps {
   userRole: "procurement" | "admin";
@@ -24,6 +25,9 @@ export default function ProcurementDashboard({}: ProcurementDashboardProps) {
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("created_at");
+  const [activeRFQ, setActiveRFQ] = useState<MaterialRequest | null>(null);
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const [feedback, setFeedback] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -43,7 +47,11 @@ export default function ProcurementDashboard({}: ProcurementDashboardProps) {
       ]);
 
       const mrs = mrsData.mrs || mrsData;
-      const suppliersResult = Array.isArray(suppliersData) ? suppliersData : [];
+      const suppliersResult = Array.isArray(suppliersData?.suppliers)
+        ? suppliersData.suppliers
+        : Array.isArray(suppliersData)
+          ? suppliersData
+          : [];
 
       setMaterialRequests(Array.isArray(mrs) ? mrs : []);
       setSuppliers(suppliersResult);
@@ -52,6 +60,25 @@ export default function ProcurementDashboard({}: ProcurementDashboardProps) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleOpenWizard = (mr: MaterialRequest) => {
+    setActiveRFQ(mr);
+    setIsWizardOpen(true);
+    setFeedback(null);
+  };
+
+  const handleRFQCreated = (rfq: RFQ) => {
+    setFeedback(`RFQ ${rfq.rfq_number} dispatched to ${rfq.suppliers.length} supplier(s).`);
+    setMaterialRequests((current) =>
+      current.map((mr) =>
+        mr.id === rfq.material_request_id
+          ? { ...mr, status: mr.status === "submitted" ? "in_progress" : mr.status }
+          : mr
+      )
+    );
+    setIsWizardOpen(false);
+    setActiveRFQ(null);
   };
 
   const filteredMRs = (materialRequests || []).filter((mr) => {
@@ -102,6 +129,12 @@ export default function ProcurementDashboard({}: ProcurementDashboardProps) {
           <h1 className="text-3xl font-bold text-brand-text">Procurement Dashboard</h1>
           <p className="text-brand-text/70">Manage Material Requests and RFQ processes</p>
         </header>
+
+        {feedback && (
+          <div className="rounded-lg border border-status-success/40 bg-status-success/10 px-4 py-3 text-sm text-status-success">
+            {feedback}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
           <Card
@@ -171,7 +204,7 @@ export default function ProcurementDashboard({}: ProcurementDashboardProps) {
                           View Details
                         </Button>
                         {mr.status === "submitted" && (
-                          <Button variant="primary" size="sm">
+                          <Button variant="primary" size="sm" onClick={() => handleOpenWizard(mr)}>
                             Create RFQ
                           </Button>
                         )}
@@ -210,6 +243,18 @@ export default function ProcurementDashboard({}: ProcurementDashboardProps) {
           </Card>
         </div>
       </div>
+
+      {isWizardOpen && activeRFQ && (
+        <RFQWizard
+          materialRequest={activeRFQ}
+          suppliers={suppliers}
+          onClose={() => {
+            setIsWizardOpen(false);
+            setActiveRFQ(null);
+          }}
+          onCreated={handleRFQCreated}
+        />
+      )}
     </div>
   );
 }

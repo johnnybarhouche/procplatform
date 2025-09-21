@@ -17,15 +17,24 @@
 2. Global Layout
 	•	Top Bar (persistent):
 	•	Left: Customer logo + Application/Project name (brand-specific).
-	•	Center: Project selector (if multiple).
-	•	Right: Admin dropdown, Notifications bell, Profile menu.
+	•	Right cluster ordered left→right as: Project selector, Role selector, Notifications bell, User avatar; all four stay on one horizontal line with 12px gaps.
 	•	Background: Deep Blue #002664, text/icons White.
+	•	Pinned to top (position: sticky/fixed) so global controls remain visible; apply subtle shadow when content scrolls beneath and keep the bar height constant so the nav offset never drifts.
+	•	Spacing to canvas mirrors horizontal gutters: 8px ≤1280px, 12px at 1281–1440px, 16px ≥1441px so headings align with sidebar labels across every page.
 	•	Left Navigation (desktop):
 	•	Background: White.
 	•	Active item: Blue highlight bar, bold text.
 	•	Items: Dashboard, MRs, RFQs, PRs, POs, Suppliers, Items, Analytics, Admin.
+	•	Column width trimmed to 176px with balanced 8px horizontal padding so icons + labels stay visually centered; sticky offset mirrors the top bar gap and eliminates drift.
+	•	Typography: 18px (Tailwind `text-lg`) labels paired with `text-xl` icons and 8px horizontal padding for a balanced stack; buttons fill the column width for consistent alignment.
+	•	Nav supports its own internal scroll if menu height exceeds viewport while remaining visually pinned relative to page headings.
 	•	Mobile Navigation:
 	•	Collapsible sidebar → Bottom tab bar for core modules.
+	•	Content Canvas (responsive):
+	•	Desktop sidebar stays fixed at 188px; below 1024px it converts to an overlay drawer.
+	•	Canvas is fluid—no wide-mode toggle—with side gutters set to 8px ≤1280px, 12px at 1281–1440px, and 16px ≥1441px; headings align horizontally with sidebar labels using matching top margins.
+	•	Maintain at least 16px breathing room on phones; larger viewports follow the gutter values above.
+	•	Tables and analytics stretch with the viewport while individual form clusters cap at 640px for readability; primary page titles share the same baseline as the first sidebar item.
 
 ⸻
 

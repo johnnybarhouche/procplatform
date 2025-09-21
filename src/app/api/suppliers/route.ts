@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Supplier } from '@/types/procurement';
 
 // Mock database for suppliers
-const suppliers: Supplier[] = [
+export const supplierStore: Supplier[] = [
   {
     id: '1',
     supplier_code: 'SUP-001',
@@ -182,7 +182,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
 
-    let filteredSuppliers = [...suppliers];
+    let filteredSuppliers = [...supplierStore];
 
     // Apply filters
     if (category) {
@@ -240,7 +240,7 @@ export async function POST(request: NextRequest) {
     const now = new Date().toISOString();
     
     // Generate unique supplier code
-    const nextId = suppliers.length + 1;
+    const nextId = supplierStore.length + 1;
     const supplierCode = body.supplier_code || `SUP-${String(nextId).padStart(3, '0')}`;
     
     const newSupplier: Supplier = {
@@ -277,7 +277,7 @@ export async function POST(request: NextRequest) {
       created_by_name: body.created_by_name || 'System'
     };
 
-    suppliers.push(newSupplier);
+    supplierStore.push(newSupplier);
 
     return NextResponse.json(newSupplier, { status: 201 });
   } catch (error) {

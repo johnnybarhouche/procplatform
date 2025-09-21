@@ -1,11 +1,14 @@
 'use client';
 
+import { cn } from '@/lib/cn';
+
 interface TopBarProps {
   projects: Array<{ id: string; name: string }>;
   selectedProjectId: string;
   onProjectChange: (projectId: string) => void;
   userRole: 'requester' | 'procurement' | 'approver' | 'admin';
   onRoleChange: (role: 'requester' | 'procurement' | 'approver' | 'admin') => void;
+  innerClassName?: string;
 }
 
 const ROLES: Array<{ id: TopBarProps['userRole']; label: string }> = [
@@ -21,10 +24,11 @@ export function TopBar({
   onProjectChange,
   userRole,
   onRoleChange,
+  innerClassName,
 }: TopBarProps) {
   return (
-    <header className="bg-brand-primary text-brand-on-primary">
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
+    <header className="sticky top-0 z-50 bg-brand-primary text-brand-on-primary shadow-sm">
+      <div className={cn('min-h-[var(--app-topbar-height)] w-full', innerClassName)}>
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-md bg-brand-on-primary text-brand-primary font-semibold">
             PP
@@ -35,8 +39,8 @@ export function TopBar({
           </div>
         </div>
 
-        <div className="hidden w-64 sm:block">
-          <label className="flex flex-col space-y-1 text-sm text-brand-on-primary/80">
+        <div className="flex items-center gap-3">
+          <label className="hidden min-w-[160px] flex-col space-y-1 text-sm text-brand-on-primary/80 sm:flex">
             <span className="font-medium text-brand-on-primary">Project</span>
             <select
               value={selectedProjectId}
@@ -50,10 +54,7 @@ export function TopBar({
               ))}
             </select>
           </label>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <label className="flex min-w-[140px] flex-col space-y-1 text-sm text-brand-on-primary/80">
+          <label className="hidden min-w-[140px] flex-col space-y-1 text-sm text-brand-on-primary/80 sm:flex">
             <span className="font-medium text-brand-on-primary">Role</span>
             <select
               value={userRole}

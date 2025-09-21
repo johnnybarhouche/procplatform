@@ -5,6 +5,7 @@ import { TopBar } from './TopBar';
 import { SideNav } from './SideNav';
 import { BottomNav } from './BottomNav';
 import { MOBILE_NAV_IDS, NavItem } from './navConfig';
+import { cn } from '@/lib/cn';
 
 interface AppLayoutProps {
   navItems: NavItem[];
@@ -34,24 +35,62 @@ export function AppLayout({
     [navItems]
   );
 
+  const widthClass = 'w-full';
+
+  const horizontalPaddingClass = 'px-2 min-[1281px]:px-3 min-[1441px]:px-4';
+
+  const contentWrapperClass = cn(
+    'mx-auto flex w-full items-start gap-4 pb-16 pt-2 transition-[padding,width] duration-200 ease-out min-[1281px]:gap-5 min-[1281px]:pt-3 min-[1441px]:gap-6 min-[1441px]:pt-4 lg:pb-10',
+    horizontalPaddingClass,
+    widthClass
+  );
+
+  const topBarInnerClass = cn(
+    'mx-auto flex w-full items-center justify-between gap-4 py-2.5',
+    horizontalPaddingClass,
+    widthClass
+  );
+
+  const bottomNavInnerClass = cn(
+    'mx-auto flex w-full items-center justify-around px-2 py-2 min-[1281px]:px-3 min-[1441px]:px-4',
+    widthClass
+  );
+
   return (
-    <div className="min-h-screen bg-brand-surface">
-     <TopBar
+    <div className="min-h-screen bg-brand-surface [--app-topbar-height:4.5rem]">
+      <TopBar
         projects={projects}
         selectedProjectId={selectedProjectId}
         onProjectChange={onProjectChange}
         userRole={userRole}
         onRoleChange={onRoleChange}
+        innerClassName={topBarInnerClass}
       />
 
-      <div className="mx-auto flex w-full max-w-6xl gap-6 px-4 py-5 pb-20 sm:px-6 lg:px-6 lg:pb-10">
-        <SideNav navItems={navItems} activeNavId={activeNavId} onNavigate={onNavigate} />
-        <main className="flex-1 space-y-5 lg:pb-0">
+      <div className={contentWrapperClass}>
+        <aside
+          className={cn(
+            'hidden lg:block lg:w-[176px] lg:flex-shrink-0',
+            'lg:sticky lg:top-[calc(var(--app-topbar-height)+0.75rem)] lg:max-h-[calc(100vh-var(--app-topbar-height)-0.75rem)] lg:overflow-y-auto'
+          )}
+        >
+          <SideNav
+            navItems={navItems}
+            activeNavId={activeNavId}
+            onNavigate={onNavigate}
+          />
+        </aside>
+        <main className="min-w-0 flex-1 space-y-5 lg:pb-0">
           {children}
         </main>
       </div>
 
-      <BottomNav navItems={mobileNavItems} activeNavId={activeNavId} onNavigate={onNavigate} />
+      <BottomNav
+        navItems={mobileNavItems}
+        activeNavId={activeNavId}
+        onNavigate={onNavigate}
+        innerClassName={bottomNavInnerClass}
+      />
     </div>
   );
 }
