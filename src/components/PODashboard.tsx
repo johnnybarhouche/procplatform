@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { PurchaseOrder, PODashboardProps } from '@/types/procurement';
+import { PageLayout } from '@/components/layout/PageLayout';
 
 export default function PODashboard({ userRole }: PODashboardProps) {
   const [pos, setPos] = useState<PurchaseOrder[]>([]);
@@ -115,18 +116,17 @@ export default function PODashboard({ userRole }: PODashboardProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-brand-text">Purchase Orders</h1>
-        <div className="flex space-x-2">
-          <button
-            onClick={() => fetchPOs()}
-            className="px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-brand-primary/90"
-          >
-            Refresh
-          </button>
-        </div>
-      </div>
+    <PageLayout 
+      title="Purchase Orders"
+      actions={
+        <button
+          onClick={() => fetchPOs()}
+          className="px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-brand-primary/90"
+        >
+          Refresh
+        </button>
+      }
+    >
 
       {/* Filters */}
       <div className="bg-brand-surface p-4 rounded-lg shadow">
@@ -324,7 +324,7 @@ export default function PODashboard({ userRole }: PODashboardProps) {
           </div>
         )}
       </div>
-    </div>
+    </PageLayout>
   );
 }
 

@@ -2,6 +2,7 @@
 
 import { ChangeEvent, FormEvent, useMemo, useRef, useState } from "react";
 import { Button, Card, Input, Select, Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow, Badge } from "@/components/ui";
+import { PageLayout } from "@/components/layout/PageLayout";
 import ItemPicker from "./ItemPicker";
 import { Item } from "@/types/procurement";
 
@@ -270,10 +271,12 @@ export default function MaterialRequestForm({ projects, onSubmit }: MaterialRequ
   };
 
   return (
-    <div className="space-y-5">
-      <Card header="Create Material Request">
+    <PageLayout 
+      title="Create Material Request"
+      description="Submit a new material request for your project"
+    >
         <form onSubmit={handleSubmit} className="space-y-6">
-          <Card header="Project Selection">
+          <Card header="Request Details">
             {projects.length === 1 ? (
               <p className="text-brand-text/80">
                 <strong>Project:</strong> {projects[0].name}
@@ -287,7 +290,7 @@ export default function MaterialRequestForm({ projects, onSubmit }: MaterialRequ
                   onChange={(event) => {
                     setSelectedProjectId(event.target.value);
                     if (validationErrors.project) {
-                      setValidationErrors(prev => {
+                      setValidationErrors((prev) => {
                         const newErrors = { ...prev };
                         delete newErrors.project;
                         return newErrors;
@@ -616,7 +619,6 @@ export default function MaterialRequestForm({ projects, onSubmit }: MaterialRequ
             </Button>
           </div>
         </form>
-      </Card>
 
       {showItemPicker && (
         <ItemPicker
@@ -627,6 +629,6 @@ export default function MaterialRequestForm({ projects, onSubmit }: MaterialRequ
           }}
         />
       )}
-    </div>
+    </PageLayout>
   );
 }

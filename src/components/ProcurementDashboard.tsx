@@ -13,7 +13,10 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@/components/ui";
+import { PageLayout } from "@/components/layout/PageLayout";
 import RFQWizard from "@/components/RFQWizard";
+import ComparisonGrid from "@/components/ComparisonGrid";
+import { ComparisonSummary } from "@/types/procurement";
 
 interface ProcurementDashboardProps {
   userRole: "procurement" | "admin";
@@ -28,6 +31,11 @@ export default function ProcurementDashboard({}: ProcurementDashboardProps) {
   const [activeRFQ, setActiveRFQ] = useState<MaterialRequest | null>(null);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
+
+  const [comparisonLoading, setComparisonLoading] = useState(false);
+  const [comparisonError, setComparisonError] = useState<string | null>(null);
+  const [comparisonRFQ, setComparisonRFQ] = useState<RFQ | null>(null);
+  const [comparisonSummary, setComparisonSummary] = useState<ComparisonSummary | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -81,6 +89,36 @@ export default function ProcurementDashboard({}: ProcurementDashboardProps) {
     setActiveRFQ(null);
   };
 
+  const handleOpenComparison = async (mr: MaterialRequest) => {
+    setComparisonLoading(true);
+    setComparisonError(null);
+    setComparisonRFQ(null);
+    try {
+      const response = await fetch(`/api/rfqs?material_request_id=${mr.id}`);
+      if (!response.ok) {
+        throw new Error('Unable to load RFQ comparison data');
+      }
+      const data = (await response.json()) as { rfqs: RFQ[] };
+      const rfq = data.rfqs?.[0];
+      if (!rfq) {
+        setComparisonError('No RFQ data found for this material request yet.');
+        return;
+      }
+      setComparisonRFQ(rfq);
+      setComparisonSummary(rfq.comparison_summary ?? null);
+    } catch (error) {
+      console.error(error);
+      setComparisonError('Failed to load comparison data. Please try again later.');
+    } finally {
+      setComparisonLoading(false);
+    }
+  };
+
+  const handleComparisonSaved = (summary: ComparisonSummary) => {
+    setComparisonSummary(summary);
+    setFeedback(`Selections recorded for RFQ ${summary.rfq_number}.`);
+  };
+
   const filteredMRs = (materialRequests || []).filter((mr) => {
     if (filterStatus === "all") return true;
     return mr.status === filterStatus;
@@ -123,16 +161,21 @@ export default function ProcurementDashboard({}: ProcurementDashboardProps) {
   }
 
   return (
-    <div className="min-h-screen bg-brand-surface p-6">
-      <div className="mx-auto max-w-6xl space-y-5">
-        <header className="space-y-1">
-          <h1 className="text-3xl font-bold text-brand-text">Procurement Dashboard</h1>
-          <p className="text-brand-text/70">Manage Material Requests and RFQ processes</p>
-        </header>
+    <>
+      <PageLayout 
+        title="Procurement Dashboard"
+        description="Manage Material Requests and RFQ processes"
+      >
 
         {feedback && (
           <div className="rounded-lg border border-status-success/40 bg-status-success/10 px-4 py-3 text-sm text-status-success">
             {feedback}
+          </div>
+        )}
+
+        {comparisonError && (
+          <div className="rounded-lg border border-status-warning/40 bg-status-warning/10 px-4 py-3 text-sm text-status-warning">
+            {comparisonError}
           </div>
         )}
 
@@ -203,6 +246,14 @@ export default function ProcurementDashboard({}: ProcurementDashboardProps) {
                         <Button variant="ghost" size="sm">
                           View Details
                         </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleOpenComparison(mr)}
+                          disabled={comparisonLoading}
+                        >
+                          Compare quotes
+                        </Button>
                         {mr.status === "submitted" && (
                           <Button variant="primary" size="sm" onClick={() => handleOpenWizard(mr)}>
                             Create RFQ
@@ -242,7 +293,34 @@ export default function ProcurementDashboard({}: ProcurementDashboardProps) {
             </div>
           </Card>
         </div>
-      </div>
+
+        {comparisonSummary && (
+          <Card
+            className="border-brand-text/10"
+            header={`Latest comparison summary — RFQ ${comparisonSummary.rfq_number}`}
+            actions={<span className="text-xs text-brand-text/60">Generated {new Date(comparisonSummary.generated_at).toLocaleString()}</span>}
+          >
+            <div className="space-y-2 text-sm text-brand-text/70">
+              {comparisonSummary.selections.map((selection) => (
+                <div key={selection.line_item_id} className="flex items-center justify-between gap-4 border-b border-brand-text/10 pb-2 last:border-b-0">
+                  <div>
+                    <p className="font-medium text-brand-text">{selection.line_description}</p>
+                    <p className="text-xs text-brand-text/50">{selection.supplier_name}</p>
+                  </div>
+                  <div className="text-right">
+                    <p>AED {selection.total_price.toFixed(2)}</p>
+                    {selection.savings !== 0 && (
+                      <p className={selection.savings > 0 ? 'text-status-success text-xs' : 'text-status-warning text-xs'}>
+                        {selection.savings > 0 ? `Saving AED ${selection.savings.toFixed(2)}` : `+AED ${Math.abs(selection.savings).toFixed(2)} vs best`}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
+      </PageLayout>
 
       {isWizardOpen && activeRFQ && (
         <RFQWizard
@@ -255,6 +333,22 @@ export default function ProcurementDashboard({}: ProcurementDashboardProps) {
           onCreated={handleRFQCreated}
         />
       )}
-    </div>
+
+      {comparisonLoading && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40">
+          <div className="rounded-lg bg-brand-surface px-6 py-4 text-sm text-brand-text shadow-lg">
+            Loading comparison data…
+          </div>
+        </div>
+      )}
+
+      {comparisonRFQ && (
+        <ComparisonGrid
+          rfq={comparisonRFQ}
+          onClose={() => setComparisonRFQ(null)}
+          onSaveSelections={handleComparisonSaved}
+        />
+      )}
+    </>
   );
 }

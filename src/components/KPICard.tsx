@@ -62,7 +62,7 @@ export default function KPICard({
 
   return (
     <div 
-      className={`bg-brand-surface p-6 rounded-lg shadow-sm border hover:shadow-md transition-shadow ${
+      className={`bg-brand-surface p-6 rounded-lg hover:shadow-md transition-shadow ${
         onClick ? 'cursor-pointer' : ''
       }`}
       onClick={onClick}

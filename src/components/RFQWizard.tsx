@@ -185,6 +185,7 @@ export function RFQWizard({ materialRequest, suppliers, onClose, onCreated }: RF
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6">
       <div className="relative max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-2xl bg-brand-surface shadow-xl">
+        {/* Header */}
         <div className="flex items-center justify-between border-b border-brand-text/10 px-8 py-6">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-brand-text/60">RFQ Wizard</p>
@@ -212,6 +213,7 @@ export function RFQWizard({ materialRequest, suppliers, onClose, onCreated }: RF
           </div>
         </div>
 
+        {/* Content */}
         <div className="space-y-6 px-8 py-6">
           {error && (
             <div className="rounded-lg border border-status-warning/40 bg-status-warning/10 px-4 py-3 text-sm text-status-warning">
@@ -224,22 +226,22 @@ export function RFQWizard({ materialRequest, suppliers, onClose, onCreated }: RF
             </div>
           )}
 
-          {currentStep === 0 && (
-            <section className="space-y-4">
-              <header className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-brand-text">Select line items</h3>
-                  <p className="text-sm text-brand-text/60">Choose which items will be included in this RFQ.</p>
-                </div>
-                <div className="flex gap-3">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSelectedLineItemIds(new Set(lineItems.map((item) => item.id)))}
-                  >
-                    Select all
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => setSelectedLineItemIds(new Set())}>
+            {currentStep === 0 && (
+              <section className="space-y-4">
+                <header className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-brand-text">Select line items</h3>
+                    <p className="text-sm text-brand-text/60">Choose which items will be included in this RFQ.</p>
+                  </div>
+                  <div className="flex gap-3">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedLineItemIds(new Set(lineItems.map((item) => item.id)))}
+                    >
+                      Select all
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => setSelectedLineItemIds(new Set())}>
                     Clear
                   </Button>
                 </div>
@@ -484,9 +486,10 @@ export function RFQWizard({ materialRequest, suppliers, onClose, onCreated }: RF
                 </Card>
               </div>
             </section>
-          )}
+            )}
         </div>
 
+        {/* Footer */}
         <footer className="flex justify-between border-t border-brand-text/10 px-8 py-6">
           <Button variant="ghost" onClick={onClose} disabled={isSubmitting}>
             Cancel

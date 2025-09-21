@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { QuoteApproval, QuoteApprovalDashboardProps } from '@/types/procurement';
+import { PageLayout } from '@/components/layout/PageLayout';
 
 export default function QuoteApprovalDashboard({ userRole: _userRole }: QuoteApprovalDashboardProps) {
   const [quoteApprovals, setQuoteApprovals] = useState<QuoteApproval[]>([]);
@@ -77,39 +78,33 @@ export default function QuoteApprovalDashboard({ userRole: _userRole }: QuoteApp
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-brand-surface shadow-sm border-b">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-brand-text">Quote Approvals</h1>
-              <p className="text-brand-text/70">Review and approve quote packs for your Material Requests</p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-3 py-2 border border-brand-text/20 rounded-md text-sm"
-              >
-                <option value="all">All Status</option>
-                <option value="pending">Pending</option>
-                <option value="approved">Approved</option>
-                <option value="rejected">Rejected</option>
-              </select>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="px-3 py-2 border border-brand-text/20 rounded-md text-sm"
-              >
-                <option value="created_at">Sort by Date</option>
-                <option value="status">Sort by Status</option>
-                <option value="project">Sort by Project</option>
-              </select>
-            </div>
-          </div>
+    <PageLayout 
+      title="Quote Approvals"
+      description="Review and approve quote packs for your Material Requests"
+      actions={
+        <div className="flex items-center space-x-4">
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="px-3 py-2 border border-brand-text/20 rounded-md text-sm"
+          >
+            <option value="all">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="px-3 py-2 border border-brand-text/20 rounded-md text-sm"
+          >
+            <option value="created_at">Sort by Date</option>
+            <option value="status">Sort by Status</option>
+            <option value="project">Sort by Project</option>
+          </select>
         </div>
-      </div>
+      }
+    >
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -251,6 +246,6 @@ export default function QuoteApprovalDashboard({ userRole: _userRole }: QuoteApp
           )}
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 }

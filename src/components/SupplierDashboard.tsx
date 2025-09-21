@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Supplier, SupplierDashboardProps } from '@/types/procurement';
+import { PageLayout } from '@/components/layout/PageLayout';
 
 export default function SupplierDashboard({ userRole }: SupplierDashboardProps) {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -96,15 +97,16 @@ export default function SupplierDashboard({ userRole }: SupplierDashboardProps) 
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-brand-text">Supplier Management</h1>
-        {userRole === 'procurement' || userRole === 'admin' ? (
+    <PageLayout 
+      title="Supplier Management"
+      actions={
+        userRole === 'procurement' || userRole === 'admin' ? (
           <button className="px-4 py-2 bg-brand-primary text-white rounded-md hover:bg-brand-primary/90">
             Add Supplier
           </button>
-        ) : null}
-      </div>
+        ) : null
+      }
+    >
 
       {/* Filters */}
       <div className="bg-brand-surface p-4 rounded-lg shadow">
@@ -299,6 +301,6 @@ export default function SupplierDashboard({ userRole }: SupplierDashboardProps) 
           </div>
         )}
       </div>
-    </div>
+    </PageLayout>
   );
 }

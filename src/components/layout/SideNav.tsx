@@ -11,7 +11,7 @@ interface SideNavProps {
 
 export function SideNav({ navItems, activeNavId, onNavigate }: SideNavProps) {
   return (
-    <nav aria-label="Primary navigation" className="w-full px-1.5">
+    <nav aria-label="Primary navigation" className="w-full px-1">
       <div className="flex w-full flex-col gap-1.5 pb-8">
         {navItems.map((item) => {
           const isActive = item.id === activeNavId;

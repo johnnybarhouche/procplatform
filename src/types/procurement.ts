@@ -122,6 +122,7 @@ export interface RFQ {
   quotes: Quote[];
   created_by: string;
   created_by_name: string;
+  comparison_summary?: ComparisonSummary;
 }
 
 export interface RFQSupplier {
@@ -134,6 +135,7 @@ export interface RFQSupplier {
   responded_at?: string;
   portal_link: string;
   email_tracking_id?: string;
+  invitation_type?: 'suggested' | 'manual' | 'imported';
 }
 
 export interface Quote {
@@ -153,6 +155,25 @@ export interface Quote {
   created_by_name: string;
 }
 
+export interface ComparisonSelection {
+  line_item_id: string;
+  line_description: string;
+  supplier_id: string;
+  supplier_name: string;
+  unit_price: number;
+  total_price: number;
+  savings: number;
+}
+
+export interface ComparisonSummary {
+  rfq_id: string;
+  rfq_number: string;
+  material_request: Pick<MaterialRequest, 'id' | 'mrn' | 'project_name'>;
+  selections: ComparisonSelection[];
+  generated_at: string;
+  remarks?: string;
+}
+
 export interface QuoteLineItem {
   id: string;
   quote_id: string;
@@ -163,6 +184,7 @@ export interface QuoteLineItem {
   total_price: number;
   lead_time_days: number;
   remarks?: string;
+  attachments?: Attachment[];
 }
 
 export interface QuotePack {

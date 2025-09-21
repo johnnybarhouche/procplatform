@@ -14,6 +14,7 @@ import {
   TableHeaderCell,
   TableRow,
 } from '@/components/ui';
+import { PageLayout } from '@/components/layout/PageLayout';
 import { PurchaseRequisition, PRDashboardProps } from '@/types/procurement';
 
 const STATUS_VARIANTS: Record<string, 'primary' | 'success' | 'warning' | 'danger' | 'neutral'> = {
@@ -108,47 +109,82 @@ export default function PRDashboard({ userRole }: PRDashboardProps) {
   }
 
   return (
-    <div className="space-y-5">
-      <header className="space-y-1">
-        <h1 className="text-3xl font-bold text-brand-text">Purchase Requisitions</h1>
-        <p className="text-brand-text/70">Manage and track requisitions across projects and suppliers.</p>
-      </header>
+    <PageLayout 
+      title="Purchase Requisitions"
+      description="Manage and track requisitions across projects and suppliers."
+    >
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
         <Card className="p-4">
-          <div className="space-y-1 text-brand-text">
-            <p className="text-sm text-brand-text/60">Total PRs</p>
-            <p className="text-2xl font-semibold text-brand-primary">{prs.length}</p>
+          <div className="flex items-center space-x-3">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 bg-brand-primary/10 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+            </div>
+            <div className="flex-1">
+              <p className="text-sm text-brand-text/60">Total PRs</p>
+              <p className="text-2xl font-semibold text-brand-primary">{prs.length}</p>
+            </div>
           </div>
         </Card>
         <Card className="p-4">
-          <div className="space-y-1 text-brand-text">
-            <p className="text-sm text-brand-text/60">Awaiting Review</p>
-            <p className="text-2xl font-semibold text-status-warning">
-              {prs.filter((pr) => pr.status === 'under_review').length}
-            </p>
+          <div className="flex items-center space-x-3">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 bg-status-warning/10 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-status-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+            <div className="flex-1">
+              <p className="text-sm text-brand-text/60">Awaiting Review</p>
+              <p className="text-2xl font-semibold text-status-warning">
+                {prs.filter((pr) => pr.status === 'under_review').length}
+              </p>
+            </div>
           </div>
         </Card>
         <Card className="p-4">
-          <div className="space-y-1 text-brand-text">
-            <p className="text-sm text-brand-text/60">Approved</p>
-            <p className="text-2xl font-semibold text-status-success">
-              {prs.filter((pr) => pr.status === 'approved').length}
-            </p>
+          <div className="flex items-center space-x-3">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 bg-status-success/10 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-status-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+            </div>
+            <div className="flex-1">
+              <p className="text-sm text-brand-text/60">Approved</p>
+              <p className="text-2xl font-semibold text-status-success">
+                {prs.filter((pr) => pr.status === 'approved').length}
+              </p>
+            </div>
           </div>
         </Card>
         <Card className="p-4">
-          <div className="space-y-1 text-brand-text">
-            <p className="text-sm text-brand-text/60">Rejected</p>
-            <p className="text-2xl font-semibold text-status-danger">
-              {prs.filter((pr) => pr.status === 'rejected').length}
-            </p>
+          <div className="flex items-center space-x-3">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 bg-status-danger/10 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-status-danger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+            </div>
+            <div className="flex-1">
+              <p className="text-sm text-brand-text/60">Rejected</p>
+              <p className="text-2xl font-semibold text-status-danger">
+                {prs.filter((pr) => pr.status === 'rejected').length}
+              </p>
+            </div>
           </div>
         </Card>
       </div>
 
       <Card header="Filters">
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-4">
           <Select label="Project" value={filterProject} onChange={(e) => setFilterProject(e.target.value)}>
             <option value="all">All Projects</option>
             <option value="1">Project Alpha</option>
@@ -274,6 +310,6 @@ export default function PRDashboard({ userRole }: PRDashboardProps) {
           </Button>
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 }

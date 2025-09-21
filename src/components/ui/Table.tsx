@@ -37,7 +37,7 @@ export function TableRow({ className, children, ...props }: HTMLAttributes<HTMLT
 
 export function TableHeaderCell({ className, children, ...props }: HTMLAttributes<HTMLTableCellElement>) {
   return (
-    <th className={cn('px-4 py-2.5 text-left font-semibold tracking-wide text-brand-text/80', className)} {...props}>
+    <th className={cn('px-4 py-3 text-left font-semibold tracking-wide text-brand-text/80 bg-brand-primary/5', className)} {...props}>
       {children}
     </th>
   );

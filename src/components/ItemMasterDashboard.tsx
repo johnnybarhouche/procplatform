@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Item, ItemSearchFilters } from '@/types/procurement';
+import { PageLayout } from '@/components/layout/PageLayout';
 
 interface ItemMasterDashboardProps {
   userRole: 'requester' | 'procurement' | 'approver' | 'admin';
@@ -128,13 +129,10 @@ export default function ItemMasterDashboard({ userRole: _userRole }: ItemMasterD
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-brand-text">Item Master Database</h1>
-          <p className="text-brand-text/70">Manage your item catalog and pricing</p>
-        </div>
+    <PageLayout 
+      title="Item Master Database"
+      description="Manage your item catalog and pricing"
+      actions={
         <div className="flex space-x-3">
           <button
             onClick={() => {/* Navigate to add item */}}
@@ -155,7 +153,8 @@ export default function ItemMasterDashboard({ userRole: _userRole }: ItemMasterD
             Export Items
           </button>
         </div>
-      </div>
+      }
+    >
 
       {/* Search and Filters */}
       <div className="bg-brand-surface p-6 rounded-lg shadow">
@@ -272,9 +271,9 @@ export default function ItemMasterDashboard({ userRole: _userRole }: ItemMasterD
       {/* Items Table */}
       <div className="bg-brand-surface shadow rounded-lg overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-brand-surface">
+          <thead className="bg-brand-primary/5">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
+              <th className="px-4 py-2 text-left text-xs font-semibold text-brand-text/80 uppercase tracking-wide">
                 <input
                   type="checkbox"
                   checked={selectedItems.length === items.length && items.length > 0}
@@ -282,30 +281,30 @@ export default function ItemMasterDashboard({ userRole: _userRole }: ItemMasterD
                   className="h-4 w-4 text-brand-primary border-brand-text/20 rounded"
                 />
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
+              <th className="px-4 py-2 text-left text-xs font-semibold text-brand-text/80 uppercase tracking-wide">
                 Item Code
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
+              <th className="px-4 py-2 text-left text-xs font-semibold text-brand-text/80 uppercase tracking-wide">
                 Description
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
+              <th className="px-4 py-2 text-left text-xs font-semibold text-brand-text/80 uppercase tracking-wide">
                 Category
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
+              <th className="px-4 py-2 text-left text-xs font-semibold text-brand-text/80 uppercase tracking-wide">
                 Brand/Model
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
+              <th className="px-4 py-2 text-left text-xs font-semibold text-brand-text/80 uppercase tracking-wide">
                 Status
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
+              <th className="px-4 py-2 text-left text-xs font-semibold text-brand-text/80 uppercase tracking-wide">
                 Actions
               </th>
             </tr>
           </thead>
           <tbody className="bg-brand-surface divide-y divide-gray-200">
             {items.map((item) => (
-              <tr key={item.id} className="hover:bg-brand-surface">
-                <td className="px-6 py-4 whitespace-nowrap">
+              <tr key={item.id} className="hover:bg-brand-primary/5">
+                <td className="px-4 py-2 whitespace-nowrap">
                   <input
                     type="checkbox"
                     checked={selectedItems.includes(item.id)}
@@ -313,24 +312,24 @@ export default function ItemMasterDashboard({ userRole: _userRole }: ItemMasterD
                     className="h-4 w-4 text-brand-primary border-brand-text/20 rounded"
                   />
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-2 whitespace-nowrap">
                   <div className="text-sm font-medium text-brand-text">{item.item_code}</div>
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-4 py-2">
                   <div className="text-sm text-brand-text">{item.description}</div>
-                  <div className="text-sm text-brand-text/60">{item.uom}</div>
+                  <div className="text-xs text-brand-text/60">{item.uom}</div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-2 whitespace-nowrap">
                   <div className="text-sm text-brand-text">{item.category}</div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-2 whitespace-nowrap">
                   <div className="text-sm text-brand-text">{item.brand}</div>
-                  <div className="text-sm text-brand-text/60">{item.model}</div>
+                  <div className="text-xs text-brand-text/60">{item.model}</div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-2 whitespace-nowrap">
                   {getStatusBadge(item.approval_status)}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium">
                   <div className="flex space-x-2">
                     <button
                       onClick={() => {/* Navigate to item details */}}
@@ -390,6 +389,6 @@ export default function ItemMasterDashboard({ userRole: _userRole }: ItemMasterD
           </div>
         </div>
       )}
-    </div>
+    </PageLayout>
   );
 }

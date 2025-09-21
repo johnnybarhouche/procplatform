@@ -202,30 +202,41 @@ export default function AnalyticsDashboard({ userRole }: AnalyticsDashboardProps
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <KPICard
-          title="Total PRs"
-          value={kpiData.totalPRs}
-          trend="up"
-          change={12.5}
-        />
-        <KPICard
-          title="Total POs"
-          value={kpiData.totalPOs}
-          trend="up"
-          change={8.3}
-        />
-        <KPICard
-          title="Total Value"
-          value={`$${(kpiData.totalValue / 1000).toFixed(0)}K`}
-          trend="up"
-          change={15.2}
-        />
-        <KPICard
-          title="Avg Response Time"
-          value={`${kpiData.avgResponseTime} days`}
-          trend="down"
-          change={-5.1}
-        />
+        <div className="relative">
+          <KPICard
+            title="Total PRs"
+            value={kpiData.totalPRs}
+            trend="up"
+            change={12.5}
+          />
+          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-px h-16 bg-gradient-to-b from-transparent via-brand-text/20 to-transparent hidden lg:block"></div>
+        </div>
+        <div className="relative">
+          <KPICard
+            title="Total POs"
+            value={kpiData.totalPOs}
+            trend="up"
+            change={8.3}
+          />
+          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-px h-16 bg-gradient-to-b from-transparent via-brand-text/20 to-transparent hidden lg:block"></div>
+        </div>
+        <div className="relative">
+          <KPICard
+            title="Total Value"
+            value={`$${(kpiData.totalValue / 1000).toFixed(0)}K`}
+            trend="up"
+            change={15.2}
+          />
+          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-px h-16 bg-gradient-to-b from-transparent via-brand-text/20 to-transparent hidden lg:block"></div>
+        </div>
+        <div>
+          <KPICard
+            title="Avg Response Time"
+            value={`${kpiData.avgResponseTime} days`}
+            trend="down"
+            change={-5.1}
+          />
+        </div>
       </div>
 
       {/* Charts */}
