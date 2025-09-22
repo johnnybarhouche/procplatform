@@ -35,8 +35,8 @@ interface MaterialRequestFormProps {
 
 const UNIT_OF_MEASURE_OPTIONS = ["EA", "BOX", "KG", "L", "SET", "PACK"];
 
-const createEmptyLineItem = (): MRLineItem => ({
-  id: crypto.randomUUID(),
+const createEmptyLineItem = (id?: string): MRLineItem => ({
+  id: id ?? crypto.randomUUID(),
   itemCode: "",
   description: "",
   uom: "EA",
@@ -50,7 +50,7 @@ const createEmptyLineItem = (): MRLineItem => ({
 });
 
 export default function MaterialRequestForm({ projects: _projects, selectedProjectId, onSubmit }: MaterialRequestFormProps) {
-  const [lineItems, setLineItems] = useState<MRLineItem[]>([createEmptyLineItem()]);
+  const [lineItems, setLineItems] = useState<MRLineItem[]>(() => [createEmptyLineItem("initial-line-item")]);
   const [showItemPicker, setShowItemPicker] = useState(false);
   const [activePickerLineId, setActivePickerLineId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);

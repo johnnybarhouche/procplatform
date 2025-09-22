@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import MaterialRequestForm from "@/components/MaterialRequestForm";
 import ProcurementDashboard from "@/components/ProcurementDashboard";
 import QuoteApprovalDashboard from "@/components/QuoteApprovalDashboard";
@@ -33,14 +33,34 @@ type ViewId =
 type RoleId = "requester" | "procurement" | "approver" | "admin";
 
 const DEFAULT_VIEW: ViewId = "mr-form";
+const VIEW_IDS: readonly ViewId[] = [
+  "mr-form",
+  "procurement-dashboard",
+  "quote-approval",
+  "pr-dashboard",
+  "po-dashboard",
+  "supplier-dashboard",
+  "item-database",
+  "analytics",
+  "admin",
+];
 
-export default function Home({ searchParams }: { searchParams: { view?: string } }) {
+const isValidViewId = (value: string | null): value is ViewId =>
+  typeof value === "string" && VIEW_IDS.includes(value as ViewId);
+
+export default function Home() {
   const router = useRouter();
-  const [currentView, setCurrentView] = useState<ViewId>((searchParams?.view as ViewId) || DEFAULT_VIEW);
+  const searchParams = useSearchParams();
+  const [currentView, setCurrentView] = useState<ViewId>(() => {
+    const initialView = searchParams.get("view");
+    return isValidViewId(initialView) ? initialView : DEFAULT_VIEW;
+  });
   const [userRole, setUserRole] = useState<RoleId>("requester");
   const [selectedProjectId, setSelectedProjectId] = useState(PROJECTS[0]?.id ?? "");
 
   // Removed redirect logic - now handled in component rendering
+
+  const viewParam = searchParams.get("view");
 
   const navItems = useMemo(
     () =>
@@ -51,7 +71,13 @@ export default function Home({ searchParams }: { searchParams: { view?: string }
     [userRole]
   );
 
-  // URL parameters are now handled directly via searchParams prop
+  // Keep current view synchronized with the URL search params
+  useEffect(() => {
+    const nextView = isValidViewId(viewParam) ? viewParam : DEFAULT_VIEW;
+    if (nextView !== currentView) {
+      setCurrentView(nextView);
+    }
+  }, [viewParam, currentView]);
 
   const handleNavigate = useCallback(
     (item: NavItem) => {
@@ -114,4 +140,3 @@ export default function Home({ searchParams }: { searchParams: { view?: string }
     </AppLayout>
   );
 }
-
