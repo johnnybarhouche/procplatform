@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import MaterialRequestForm from "@/components/MaterialRequestForm";
 import ProcurementDashboard from "@/components/ProcurementDashboard";
 import QuoteApprovalDashboard from "@/components/QuoteApprovalDashboard";
@@ -34,25 +34,13 @@ type RoleId = "requester" | "procurement" | "approver" | "admin";
 
 const DEFAULT_VIEW: ViewId = "mr-form";
 
-export default function Home() {
+export default function Home({ searchParams }: { searchParams: { view?: string } }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const initialView = useMemo(() => {
-    const view = searchParams.get("view") as ViewId | null;
-    return view ?? DEFAULT_VIEW;
-  }, [searchParams]);
-
-  const [currentView, setCurrentView] = useState<ViewId>(initialView);
+  const [currentView, setCurrentView] = useState<ViewId>((searchParams?.view as ViewId) || DEFAULT_VIEW);
   const [userRole, setUserRole] = useState<RoleId>("requester");
   const [selectedProjectId, setSelectedProjectId] = useState(PROJECTS[0]?.id ?? "");
 
-  useEffect(() => {
-    if (userRole !== "admin" && currentView === "admin") {
-      setCurrentView("mr-form");
-      router.push("/?view=mr-form", { scroll: false });
-    }
-  }, [userRole, currentView, router]);
+  // Removed redirect logic - now handled in component rendering
 
   const navItems = useMemo(
     () =>
@@ -63,12 +51,7 @@ export default function Home() {
     [userRole]
   );
 
-  useEffect(() => {
-    const view = searchParams.get("view") as ViewId | null;
-    if (view && view !== currentView) {
-      setCurrentView(view);
-    }
-  }, [searchParams, currentView]);
+  // URL parameters are now handled directly via searchParams prop
 
   const handleNavigate = useCallback(
     (item: NavItem) => {
@@ -76,8 +59,8 @@ export default function Home() {
         router.push(item.href);
         return;
       }
-      const nextView = item.id as ViewId;
-      setCurrentView(nextView);
+      // Update the current view state
+      setCurrentView(item.id as ViewId);
       router.push(item.href, { scroll: false });
     },
     [router]
@@ -131,3 +114,4 @@ export default function Home() {
     </AppLayout>
   );
 }
+

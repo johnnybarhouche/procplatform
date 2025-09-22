@@ -1,143 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PurchaseRequisition, QuoteApproval, AuditLog, LineItemDecision, MRLineItem } from '@/types/procurement';
 import { notificationService } from '@/lib/notification-service';
 import { createMockSupplier } from '@/lib/mock-suppliers';
+import { QuoteApproval, LineItemDecision, PurchaseRequisition, AuditLog } from '@/types/procurement';
+import {
+  purchaseRequisitions,
+  prAuditLogs,
+  initializePRMockData,
+} from '@/lib/mock-data/prs';
 
-const sampleSupplierOverrides = {
-  id: 'supplier-001',
-  supplier_code: 'SUP-001',
-  name: 'ABC Construction Supplies',
-  email: 'quotes@abc.com',
-  category: 'Construction',
-  rating: 4.5,
-  quote_count: 15,
-  avg_response_time: 24,
-  last_quote_date: '2025-01-15',
-  status: 'approved' as const,
-  has_been_used: true,
-};
-
-const buildSampleSupplier = () => createMockSupplier(sampleSupplierOverrides);
-
-// Mock database for PRs - in production this would come from database
-const purchaseRequisitions: PurchaseRequisition[] = [];
-const auditLogs: AuditLog[] = [];
-
-// Initialize with sample data
-const initializeData = () => {
-  if (purchaseRequisitions.length === 0) {
-    // Create sample PR from approved quote approval
-    const baseSupplier = buildSampleSupplier();
-
-    const samplePR: PurchaseRequisition = {
-      id: 'pr-001',
-      pr_number: 'PR-2025-001',
-      project_id: '1',
-      project_name: 'Project Alpha',
-      supplier_id: 'supplier-001',
-      supplier: baseSupplier,
-      status: 'draft',
-      total_value: 15000,
-      currency: 'AED',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      created_by: 'procurement-user',
-      created_by_name: 'Procurement Team',
-      line_items: [
-        {
-          id: 'prli-001',
-          pr_id: 'pr-001',
-          mr_line_item_id: 'mri-001',
-          mr_line_item: {
-            id: 'mri-001',
-            item_code: 'ITEM-001',
-            description: 'Safety Helmet',
-            uom: 'Pcs',
-            quantity: 10,
-            unit_price: 1000,
-          },
-          quote_id: 'q-001',
-          quote: {
-            id: 'q-001',
-            rfq_id: 'rfq-001',
-            supplier_id: 'supplier-001',
-            supplier: baseSupplier,
-            status: 'submitted',
-            submitted_at: new Date().toISOString(),
-            valid_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-            total_amount: 15000,
-            currency: 'AED',
-            line_items: [],
-            attachments: [],
-            created_by: 'supplier-001',
-            created_by_name: 'ABC Sales'
-          },
-          quantity: 10,
-          unit_price: 1000,
-          total_price: 10000,
-          lead_time_days: 7,
-        }
-      ],
-      approvals: [],
-      quote_approval_id: 'qa-001',
-      quote_approval: {
-        id: 'qa-001',
-        quote_pack_id: 'qp-001',
-        quote_pack: {
-          id: 'qp-001',
-          rfq_id: 'rfq-001',
-          status: 'approved',
-          rfq: {
-            id: 'rfq-001',
-            rfq_number: 'RFQ-001',
-            material_request_id: 'mr-001',
-            material_request: {
-              id: 'mr-001',
-              project_id: '1',
-              project_name: 'Project Alpha',
-              mrn: 'MR-001',
-              status: 'approved',
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-              requester_id: 'user-001',
-              requester_name: 'John Doe',
-              line_items: [],
-              attachments: []
-            },
-            suppliers: [],
-            quotes: [],
-            due_date: new Date().toISOString(),
-            status: 'sent',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            created_by: 'user-002',
-            created_by_name: 'Jane Smith'
-          },
-          quotes: [],
-          comparison_data: {
-            total_savings: 0,
-            recommended_suppliers: [],
-            key_differences: [],
-            risk_assessment: 'Low risk'
-          },
-          created_at: new Date().toISOString(),
-          created_by: 'user-002',
-          created_by_name: 'Jane Smith'
-        },
-        status: 'approved',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        approved_at: new Date().toISOString(),
-        approved_by: 'end-user',
-        approved_by_name: 'End User',
-        line_item_decisions: []
-      }
-    };
-    purchaseRequisitions.push(samplePR);
-  }
-};
-
-initializeData();
+initializePRMockData();
 
 // GET /api/prs - Retrieve PRs with filtering and pagination
 export async function GET(request: NextRequest) {
@@ -192,7 +63,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'quote_approval_id and project_id are required' }, { status: 400 });
     }
 
-    const baseSupplier = buildSampleSupplier();
+    const baseSupplier = createMockSupplier();
 
     // Mock: Get quote approval data (in production this would come from database)
     const quoteApproval: QuoteApproval = {
@@ -297,9 +168,16 @@ export async function POST(request: NextRequest) {
     // Create PR for each supplier
     for (const [supplierId, decisions] of supplierGroups) {
       const firstQuote = decisions[0].selected_quote;
-      const supplier = firstQuote?.supplier ?? buildSampleSupplier();
+      const supplier = firstQuote?.supplier ?? createMockSupplier();
       const totalValue = decisions.reduce((sum, decision) => sum + (decision.selected_quote?.total_amount || 0), 0);
       
+      const totalValueAED = firstQuote?.currency === 'AED'
+        ? totalValue
+        : Math.round(totalValue * 3.67 * 100) / 100;
+      const totalValueUSD = firstQuote?.currency === 'USD'
+        ? totalValue
+        : Math.round(totalValue * 0.2722 * 100) / 100;
+
       const newPR: PurchaseRequisition = {
         id: `pr-${Date.now()}-${supplierId}`,
         pr_number: `PR-${new Date().getFullYear()}-${String(purchaseRequisitions.length + 1).padStart(3, '0')}`,
@@ -310,6 +188,8 @@ export async function POST(request: NextRequest) {
         status: 'draft',
         total_value: totalValue,
         currency: firstQuote?.currency || 'AED',
+        total_value_aed: Number.isFinite(totalValueAED) ? totalValueAED : totalValue,
+        total_value_usd: Number.isFinite(totalValueUSD) ? totalValueUSD : totalValue,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         created_by: 'system',
@@ -346,7 +226,7 @@ export async function POST(request: NextRequest) {
         timestamp: new Date().toISOString(),
         after_data: newPR
       };
-      auditLogs.push(auditLog);
+      prAuditLogs.push(auditLog);
       
       // Send notification
       await notificationService.sendPRCreatedNotification(newPR);

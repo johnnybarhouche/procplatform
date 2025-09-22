@@ -10,7 +10,7 @@ import IntegrationManagement from './IntegrationManagement';
 import SystemSettings from './SystemSettings';
 
 interface AdminDashboardProps {
-  userRole: 'admin';
+  userRole: 'requester' | 'procurement' | 'approver' | 'admin';
 }
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole }) => {
@@ -57,6 +57,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole }) => {
       hasFetchedDashboard.current = true;
     } catch (error) {
       console.error('Error fetching admin dashboard data:', error);
+      setDashboardData(null);
     } finally {
       if (shouldShowSpinner) {
         setLoading(false);
@@ -201,6 +202,18 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole }) => {
     return new Date(timestamp).toLocaleString();
   };
 
+  // Access control check - must be after all hooks
+  if (userRole !== 'admin') {
+    return (
+      <div className="p-6">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-brand-text mb-4">Access Denied</h2>
+          <p className="text-brand-text/70">You need admin privileges to access this page.</p>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="p-6">
@@ -225,6 +238,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole }) => {
         <div className="text-center">
           <h2 className="text-2xl font-bold text-brand-text mb-4">Admin Dashboard</h2>
           <p className="text-brand-text/70">Failed to load dashboard data</p>
+          <button 
+            onClick={() => fetchDashboardData({ force: true })}
+            className="mt-4 px-4 py-2 bg-brand-primary text-white rounded-md hover:bg-brand-primary/90"
+          >
+            Retry
+          </button>
         </div>
       </div>
     );

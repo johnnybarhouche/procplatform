@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { GET, PUT } from './route';
+import { resetPRMockData } from '@/lib/mock-data/prs';
 
 // Mock the notification service
 jest.mock('@/lib/notification-service', () => ({
@@ -16,7 +17,11 @@ describe('/api/prs/[id]', () => {
   };
 
   const createMockParams = (id: string) => ({
-    params: Promise.resolve({ id }),
+    params: { id },
+  });
+
+  beforeEach(() => {
+    resetPRMockData();
   });
 
   describe('GET /api/prs/[id]', () => {

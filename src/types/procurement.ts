@@ -286,6 +286,8 @@ export interface PurchaseRequisition {
   status: 'draft' | 'submitted' | 'under_review' | 'approved' | 'rejected';
   total_value: number;
   currency: string;
+  total_value_aed?: number;
+  total_value_usd?: number;
   created_at: string;
   updated_at: string;
   submitted_at?: string;
@@ -371,6 +373,8 @@ export interface PurchaseOrder {
   status: 'draft' | 'sent' | 'acknowledged' | 'in_progress' | 'delivered' | 'invoiced' | 'paid';
   total_value: number;
   currency: string;
+  total_value_aed?: number;
+  total_value_usd?: number;
   created_at: string;
   updated_at: string;
   sent_at?: string;

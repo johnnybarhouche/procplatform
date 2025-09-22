@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PurchaseRequisition, PRApproval, AuditLog } from '@/types/procurement';
 import { notificationService } from '@/lib/notification-service';
-import { getNextApprovalLevel, getApproversForLevel, isPRFullyApproved } from '@/lib/authorization-matrix';
+import { getNextApprovalLevel, isPRFullyApproved } from '@/lib/authorization-matrix';
+import {
+  purchaseRequisitions,
+  prAuditLogs,
+  initializePRMockData,
+} from '@/lib/mock-data/prs';
 
-// Mock database - in production this would come from database
-const purchaseRequisitions: PurchaseRequisition[] = [];
-const auditLogs: AuditLog[] = [];
+initializePRMockData();
 
 // POST /api/prs/[id]/approve - Approve a PR
 export async function POST(
@@ -13,6 +16,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id: prId } = await params;
     const body = await request.json();
     const { approver_id, comments } = body;
     
@@ -20,8 +24,7 @@ export async function POST(
       return NextResponse.json({ error: 'approver_id is required' }, { status: 400 });
     }
     
-    const { id } = await params;
-    const prIndex = purchaseRequisitions.findIndex(p => p.id === id);
+    const prIndex = purchaseRequisitions.findIndex(p => p.id === prId);
     
     if (prIndex === -1) {
       return NextResponse.json({ error: 'Purchase Requisition not found' }, { status: 404 });
@@ -79,7 +82,7 @@ export async function POST(
       before_data: pr,
       after_data: updatedPR
     };
-    auditLogs.push(auditLog);
+    prAuditLogs.push(auditLog);
     
     // Send notification
     await notificationService.sendPRApprovalDecisionNotification(updatedPR, approval);
@@ -100,7 +103,7 @@ export async function POST(
           supplier: updatedPR.supplier.name
         }
       };
-      auditLogs.push(poTriggerLog);
+      prAuditLogs.push(poTriggerLog);
     }
     
     return NextResponse.json(updatedPR);

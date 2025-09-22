@@ -1,128 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PurchaseOrder, AuditLog } from '@/types/procurement';
-import { createMockSupplier } from '@/lib/mock-suppliers';
 import { notificationService } from '@/lib/notification-service';
+import {
+  purchaseOrders,
+  poAuditLogs,
+  initializePOMockData,
+} from '@/lib/mock-data/pos';
 
-// Mock database for POs - in production this would come from database
-const purchaseOrders: PurchaseOrder[] = [];
-const auditLogs: AuditLog[] = [];
-
-// Initialize with sample data
-const initializeData = () => {
-  if (purchaseOrders.length === 0) {
-    const supplier = createMockSupplier({
-      id: 'supplier-001',
-      supplier_code: 'SUP-001',
-      name: 'ABC Construction Supplies',
-      email: 'quotes@abc.com',
-      phone: '123-456-7890',
-      address: '123 Main St',
-      category: 'Construction',
-      rating: 4.5,
-      quote_count: 10,
-      avg_response_time: 24,
-      last_quote_date: new Date().toISOString().split('T')[0],
-      status: 'approved',
-      has_been_used: true,
-    });
-
-    const samplePO: PurchaseOrder = {
-      id: 'po-001',
-      po_number: 'PO-ALPHA-001',
-      project_id: '1',
-      project_name: 'Project Alpha',
-      supplier_id: 'supplier-001',
-      supplier,
-      status: 'draft',
-      total_value: 15000,
-      currency: 'AED',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      created_by: 'user-002',
-      created_by_name: 'Jane Smith',
-      payment_terms: 'Net 30',
-      delivery_address: 'Project Alpha Site, Dubai',
-      line_items: [],
-      status_history: [],
-      attachments: [],
-      pr_id: 'pr-001',
-      pr: {
-        id: 'pr-001',
-        pr_number: 'PR-ALPHA-001',
-        project_id: '1',
-        project_name: 'Project Alpha',
-        supplier_id: 'supplier-001',
-        supplier,
-        status: 'approved',
-        total_value: 15000,
-        currency: 'AED',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        submitted_at: new Date().toISOString(),
-        created_by: 'user-002',
-        created_by_name: 'Jane Smith',
-        line_items: [],
-        approvals: [],
-        quote_approval_id: 'qa-001',
-        quote_approval: {
-          id: 'qa-001',
-          quote_pack_id: 'qp-001',
-          quote_pack: {
-            id: 'qp-001',
-            rfq_id: 'rfq-001',
-            status: 'approved',
-            rfq: {
-              id: 'rfq-001',
-              rfq_number: 'RFQ-001',
-              material_request_id: 'mr-001',
-              material_request: {
-                id: 'mr-001',
-                project_id: '1',
-                project_name: 'Project Alpha',
-                mrn: 'MR-001',
-                status: 'approved',
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-                requester_id: 'user-001',
-                requester_name: 'John Doe',
-                line_items: [],
-                attachments: []
-              },
-              suppliers: [],
-              quotes: [],
-              due_date: new Date().toISOString(),
-              status: 'sent',
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-              created_by: 'user-002',
-              created_by_name: 'Jane Smith'
-            },
-            quotes: [],
-            comparison_data: {
-              total_savings: 0,
-              recommended_suppliers: [],
-              key_differences: [],
-              risk_assessment: 'Low risk'
-            },
-            created_at: new Date().toISOString(),
-            created_by: 'user-002',
-            created_by_name: 'Jane Smith'
-          },
-          status: 'approved',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          approved_at: new Date().toISOString(),
-          approved_by: 'end-user',
-          approved_by_name: 'End User',
-          comments: 'All items approved',
-          line_item_decisions: []
-        }
-      }
-    };
-    purchaseOrders.push(samplePO);
-  }
-};
-initializeData();
+initializePOMockData();
 
 // POST /api/pos/[id]/send - Send PO to supplier
 export async function POST(
@@ -167,7 +52,7 @@ export async function POST(
     await notificationService.sendPOSentToSupplierNotification(po);
 
     // Log audit
-    auditLogs.push({
+    poAuditLogs.push({
       id: `audit-${Date.now()}-${poId}`,
       entity_type: 'purchase_order',
       entity_id: poId,

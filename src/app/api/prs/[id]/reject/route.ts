@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PurchaseRequisition, PRApproval, AuditLog } from '@/types/procurement';
 import { notificationService } from '@/lib/notification-service';
+import {
+  purchaseRequisitions,
+  prAuditLogs,
+  initializePRMockData,
+} from '@/lib/mock-data/prs';
 
-// Mock database - in production this would come from database
-const purchaseRequisitions: PurchaseRequisition[] = [];
-const auditLogs: AuditLog[] = [];
+initializePRMockData();
 
 // POST /api/prs/[id]/reject - Reject a PR
 export async function POST(
@@ -12,6 +15,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id: prId } = await params;
     const body = await request.json();
     const { approver_id, reason, comments } = body;
     
@@ -19,8 +23,7 @@ export async function POST(
       return NextResponse.json({ error: 'approver_id and reason are required' }, { status: 400 });
     }
     
-    const { id } = await params;
-    const prIndex = purchaseRequisitions.findIndex(p => p.id === id);
+    const prIndex = purchaseRequisitions.findIndex(p => p.id === prId);
     
     if (prIndex === -1) {
       return NextResponse.json({ error: 'Purchase Requisition not found' }, { status: 404 });
@@ -69,7 +72,7 @@ export async function POST(
       before_data: pr,
       after_data: updatedPR
     };
-    auditLogs.push(auditLog);
+    prAuditLogs.push(auditLog);
     
     // Send notification
     await notificationService.sendPRApprovalDecisionNotification(updatedPR, approval);
@@ -89,7 +92,7 @@ export async function POST(
         approver: approval.approver_name
       }
     };
-    auditLogs.push(returnToProcurementLog);
+    prAuditLogs.push(returnToProcurementLog);
     
     return NextResponse.json(updatedPR);
   } catch (error) {
@@ -97,4 +100,3 @@ export async function POST(
     return NextResponse.json({ error: 'Failed to reject PR' }, { status: 500 });
   }
 }
-

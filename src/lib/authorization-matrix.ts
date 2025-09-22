@@ -43,7 +43,18 @@ export function getAuthorizationMatrix(projectId: string): AuthorizationMatrix[]
 
 export function getRequiredApprovalLevels(projectId: string, totalValue: number): AuthorizationMatrix[] {
   const matrix = getAuthorizationMatrix(projectId);
-  return matrix.filter(am => totalValue >= am.threshold_min && totalValue < am.threshold_max);
+
+  const eligibleLevels = matrix.filter((am) => {
+    const maxThreshold = Number.isFinite(am.threshold_max) ? am.threshold_max : Infinity;
+    return totalValue >= am.threshold_min && totalValue < maxThreshold;
+  });
+
+  if (eligibleLevels.length === 0) {
+    return [];
+  }
+
+  const highestLevel = Math.max(...eligibleLevels.map((am) => am.approval_level));
+  return matrix.filter((am) => am.approval_level <= highestLevel);
 }
 
 export function getNextApprovalLevel(pr: PurchaseRequisition): number {

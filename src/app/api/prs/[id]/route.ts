@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PurchaseRequisition, AuditLog } from '@/types/procurement';
+import { AuditLog, PurchaseRequisition } from '@/types/procurement';
 import { notificationService } from '@/lib/notification-service';
+import {
+  purchaseRequisitions,
+  prAuditLogs,
+  initializePRMockData,
+} from '@/lib/mock-data/prs';
 
-// Mock database - in production this would come from database
-const purchaseRequisitions: PurchaseRequisition[] = [];
-const auditLogs: AuditLog[] = [];
+initializePRMockData();
 
 // GET /api/prs/[id] - Retrieve specific PR details
 export async function GET(
@@ -64,7 +67,7 @@ export async function PUT(
       before_data: oldPR,
       after_data: updatedPR
     };
-    auditLogs.push(auditLog);
+    prAuditLogs.push(auditLog);
     
     // Send notification if status changed
     if (status && status !== oldPR.status) {

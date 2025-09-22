@@ -1,20 +1,45 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { PurchaseRequisition, PRDetailViewProps } from '@/types/procurement';
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  FormEvent,
+} from 'react';
+import TraceabilityChips from '@/components/approvals/TraceabilityChips';
+import ApprovalMatrix from '@/components/approvals/ApprovalMatrix';
+import {
+  getRequiredApprovalLevels,
+  getNextApprovalLevel,
+  isPRFullyApproved,
+} from '@/lib/authorization-matrix';
+import { AuthorizationMatrix, PurchaseRequisition, PRDetailViewProps } from '@/types/procurement';
+
+const statusBadgeVariants: Record<PurchaseRequisition['status'], string> = {
+  draft: 'bg-brand-surface text-brand-text/80 border border-brand-text/20',
+  submitted: 'bg-brand-primary/10 text-brand-primary border border-brand-primary/30',
+  under_review: 'bg-status-warning/10 text-status-warning border border-status-warning/40',
+  approved: 'bg-status-success/10 text-status-success border border-status-success/40',
+  rejected: 'bg-status-danger/10 text-status-danger border border-status-danger/40',
+};
+
+const currencyFormatter = (value: number, currency: string) =>
+  new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(value);
 
 export default function PRDetailView({ prId, userRole }: PRDetailViewProps) {
   const [pr, setPR] = useState<PurchaseRequisition | null>(null);
   const [loading, setLoading] = useState(true);
   const [showApprovalForm, setShowApprovalForm] = useState(false);
   const [showRejectionForm, setShowRejectionForm] = useState(false);
+  const [showCommentForm, setShowCommentForm] = useState(false);
 
   const fetchPR = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/prs/${prId}`);
       const data = await response.json();
-      
+
       if (response.ok) {
         setPR(data);
       } else {
@@ -31,310 +56,469 @@ export default function PRDetailView({ prId, userRole }: PRDetailViewProps) {
     fetchPR();
   }, [prId, fetchPR]);
 
-  const handleApprove = async (approverId: string, comments?: string) => {
-    try {
-      const response = await fetch(`/api/prs/${prId}/approve`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ approver_id: approverId, comments }),
-      });
-      
-      if (response.ok) {
-        fetchPR(); // Refresh PR data
-        setShowApprovalForm(false);
-      } else {
-        console.error('Error approving PR');
-      }
-    } catch (error) {
-      console.error('Error approving PR:', error);
-    }
-  };
+  const handleApprove = useCallback(
+    async (approverId: string, comments?: string) => {
+      try {
+        const response = await fetch(`/api/prs/${prId}/approve`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ approver_id: approverId, comments }),
+        });
 
-  const handleReject = async (approverId: string, reason: string, comments?: string) => {
-    try {
-      const response = await fetch(`/api/prs/${prId}/reject`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ approver_id: approverId, reason, comments }),
-      });
-      
-      if (response.ok) {
-        fetchPR(); // Refresh PR data
-        setShowRejectionForm(false);
-      } else {
-        console.error('Error rejecting PR');
+        if (response.ok) {
+          await fetchPR();
+          setShowApprovalForm(false);
+        } else {
+          console.error('Error approving PR');
+        }
+      } catch (error) {
+        console.error('Error approving PR:', error);
       }
-    } catch (error) {
-      console.error('Error rejecting PR:', error);
-    }
-  };
+    },
+    [fetchPR, prId]
+  );
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'draft': return 'bg-brand-surface text-brand-text/90';
-      case 'submitted': return 'bg-brand-primary/10 text-blue-800';
-      case 'under_review': return 'bg-status-warning/10 text-yellow-800';
-      case 'approved': return 'bg-status-success/10 text-green-800';
-      case 'rejected': return 'bg-status-danger/10 text-red-800';
-      default: return 'bg-brand-surface text-brand-text/90';
+  const handleReject = useCallback(
+    async (approverId: string, reason: string, comments?: string) => {
+      try {
+        const response = await fetch(`/api/prs/${prId}/reject`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ approver_id: approverId, reason, comments }),
+        });
+
+        if (response.ok) {
+          await fetchPR();
+          setShowRejectionForm(false);
+        } else {
+          console.error('Error rejecting PR');
+        }
+      } catch (error) {
+        console.error('Error rejecting PR:', error);
+      }
+    },
+    [fetchPR, prId]
+  );
+
+  const handleComment = useCallback(
+    async (comments: string) => {
+      try {
+        const response = await fetch(`/api/prs/${prId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ comments }),
+        });
+
+        if (response.ok) {
+          await fetchPR();
+          setShowCommentForm(false);
+        } else {
+          console.error('Error capturing comment');
+        }
+      } catch (error) {
+        console.error('Error capturing comment:', error);
+      }
+    },
+    [fetchPR, prId]
+  );
+
+  const getStatusColor = useCallback((status: PurchaseRequisition['status']) => {
+    return statusBadgeVariants[status] ?? statusBadgeVariants.draft;
+  }, []);
+
+  const matrixLevels = useMemo<AuthorizationMatrix[]>(() => {
+    if (!pr) {
+      return [];
     }
-  };
+    return getRequiredApprovalLevels(pr.project_id, pr.total_value);
+  }, [pr]);
+
+  const currentApprovalLevel = useMemo(() => (pr ? getNextApprovalLevel(pr) : 0), [pr]);
+
+  const fullyApproved = useMemo(() => (pr ? isPRFullyApproved(pr) : false), [pr]);
+
+  const activeMatrixLevel = useMemo(() => {
+    if (!pr || !currentApprovalLevel) {
+      return undefined;
+    }
+    return matrixLevels.find((entry) => entry.approval_level === currentApprovalLevel);
+  }, [currentApprovalLevel, matrixLevels, pr]);
+
+  const totalValueSummary = useMemo(() => {
+    if (!pr) {
+      return [] as Array<{ label: string; value: string }>;
+    }
+
+    const values: Array<{ label: string; value: string }> = [
+      {
+        label: `Total (${pr.currency})`,
+        value: currencyFormatter(pr.total_value, pr.currency),
+      },
+    ];
+
+    if (typeof pr.total_value_aed === 'number') {
+      values.push({ label: 'Total (AED)', value: currencyFormatter(pr.total_value_aed, 'AED') });
+    } else if (pr.currency !== 'AED') {
+      values.push({ label: 'Total (AED)', value: '—' });
+    }
+
+    if (typeof pr.total_value_usd === 'number') {
+      values.push({ label: 'Total (USD)', value: currencyFormatter(pr.total_value_usd, 'USD') });
+    } else if (pr.currency !== 'USD') {
+      values.push({ label: 'Total (USD)', value: '—' });
+    }
+
+    return values;
+  }, [pr]);
+
+  const isDecisionDisabled = useMemo(() => {
+    if (!pr) {
+      return true;
+    }
+    if (pr.status === 'approved' || pr.status === 'rejected') {
+      return true;
+    }
+    if (userRole !== 'approver') {
+      return true;
+    }
+    return currentApprovalLevel === 0;
+  }, [currentApprovalLevel, pr, userRole]);
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-brand-primary" role="status" />
       </div>
     );
   }
 
   if (!pr) {
     return (
-      <div className="text-center py-12">
-        <p className="text-brand-text/60">Purchase Requisition not found</p>
+      <div className="rounded-xl border border-brand-text/10 bg-brand-surface px-6 py-12 text-center text-brand-text/60">
+        Purchase Requisition not found
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-5 sm:px-6 lg:px-6">
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-brand-text">{pr.pr_number}</h1>
-            <p className="mt-2 text-brand-text/70">Purchase Requisition Details</p>
-          </div>
-          <div className="flex items-center space-x-4">
-            <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getStatusColor(pr.status)}`}>
-              {pr.status.replace('_', ' ').toUpperCase()}
-            </span>
-            {userRole === 'approver' && (pr.status === 'submitted' || pr.status === 'under_review') && (
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => setShowApprovalForm(true)}
-                  className="px-4 py-2 bg-status-success text-white rounded-md hover:bg-status-success/90 focus:outline-none focus:ring-2 focus:ring-green-500"
-                >
-                  Approve
-                </button>
-                <button
-                  onClick={() => setShowRejectionForm(true)}
-                  className="px-4 py-2 bg-status-danger text-white rounded-md hover:bg-status-danger/90 focus:outline-none focus:ring-2 focus:ring-red-500"
-                >
-                  Reject
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+    <div className="space-y-8 px-4 py-6 sm:px-6 lg:px-8">
+      <section className="rounded-2xl border border-brand-primary/20 bg-brand-surface p-6 shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-6">
+          <div className="min-w-[260px] space-y-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-2xl font-bold text-brand-text">{pr.pr_number}</h1>
+              <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${getStatusColor(pr.status)}`}>
+                {pr.status.replace('_', ' ')}
+              </span>
+            </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* PR Information */}
-          <div className="bg-brand-surface p-6 rounded-lg shadow-sm border">
-            <h2 className="text-xl font-semibold text-brand-text mb-4">PR Information</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid gap-4 text-sm text-brand-text/80 sm:grid-cols-2">
               <div>
-                <label className="block text-sm font-medium text-brand-text/80">PR Number</label>
-                <p className="mt-1 text-sm text-brand-text">{pr.pr_number}</p>
+                <p className="font-semibold uppercase tracking-wide text-brand-text/50">Project</p>
+                <p className="mt-1 text-base font-semibold text-brand-text">{pr.project_name}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-brand-text/80">Project</label>
-                <p className="mt-1 text-sm text-brand-text">{pr.project_name}</p>
+                <p className="font-semibold uppercase tracking-wide text-brand-text/50">Supplier</p>
+                <p className="mt-1 text-base font-semibold text-brand-text">{pr.supplier.name}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-brand-text/80">Supplier</label>
-                <p className="mt-1 text-sm text-brand-text">{pr.supplier.name}</p>
+                <p className="font-semibold uppercase tracking-wide text-brand-text/50">Created By</p>
+                <p className="mt-1 text-sm text-brand-text/80">{pr.created_by_name}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-brand-text/80">Total Value</label>
-                <p className="mt-1 text-sm text-brand-text">{pr.total_value.toLocaleString()} {pr.currency}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-brand-text/80">Created By</label>
-                <p className="mt-1 text-sm text-brand-text">{pr.created_by_name}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-brand-text/80">Created Date</label>
-                <p className="mt-1 text-sm text-brand-text">{new Date(pr.created_at).toLocaleDateString()}</p>
+                <p className="font-semibold uppercase tracking-wide text-brand-text/50">Created</p>
+                <p className="mt-1 text-sm text-brand-text/80">
+                  {new Date(pr.created_at).toLocaleString(undefined, {
+                    dateStyle: 'medium',
+                    timeStyle: 'short',
+                  })}
+                </p>
               </div>
             </div>
-            {pr.comments && (
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-brand-text/80">Comments</label>
-                <p className="mt-1 text-sm text-brand-text">{pr.comments}</p>
-              </div>
-            )}
+
+            <TraceabilityChips quoteApproval={pr.quote_approval} />
           </div>
 
-          {/* Line Items */}
-          <div className="bg-brand-surface p-6 rounded-lg shadow-sm border">
-            <h2 className="text-xl font-semibold text-brand-text mb-4">Line Items</h2>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
+          <div className="grid flex-1 gap-4 sm:grid-cols-2 lg:flex lg:flex-col">
+            {totalValueSummary.map(({ label, value }) => (
+              <div
+                key={label}
+                className="rounded-xl border border-brand-primary/20 bg-white/90 px-4 py-3 text-right shadow-sm"
+              >
+                <p className="text-xs font-semibold uppercase tracking-wide text-brand-text/50">{label}</p>
+                <p className="mt-1 text-lg font-semibold text-brand-text">{value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <ApprovalMatrix
+          className="mt-6"
+          matrix={matrixLevels}
+          approvals={pr.approvals}
+          currentLevel={currentApprovalLevel}
+          currency={pr.currency}
+        />
+      </section>
+
+      <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
+        <div className="space-y-6">
+          <section className="rounded-2xl border border-brand-text/10 bg-brand-surface p-6 shadow-sm">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-brand-text">Line Items</h2>
+              <span className="text-sm text-brand-text/60">{pr.line_items.length} items</span>
+            </div>
+            <div className="mt-4 overflow-x-auto">
+              <table className="min-w-full divide-y divide-brand-text/10">
                 <thead className="bg-brand-surface">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-brand-text/50">
                       Item Code
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-brand-text/50">
                       Description
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-brand-text/50">
                       Quantity
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-brand-text/50">
                       Unit Price
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-brand-text/50">
                       Total Price
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-brand-text/60 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-brand-text/50">
                       Lead Time
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-brand-surface divide-y divide-gray-200">
+                <tbody className="divide-y divide-brand-text/10">
                   {pr.line_items.map((item) => (
-                    <tr key={item.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-brand-text">
-                        {item.mr_line_item.item_code}
+                    <tr key={item.id} className="bg-white/70">
+                      <td className="px-6 py-4 text-sm text-brand-text">{item.mr_line_item.item_code}</td>
+                      <td className="px-6 py-4 text-sm text-brand-text">{item.mr_line_item.description}</td>
+                      <td className="px-6 py-4 text-sm text-brand-text">{item.quantity}</td>
+                      <td className="px-6 py-4 text-sm text-brand-text">
+                        {currencyFormatter(item.unit_price, pr.currency)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-brand-text">
-                        {item.mr_line_item.description}
+                      <td className="px-6 py-4 text-sm text-brand-text">
+                        {currencyFormatter(item.total_price, pr.currency)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-brand-text">
-                        {item.quantity}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-brand-text">
-                        {item.unit_price.toLocaleString()} {pr.currency}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-brand-text">
-                        {item.total_price.toLocaleString()} {pr.currency}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-brand-text">
-                        {item.lead_time_days} days
-                      </td>
+                      <td className="px-6 py-4 text-sm text-brand-text">{item.lead_time_days} days</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          </div>
+          </section>
 
-          {/* Approval History */}
-          {pr.approvals.length > 0 && (
-            <div className="bg-brand-surface p-6 rounded-lg shadow-sm border">
-              <h2 className="text-xl font-semibold text-brand-text mb-4">Approval History</h2>
-              <div className="space-y-4">
-                {pr.approvals.map((approval) => (
-                  <div key={approval.id} className="border-l-4 border-blue-200 pl-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-brand-text">{approval.approver_name}</p>
-                        <p className="text-sm text-brand-text/60">Level {approval.approval_level}</p>
-                      </div>
-                      <div className="text-right">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          approval.status === 'approved' ? 'bg-status-success/10 text-green-800' : 'bg-status-danger/10 text-red-800'
-                        }`}>
-                          {approval.status.toUpperCase()}
-                        </span>
-                        <p className="text-sm text-brand-text/60">
-                          {approval.approved_at ? new Date(approval.approved_at).toLocaleDateString() : 
-                           approval.rejected_at ? new Date(approval.rejected_at).toLocaleDateString() : 
-                           new Date(approval.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
+          <section className="rounded-2xl border border-brand-text/10 bg-brand-surface p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-brand-text">Approval History &amp; Audit Trail</h2>
+            <p className="mt-1 text-sm text-brand-text/70">
+              Every decision is recorded with comments and timestamps for compliance traceability.
+            </p>
+            <div className="mt-4 space-y-4">
+              {pr.approvals.length === 0 && (
+                <p className="rounded-lg border border-dashed border-brand-text/20 bg-white/60 px-4 py-6 text-sm text-brand-text/60">
+                  No approval activity recorded yet.
+                </p>
+              )}
+
+              {pr.approvals.map((approval) => (
+                <div
+                  key={approval.id}
+                  className="rounded-xl border border-brand-text/10 bg-white/80 p-4 shadow-sm"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-brand-text">{approval.approver_name}</p>
+                      <p className="text-xs uppercase tracking-wide text-brand-text/60">
+                        Level {approval.approval_level}
+                      </p>
                     </div>
-                    {approval.comments && (
-                      <p className="mt-2 text-sm text-brand-text/70">{approval.comments}</p>
-                    )}
+                    <span
+                      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${
+                        approval.status === 'approved'
+                          ? 'bg-status-success/10 text-status-success border border-status-success/40'
+                          : 'bg-status-danger/10 text-status-danger border border-status-danger/40'
+                      }`}
+                    >
+                      {approval.status}
+                    </span>
                   </div>
-                ))}
-              </div>
+                  <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-brand-text/60">
+                    <span>
+                      {new Date(
+                        approval.approved_at ||
+                          approval.rejected_at ||
+                          approval.created_at
+                      ).toLocaleString(undefined, {
+                        dateStyle: 'medium',
+                        timeStyle: 'short',
+                      })}
+                    </span>
+                    {approval.comments && <span className="italic">“{approval.comments}”</span>}
+                  </div>
+                </div>
+              ))}
+
+              {pr.comments && (
+                <div className="rounded-xl border border-brand-text/10 bg-white/70 p-4 text-sm text-brand-text/70">
+                  <p className="font-semibold text-brand-text">Latest approver comment</p>
+                  <p className="mt-1">{pr.comments}</p>
+                </div>
+              )}
             </div>
-          )}
+          </section>
         </div>
 
-        {/* Sidebar */}
         <div className="space-y-6">
-          {/* Supplier Information */}
-          <div className="bg-brand-surface p-6 rounded-lg shadow-sm border">
-            <h3 className="text-lg font-semibold text-brand-text mb-4">Supplier Information</h3>
-            <div className="space-y-3">
-              <div>
-                <label className="block text-sm font-medium text-brand-text/80">Name</label>
-                <p className="text-sm text-brand-text">{pr.supplier.name}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-brand-text/80">Email</label>
-                <p className="text-sm text-brand-text">{pr.supplier.email}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-brand-text/80">Category</label>
-                <p className="text-sm text-brand-text">{pr.supplier.category}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-brand-text/80">Rating</label>
-                <p className="text-sm text-brand-text">{pr.supplier.rating}/5</p>
-              </div>
-            </div>
-          </div>
+          <section className="rounded-2xl border border-brand-primary/20 bg-brand-primary/5 p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-brand-text">Approver Actions</h2>
+            <p className="mt-1 text-sm text-brand-text/70">
+              Decisions update audit logs automatically and advance the workflow state machine.
+            </p>
 
-          {/* Quick Actions */}
-          <div className="bg-brand-surface p-6 rounded-lg shadow-sm border">
-            <h3 className="text-lg font-semibold text-brand-text mb-4">Quick Actions</h3>
-            <div className="space-y-2">
-              <button className="w-full px-4 py-2 text-sm font-medium text-brand-primary bg-blue-50 rounded-md hover:bg-brand-primary/10">
-                Download PDF
+            <div className="mt-4 space-y-3 text-sm text-brand-text/70">
+              {currentApprovalLevel === 0 ? (
+                fullyApproved ? (
+                  <p className="rounded-lg border border-status-success/30 bg-status-success/10 px-3 py-2 text-status-success">
+                    All approval levels completed. PR is ready for PO generation.
+                  </p>
+                ) : (
+                  <p className="rounded-lg border border-brand-text/20 bg-white/60 px-3 py-2">
+                    No additional approvals required for this requisition.
+                  </p>
+                )
+              ) : (
+                <p className="rounded-lg border border-brand-primary/30 bg-brand-primary/10 px-3 py-2 text-brand-primary">
+                  Awaiting Level {currentApprovalLevel} approval
+                  {activeMatrixLevel ? ` (${activeMatrixLevel.approver_role})` : ''}.
+                </p>
+              )}
+            </div>
+
+            <div className="mt-6 flex flex-col gap-3">
+              <button
+                type="button"
+                onClick={() => setShowApprovalForm(true)}
+                disabled={isDecisionDisabled}
+                className={`w-full rounded-lg px-4 py-2 text-sm font-semibold text-white transition focus:outline-none focus:ring-2 focus:ring-status-success/40 ${
+                  isDecisionDisabled
+                    ? 'cursor-not-allowed bg-status-success/40'
+                    : 'bg-status-success hover:bg-status-success/90'
+                }`}
+              >
+                Approve &amp; Advance
               </button>
-              <button className="w-full px-4 py-2 text-sm font-medium text-status-success bg-green-50 rounded-md hover:bg-status-success/10">
-                Generate PO
+              <button
+                type="button"
+                onClick={() => setShowRejectionForm(true)}
+                disabled={isDecisionDisabled}
+                className={`w-full rounded-lg px-4 py-2 text-sm font-semibold text-white transition focus:outline-none focus:ring-2 focus:ring-status-danger/40 ${
+                  isDecisionDisabled
+                    ? 'cursor-not-allowed bg-status-danger/40'
+                    : 'bg-status-danger hover:bg-status-danger/90'
+                }`}
+              >
+                Reject &amp; Block
               </button>
-              <button className="w-full px-4 py-2 text-sm font-medium text-brand-text/70 bg-brand-surface rounded-md hover:bg-brand-surface">
-                Print
+              <button
+                type="button"
+                onClick={() => setShowCommentForm(true)}
+                disabled={!pr || pr.status === 'rejected'}
+                className={`w-full rounded-lg px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-brand-primary/30 ${
+                  !pr || pr.status === 'rejected'
+                    ? 'cursor-not-allowed border border-brand-text/20 text-brand-text/40'
+                    : 'border border-brand-primary/40 text-brand-primary hover:bg-brand-primary/10'
+                }`}
+              >
+                Add Comment
               </button>
             </div>
-          </div>
+          </section>
+
+          <section className="rounded-2xl border border-brand-text/10 bg-brand-surface p-6 shadow-sm">
+            <h3 className="text-lg font-semibold text-brand-text">Supplier Snapshot</h3>
+            <div className="mt-4 space-y-3 text-sm text-brand-text/70">
+              <div>
+                <p className="font-semibold uppercase tracking-wide text-brand-text/50">Name</p>
+                <p className="mt-1 text-brand-text">{pr.supplier.name}</p>
+              </div>
+              <div>
+                <p className="font-semibold uppercase tracking-wide text-brand-text/50">Email</p>
+                <p className="mt-1 text-brand-text">{pr.supplier.email}</p>
+              </div>
+              <div>
+                <p className="font-semibold uppercase tracking-wide text-brand-text/50">Category</p>
+                <p className="mt-1 text-brand-text">{pr.supplier.category}</p>
+              </div>
+              <div>
+                <p className="font-semibold uppercase tracking-wide text-brand-text/50">Rating</p>
+                <p className="mt-1 text-brand-text">{pr.supplier.rating}/5</p>
+              </div>
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-brand-text/10 bg-brand-surface p-6 shadow-sm">
+            <h3 className="text-lg font-semibold text-brand-text">Quick Actions</h3>
+            <div className="mt-4 space-y-2">
+              <button className="w-full rounded-lg border border-brand-primary/30 bg-brand-primary/10 px-4 py-2 text-sm font-semibold text-brand-primary transition hover:bg-brand-primary/20">
+                Download PR Summary
+              </button>
+              <button className="w-full rounded-lg border border-status-success/30 bg-status-success/10 px-4 py-2 text-sm font-semibold text-status-success transition hover:bg-status-success/20">
+                Generate Draft PO
+              </button>
+              <button className="w-full rounded-lg border border-brand-text/20 bg-brand-surface px-4 py-2 text-sm font-semibold text-brand-text/70 transition hover:bg-brand-primary/10">
+                Print Preview
+              </button>
+            </div>
+          </section>
         </div>
       </div>
 
-      {/* Approval Form Modal */}
+      {/* Approval Modal */}
       {showApprovalForm && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-brand-surface p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold text-brand-text mb-4">Approve Purchase Requisition</h3>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              const formData = new FormData(e.currentTarget);
-              handleApprove('approver-001', formData.get('comments') as string);
-            }}>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-brand-text/80 mb-2">Comments (Optional)</label>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 px-4">
+          <div className="w-full max-w-md rounded-2xl border border-brand-primary/30 bg-brand-surface p-6 shadow-xl">
+            <h3 className="text-lg font-semibold text-brand-text">Approve Purchase Requisition</h3>
+            <p className="mt-1 text-sm text-brand-text/70">
+              Confirm approval for this level. Workflow will advance to the next approver if required.
+            </p>
+            <form
+              className="mt-4 space-y-4"
+              onSubmit={(event: FormEvent<HTMLFormElement>) => {
+                event.preventDefault();
+                const formData = new FormData(event.currentTarget);
+                handleApprove('approver-001', formData.get('comments') as string);
+              }}
+            >
+              <label className="block text-sm font-medium text-brand-text">
+                Comments (optional)
                 <textarea
                   name="comments"
                   rows={3}
-                  className="w-full px-3 py-2 border border-brand-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
-                  placeholder="Add any comments about this approval..."
+                  className="mt-2 w-full rounded-lg border border-brand-text/20 px-3 py-2 text-sm focus:border-brand-primary/60 focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
+                  placeholder="Add contextual notes for audit trail"
                 />
-              </div>
-              <div className="flex justify-end space-x-3">
+              </label>
+              <div className="flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setShowApprovalForm(false)}
-                  className="px-4 py-2 text-sm font-medium text-brand-text/80 bg-brand-surface rounded-md hover:bg-brand-surface"
+                  className="rounded-lg border border-brand-text/20 px-4 py-2 text-sm font-semibold text-brand-text/70 hover:bg-brand-primary/10"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-sm font-medium text-white bg-status-success rounded-md hover:bg-status-success/90"
+                  className="rounded-lg bg-status-success px-4 py-2 text-sm font-semibold text-white hover:bg-status-success/90"
                 >
                   Approve
                 </button>
@@ -344,53 +528,109 @@ export default function PRDetailView({ prId, userRole }: PRDetailViewProps) {
         </div>
       )}
 
-      {/* Rejection Form Modal */}
+      {/* Rejection Modal */}
       {showRejectionForm && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-brand-surface p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold text-brand-text mb-4">Reject Purchase Requisition</h3>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              const formData = new FormData(e.currentTarget);
-              handleReject('approver-001', formData.get('reason') as string, formData.get('comments') as string);
-            }}>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-brand-text/80 mb-2">Reason for Rejection *</label>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 px-4">
+          <div className="w-full max-w-md rounded-2xl border border-status-danger/30 bg-brand-surface p-6 shadow-xl">
+            <h3 className="text-lg font-semibold text-brand-text">Reject Purchase Requisition</h3>
+            <p className="mt-1 text-sm text-brand-text/70">
+              Provide a reason for rejection. The requisition will return to procurement for remediation.
+            </p>
+            <form
+              className="mt-4 space-y-4"
+              onSubmit={(event: FormEvent<HTMLFormElement>) => {
+                event.preventDefault();
+                const formData = new FormData(event.currentTarget);
+                handleReject(
+                  'approver-001',
+                  formData.get('reason') as string,
+                  formData.get('comments') as string
+                );
+              }}
+            >
+              <label className="block text-sm font-medium text-brand-text">
+                Rejection reason
                 <select
                   name="reason"
                   required
-                  className="w-full px-3 py-2 border border-brand-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                  className="mt-2 w-full rounded-lg border border-brand-text/20 px-3 py-2 text-sm focus:border-status-danger/60 focus:outline-none focus:ring-2 focus:ring-status-danger/30"
                 >
                   <option value="">Select a reason</option>
-                  <option value="budget_exceeded">Budget Exceeded</option>
-                  <option value="supplier_not_qualified">Supplier Not Qualified</option>
-                  <option value="specifications_incorrect">Specifications Incorrect</option>
-                  <option value="duplicate_request">Duplicate Request</option>
+                  <option value="budget_exceeded">Budget exceeded</option>
+                  <option value="supplier_not_qualified">Supplier not qualified</option>
+                  <option value="specifications_incorrect">Specifications incorrect</option>
+                  <option value="duplicate_request">Duplicate request</option>
                   <option value="other">Other</option>
                 </select>
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-brand-text/80 mb-2">Additional Comments</label>
+              </label>
+              <label className="block text-sm font-medium text-brand-text">
+                Comments (optional)
                 <textarea
                   name="comments"
                   rows={3}
-                  className="w-full px-3 py-2 border border-brand-text/20 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
-                  placeholder="Provide additional details about the rejection..."
+                  className="mt-2 w-full rounded-lg border border-brand-text/20 px-3 py-2 text-sm focus:border-status-danger/60 focus:outline-none focus:ring-2 focus:ring-status-danger/30"
+                  placeholder="Share context for the requester"
                 />
-              </div>
-              <div className="flex justify-end space-x-3">
+              </label>
+              <div className="flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setShowRejectionForm(false)}
-                  className="px-4 py-2 text-sm font-medium text-brand-text/80 bg-brand-surface rounded-md hover:bg-brand-surface"
+                  className="rounded-lg border border-brand-text/20 px-4 py-2 text-sm font-semibold text-brand-text/70 hover:bg-status-danger/10"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-sm font-medium text-white bg-status-danger rounded-md hover:bg-status-danger/90"
+                  className="rounded-lg bg-status-danger px-4 py-2 text-sm font-semibold text-white hover:bg-status-danger/90"
                 >
                   Reject
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Comment Modal */}
+      {showCommentForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 px-4">
+          <div className="w-full max-w-md rounded-2xl border border-brand-primary/20 bg-brand-surface p-6 shadow-xl">
+            <h3 className="text-lg font-semibold text-brand-text">Add Approver Comment</h3>
+            <p className="mt-1 text-sm text-brand-text/70">
+              Comments are recorded in the audit trail and surfaced to downstream stakeholders.
+            </p>
+            <form
+              className="mt-4 space-y-4"
+              onSubmit={(event: FormEvent<HTMLFormElement>) => {
+                event.preventDefault();
+                const formData = new FormData(event.currentTarget);
+                handleComment(formData.get('comments') as string);
+              }}
+            >
+              <label className="block text-sm font-medium text-brand-text">
+                Comment
+                <textarea
+                  name="comments"
+                  required
+                  rows={3}
+                  className="mt-2 w-full rounded-lg border border-brand-text/20 px-3 py-2 text-sm focus:border-brand-primary/60 focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
+                  placeholder="Document guidance, conditions, or concerns"
+                />
+              </label>
+              <div className="flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowCommentForm(false)}
+                  className="rounded-lg border border-brand-text/20 px-4 py-2 text-sm font-semibold text-brand-text/70 hover:bg-brand-primary/10"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:bg-brand-primary/90"
+                >
+                  Save Comment
                 </button>
               </div>
             </form>

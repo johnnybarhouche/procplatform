@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { POST } from './route';
 import * as authMatrix from '@/lib/authorization-matrix';
+import { resetPRMockData } from '@/lib/mock-data/prs';
 
 // Mock the notification service
 jest.mock('@/lib/notification-service', () => ({
@@ -23,7 +24,13 @@ describe('/api/prs/[id]/approve', () => {
   };
 
   const createMockParams = (id: string) => ({
-    params: Promise.resolve({ id }),
+    params: { id },
+  });
+
+  beforeEach(() => {
+    resetPRMockData();
+    (authMatrix.getNextApprovalLevel as jest.Mock).mockReturnValue(1);
+    (authMatrix.isPRFullyApproved as jest.Mock).mockReturnValue(false);
   });
 
   describe('POST /api/prs/[id]/approve', () => {

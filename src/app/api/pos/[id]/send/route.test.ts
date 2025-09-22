@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { POST } from './route';
+import { resetPOMockData } from '@/lib/mock-data/pos';
 
 // Mock the notification service
 jest.mock('@/lib/notification-service', () => ({
@@ -9,6 +10,10 @@ jest.mock('@/lib/notification-service', () => ({
 }));
 
 describe('/api/pos/[id]/send', () => {
+  beforeEach(() => {
+    resetPOMockData();
+  });
+
   describe('POST', () => {
     it('should send PO to supplier successfully', async () => {
       const requestBody = {
@@ -103,4 +108,3 @@ describe('/api/pos/[id]/send', () => {
     });
   });
 });
-

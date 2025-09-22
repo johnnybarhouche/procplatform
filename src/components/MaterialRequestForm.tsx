@@ -4,7 +4,7 @@ import { ChangeEvent, FormEvent, useMemo, useState } from "react";
 import { Button, Card, Input, Select, Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow, Badge } from "@/components/ui";
 import { PageLayout } from "@/components/layout/PageLayout";
 import ItemPicker from "./ItemPicker";
-import { Item } from "@/types/procurement";
+import { Item, MaterialRequest } from "@/types/procurement";
 
 interface MRLineItem {
   id: string;
@@ -30,7 +30,7 @@ interface LineAttachment {
 interface MaterialRequestFormProps {
   projects: Array<{ id: string; name: string }>;
   selectedProjectId: string;
-  onSubmit?: (data: any) => void;
+  onSubmit?: (data: { projectId: string; lineItems: MRLineItem[] }) => void;
 }
 
 const UNIT_OF_MEASURE_OPTIONS = ["EA", "BOX", "KG", "L", "SET", "PACK"];
@@ -192,7 +192,7 @@ export default function MaterialRequestForm({ projects: _projects, selectedProje
         brandAsset: item.brandAsset,
         serialChassisEngineNo: item.serialChassisEngineNo,
         modelYear: item.modelYear,
-        attachments: item.attachments.map((attachment) => attachment.file.name),
+        attachments: item.attachments,
       }));
 
       const payload = {

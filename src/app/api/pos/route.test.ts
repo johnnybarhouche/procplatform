@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { GET, POST } from './route';
+import { resetPOMockData } from '@/lib/mock-data/pos';
 
 // Mock the notification service
 jest.mock('@/lib/notification-service', () => ({
@@ -9,6 +10,10 @@ jest.mock('@/lib/notification-service', () => ({
 }));
 
 describe('/api/pos', () => {
+  beforeEach(() => {
+    resetPOMockData();
+  });
+
   describe('GET', () => {
     it('should return POs with pagination', async () => {
       const request = new NextRequest('http://localhost:3000/api/pos');
@@ -133,4 +138,3 @@ describe('/api/pos', () => {
     });
   });
 });
-

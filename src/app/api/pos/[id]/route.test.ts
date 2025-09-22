@@ -1,7 +1,12 @@
 import { NextRequest } from 'next/server';
 import { GET, PUT } from './route';
+import { resetPOMockData } from '@/lib/mock-data/pos';
 
 describe('/api/pos/[id]', () => {
+  beforeEach(() => {
+    resetPOMockData();
+  });
+
   describe('GET', () => {
     it('should return PO details for valid ID', async () => {
       const request = new NextRequest('http://localhost:3000/api/pos/po-001');
@@ -113,4 +118,3 @@ describe('/api/pos/[id]', () => {
     });
   });
 });
-
