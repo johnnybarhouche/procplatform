@@ -1,19 +1,70 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { QuoteApproval, AuditLog, LineItemDecision } from '@/types/procurement';
+import {
+  buildLineItemDecision,
+  getQuoteApproval,
+  logQuoteApprovalAudit,
+  seedQuoteApprovals,
+  updateQuoteApproval,
+} from '@/lib/mock-quote-approvals';
+import { LineItemDecision, QuoteApproval } from '@/types/procurement';
 
-// Mock data - in production this would come from database
-const quoteApprovals: QuoteApproval[] = [];
-const auditLogs: AuditLog[] = [];
+seedQuoteApprovals();
 
-// GET /api/quote-approvals/[id]
+function computeSavingsForLine(approval: QuoteApproval, decision: LineItemDecision) {
+  const lineId = decision.mr_line_item_id;
+  const quotesForLine = approval.quote_pack.quotes
+    .map((quote) => {
+      const lineItem = quote.line_items.find((item) => item.mr_line_item_id === lineId);
+      return lineItem ? { quote, lineItem } : undefined;
+    })
+    .filter(Boolean) as { quote: typeof approval.quote_pack.quotes[number]; lineItem: typeof approval.quote_pack.quotes[number]['line_items'][number] }[];
+
+  if (!quotesForLine.length) {
+    return 0;
+  }
+
+  const lowest = quotesForLine.reduce((min, current) =>
+    current.lineItem.total_price < min.lineItem.total_price ? current : min
+  );
+  const selected = quotesForLine.find((entry) => entry.quote.id === decision.selected_quote_id);
+  if (!selected) return 0;
+  return Number((lowest.lineItem.total_price - selected.lineItem.total_price).toFixed(2));
+}
+
+function buildComparisonSummary(approval: QuoteApproval, decisions: LineItemDecision[]) {
+  const rfq = approval.quote_pack.rfq;
+  return {
+    rfq_id: rfq.id,
+    rfq_number: rfq.rfq_number,
+    material_request: {
+      id: rfq.material_request.id,
+      mrn: rfq.material_request.mrn,
+      project_name: rfq.material_request.project_name,
+    },
+    selections: decisions.map((decision) => {
+      const quote = decision.selected_quote;
+      const lineItem = quote?.line_items.find((item) => item.mr_line_item_id === decision.mr_line_item_id);
+      return {
+        line_item_id: decision.mr_line_item_id,
+        line_description: decision.mr_line_item.description,
+        supplier_id: quote?.supplier_id ?? '',
+        supplier_name: quote?.supplier.name ?? 'Unknown Supplier',
+        unit_price: lineItem?.unit_price ?? 0,
+        total_price: lineItem?.total_price ?? 0,
+        savings: computeSavingsForLine(approval, decision),
+      };
+    }),
+    generated_at: new Date().toISOString(),
+  };
+}
+
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params;
-    const approval = quoteApprovals.find(a => a.id === id);
-    
+    const approval = getQuoteApproval(id);
     if (!approval) {
       return NextResponse.json({ error: 'Quote approval not found' }, { status: 404 });
     }
@@ -25,100 +76,115 @@ export async function GET(
   }
 }
 
-// POST /api/quote-approvals/[id] - Submit approval decision
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const body = await request.json();
-    const { decision, line_item_decisions, comments } = body;
+    const { decision, line_item_decisions, comments } = body as {
+      decision: 'approved' | 'rejected';
+      line_item_decisions?: Array<{ mr_line_item_id: string; selected_quote_id: string; comments?: string; decision?: 'approved' | 'rejected' }>;
+      comments?: string;
+    };
+
+    if (!decision) {
+      return NextResponse.json({ error: 'Decision is required.' }, { status: 400 });
+    }
 
     const { id } = await params;
-    const approvalIndex = quoteApprovals.findIndex(a => a.id === id);
-    
-    if (approvalIndex === -1) {
+    const approval = getQuoteApproval(id);
+    if (!approval) {
       return NextResponse.json({ error: 'Quote approval not found' }, { status: 404 });
     }
 
-    // Update approval
-    const updatedApproval: QuoteApproval = {
-      ...quoteApprovals[approvalIndex],
-      status: decision,
-      updated_at: new Date().toISOString(),
-      approved_at: decision === 'approved' ? new Date().toISOString() : undefined,
-      approved_by: decision === 'approved' ? 'end-user' : undefined,
-      approved_by_name: decision === 'approved' ? 'End User' : undefined,
-      comments,
-      line_item_decisions: line_item_decisions || []
-    };
+    const rfq = approval.quote_pack.rfq;
 
-    quoteApprovals[approvalIndex] = updatedApproval;
+    let decisions: LineItemDecision[] = [];
+    if (decision === 'approved') {
+      const payload = Array.isArray(line_item_decisions) ? line_item_decisions : [];
+      decisions = payload
+        .map((entry) =>
+          buildLineItemDecision(
+            approval,
+            entry.mr_line_item_id,
+            entry.selected_quote_id,
+            entry.decision ?? 'approved',
+            entry.comments,
+          )
+        )
+        .filter(Boolean) as LineItemDecision[];
 
-    // Log the decision
-    const auditLog: AuditLog = {
+      const requiredLines = rfq.material_request.line_items.filter((line) => {
+        const availableQuotes = approval.quote_pack.quotes.some((quote) =>
+          quote.line_items.some((item) => item.mr_line_item_id === line.id)
+        );
+        return availableQuotes;
+      });
+
+      if (decisions.length !== requiredLines.length) {
+        return NextResponse.json({ error: 'All lines with supplier quotes must have a selected supplier before approval.' }, { status: 400 });
+      }
+    }
+
+    const updatedApproval = updateQuoteApproval(id, (existing) => {
+      const now = new Date().toISOString();
+      const next: QuoteApproval = {
+        ...existing,
+        status: decision,
+        updated_at: now,
+        approved_at: decision === 'approved' ? now : undefined,
+        approved_by: decision === 'approved' ? 'end-user' : existing.approved_by,
+        approved_by_name: decision === 'approved' ? 'End User' : existing.approved_by_name,
+        comments,
+        line_item_decisions: decision === 'approved' ? decisions : [],
+      };
+
+      next.quote_pack.status = decision === 'approved' ? 'approved' : 'rejected';
+      next.quote_pack.rfq.status = decision === 'approved' ? 'approved' : 'comparison_ready';
+      next.quote_pack.rfq.updated_at = now;
+
+      if (decision === 'approved' && decisions.length) {
+        next.quote_pack.rfq.comparison_summary = buildComparisonSummary(next, decisions);
+        next.quote_pack.comparison_data.recommended_suppliers = decisions.map((entry) => entry.selected_quote?.supplier_id ?? '');
+        next.quote_pack.comparison_data.total_savings = decisions.reduce((sum, entry) => sum + computeSavingsForLine(next, entry), 0);
+      }
+
+      return next;
+    });
+
+    if (!updatedApproval) {
+      return NextResponse.json({ error: 'Failed to update quote approval' }, { status: 500 });
+    }
+
+    logQuoteApprovalAudit({
       id: `audit-${Date.now()}`,
       entity_type: 'quote_pack',
-      entity_id: quoteApprovals[approvalIndex].quote_pack_id,
+      entity_id: updatedApproval.quote_pack_id,
       action: `approval_${decision}`,
       actor_id: 'end-user',
       actor_name: 'End User',
       timestamp: new Date().toISOString(),
-      before_data: { status: 'pending' },
-      after_data: { 
-        status: decision, 
-        line_item_decisions: line_item_decisions?.length || 0,
-        comments 
-      }
-    };
-    auditLogs.push(auditLog);
+      after_data: {
+        status: decision,
+        line_item_decisions: updatedApproval.line_item_decisions.length,
+        comments: comments ? 'provided' : 'none',
+      },
+    });
 
-    // If approved, trigger PR creation workflow
     if (decision === 'approved') {
-      // This would trigger the PR creation workflow
-      console.log('Triggering PR creation workflow for approved items');
-      
-      // Log PR creation trigger
-      const prTriggerLog: AuditLog = {
+      logQuoteApprovalAudit({
         id: `audit-${Date.now() + 1}`,
         entity_type: 'quote_pack',
-        entity_id: quoteApprovals[approvalIndex].quote_pack_id,
+        entity_id: updatedApproval.quote_pack_id,
         action: 'pr_creation_triggered',
         actor_id: 'system',
         actor_name: 'System',
         timestamp: new Date().toISOString(),
-        after_data: { 
-          approved_items: line_item_decisions?.filter((d: LineItemDecision) => d.decision === 'approved').length || 0,
-          total_value: line_item_decisions?.reduce((sum: number, d: LineItemDecision) => {
-            if (d.decision === 'approved' && d.selected_quote) {
-              return sum + (d.selected_quote.total_amount || 0);
-            }
-            return sum;
-          }, 0) || 0
-        }
-      };
-      auditLogs.push(prTriggerLog);
-    }
-
-    // If rejected, return items to procurement
-    if (decision === 'rejected') {
-      console.log('Returning rejected items to procurement for re-quoting');
-      
-      // Log rejection workflow
-      const rejectionLog: AuditLog = {
-        id: `audit-${Date.now() + 1}`,
-        entity_type: 'quote_pack',
-        entity_id: quoteApprovals[approvalIndex].quote_pack_id,
-        action: 'returned_to_procurement',
-        actor_id: 'system',
-        actor_name: 'System',
-        timestamp: new Date().toISOString(),
-        after_data: { 
-          rejected_items: line_item_decisions?.filter((d: LineItemDecision) => d.decision === 'rejected').length || 0,
-          reason: 'End user rejection'
-        }
-      };
-      auditLogs.push(rejectionLog);
+        after_data: {
+          approved_items: updatedApproval.line_item_decisions.length,
+        },
+      });
     }
 
     return NextResponse.json(updatedApproval);
@@ -128,47 +194,56 @@ export async function POST(
   }
 }
 
-// PUT /api/quote-approvals/[id] - Update approval
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const body = await request.json();
-    const { line_item_decisions, comments } = body;
+    const { line_item_decisions, comments } = body as {
+      line_item_decisions?: Array<{ mr_line_item_id: string; selected_quote_id: string; comments?: string; decision?: 'approved' | 'rejected' }>;
+      comments?: string;
+    };
 
     const { id } = await params;
-    const approvalIndex = quoteApprovals.findIndex(a => a.id === id);
-    
-    if (approvalIndex === -1) {
+    const approval = getQuoteApproval(id);
+    if (!approval) {
       return NextResponse.json({ error: 'Quote approval not found' }, { status: 404 });
     }
 
-    // Update approval
-    const updatedApproval: QuoteApproval = {
-      ...quoteApprovals[approvalIndex],
+    let decisions = approval.line_item_decisions;
+    if (Array.isArray(line_item_decisions)) {
+      decisions = line_item_decisions
+        .map((entry) =>
+          buildLineItemDecision(approval, entry.mr_line_item_id, entry.selected_quote_id, entry.decision ?? 'approved', entry.comments)
+        )
+        .filter(Boolean) as LineItemDecision[];
+    }
+
+    const updatedApproval = updateQuoteApproval(id, (existing) => ({
+      ...existing,
       updated_at: new Date().toISOString(),
-      line_item_decisions: line_item_decisions || quoteApprovals[approvalIndex].line_item_decisions,
-      comments: comments || quoteApprovals[approvalIndex].comments
-    };
+      line_item_decisions: decisions,
+      comments: comments ?? existing.comments,
+    }));
 
-    quoteApprovals[approvalIndex] = updatedApproval;
+    if (!updatedApproval) {
+      return NextResponse.json({ error: 'Failed to update quote approval' }, { status: 500 });
+    }
 
-    // Log the update
-    const auditLog: AuditLog = {
+    logQuoteApprovalAudit({
       id: `audit-${Date.now()}`,
       entity_type: 'quote_pack',
-      entity_id: quoteApprovals[approvalIndex].quote_pack_id,
+      entity_id: updatedApproval.quote_pack_id,
       action: 'approval_updated',
       actor_id: 'end-user',
       actor_name: 'End User',
       timestamp: new Date().toISOString(),
-      after_data: { 
-        line_item_decisions: line_item_decisions?.length || 0,
-        comments: comments ? 'Updated' : 'No change'
-      }
-    };
-    auditLogs.push(auditLog);
+      after_data: {
+        line_item_decisions: updatedApproval.line_item_decisions.length,
+        comments: comments ? 'updated' : 'unchanged',
+      },
+    });
 
     return NextResponse.json(updatedApproval);
   } catch (error) {

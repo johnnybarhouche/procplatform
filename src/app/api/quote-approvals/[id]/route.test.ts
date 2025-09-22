@@ -11,7 +11,7 @@ jest.mock('next/server', () => ({
 describe('/api/quote-approvals/[id]', () => {
   describe('GET', () => {
     it('should return quote approval by id', async () => {
-      const response = await GET({} as NextRequest, { params: { id: 'qa-001' } });
+    const response = await GET({} as NextRequest, { params: { id: 'qa-rfq-1001' } });
       
       expect(response.data).toBeDefined();
     });
@@ -25,24 +25,34 @@ describe('/api/quote-approvals/[id]', () => {
 
   describe('POST', () => {
     it('should submit approval decision', async () => {
-      const requestBody = {
-        decision: 'approved',
-        line_item_decisions: [
-          {
-            mr_line_item_id: 'mrli-001',
-            selected_quote_id: 'q-001',
-            decision: 'approved',
-            comments: 'Good price'
-          }
-        ],
-        comments: 'Approved for procurement'
-      };
+    const requestBody = {
+      decision: 'approved',
+      line_item_decisions: [
+        {
+          mr_line_item_id: 'mr-line-1',
+          selected_quote_id: 'quote-sup-1',
+          decision: 'approved',
+          comments: 'Good price'
+        },
+        {
+          mr_line_item_id: 'mr-line-2',
+          selected_quote_id: 'quote-sup-1',
+          decision: 'approved',
+        },
+        {
+          mr_line_item_id: 'mr-line-3',
+          selected_quote_id: 'quote-sup-1',
+          decision: 'approved',
+        },
+      ],
+      comments: 'Approved for procurement'
+    };
 
       const request = {
         json: async () => requestBody
       } as NextRequest;
 
-      const response = await POST(request, { params: { id: 'qa-001' } });
+      const response = await POST(request, { params: { id: 'qa-rfq-1001' } });
       
       expect(response.data).toBeDefined();
       expect(response.data.status).toBe('approved');
@@ -53,7 +63,7 @@ describe('/api/quote-approvals/[id]', () => {
         decision: 'rejected',
         line_item_decisions: [
           {
-            mr_line_item_id: 'mrli-001',
+            mr_line_item_id: 'mr-line-1',
             selected_quote_id: '',
             decision: 'rejected',
             comments: 'Price too high'
@@ -94,8 +104,8 @@ describe('/api/quote-approvals/[id]', () => {
       const requestBody = {
         line_item_decisions: [
           {
-            mr_line_item_id: 'mrli-001',
-            selected_quote_id: 'q-001',
+            mr_line_item_id: 'mr-line-1',
+            selected_quote_id: 'quote-sup-1',
             decision: 'approved',
             comments: 'Updated decision'
           }
@@ -107,7 +117,7 @@ describe('/api/quote-approvals/[id]', () => {
         json: async () => requestBody
       } as NextRequest;
 
-      const response = await PUT(request, { params: { id: 'qa-001' } });
+      const response = await PUT(request, { params: { id: 'qa-rfq-1001' } });
       
       expect(response.data).toBeDefined();
     });
@@ -128,4 +138,3 @@ describe('/api/quote-approvals/[id]', () => {
     });
   });
 });
-

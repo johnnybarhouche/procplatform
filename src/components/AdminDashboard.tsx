@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { AdminDashboardData, MRFieldConfig, AuthorizationMatrix, CurrencyConfig } from '@/types/admin';
 import MRFieldConfiguration from './MRFieldConfiguration';
 import AuthorizationMatrixManager from './AuthorizationMatrixManager';
@@ -25,9 +25,23 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole }) => {
   const [currencyConfig, setCurrencyConfig] = useState<CurrencyConfig | null>(null);
   const [currencyLoading, setCurrencyLoading] = useState(false);
 
-  const fetchDashboardData = useCallback(async () => {
-    try {
+  const hasFetchedDashboard = useRef(false);
+  const hasFetchedMRFields = useRef(false);
+  const fetchedAuthorizationProjects = useRef<Record<string, boolean>>({});
+  const hasFetchedCurrency = useRef(false);
+
+  const fetchDashboardData = useCallback(async (options?: { force?: boolean }) => {
+    const force = options?.force ?? false;
+    if (hasFetchedDashboard.current && !force) {
+      return;
+    }
+
+    const shouldShowSpinner = !hasFetchedDashboard.current;
+    if (shouldShowSpinner) {
       setLoading(true);
+    }
+
+    try {
       const response = await fetch('/api/admin/dashboard', {
         headers: {
           'x-user-role': userRole
@@ -40,10 +54,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole }) => {
       
       const data = await response.json();
       setDashboardData(data);
+      hasFetchedDashboard.current = true;
     } catch (error) {
       console.error('Error fetching admin dashboard data:', error);
     } finally {
-      setLoading(false);
+      if (shouldShowSpinner) {
+        setLoading(false);
+      }
     }
   }, [userRole]);
 
@@ -51,9 +68,18 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole }) => {
     fetchDashboardData();
   }, [fetchDashboardData]);
 
-  const fetchMRFields = useCallback(async () => {
-    try {
+  const fetchMRFields = useCallback(async (options?: { force?: boolean }) => {
+    const force = options?.force ?? false;
+    if (hasFetchedMRFields.current && !force) {
+      return;
+    }
+
+    const shouldShowSpinner = !hasFetchedMRFields.current;
+    if (shouldShowSpinner) {
       setMrFieldsLoading(true);
+    }
+
+    try {
       const response = await fetch('/api/admin/mr-fields', {
         headers: {
           'x-user-role': userRole
@@ -66,10 +92,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole }) => {
       
       const data = await response.json();
       setMrFields(data);
+      hasFetchedMRFields.current = true;
     } catch (error) {
       console.error('Error fetching MR field configuration:', error);
     } finally {
-      setMrFieldsLoading(false);
+      if (shouldShowSpinner) {
+        setMrFieldsLoading(false);
+      }
     }
   }, [userRole]);
 
@@ -79,9 +108,18 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole }) => {
     }
   }, [activeTab, fetchMRFields]);
 
-  const fetchAuthorizationMatrix = useCallback(async (projectId: string) => {
-    try {
+  const fetchAuthorizationMatrix = useCallback(async (projectId: string, options?: { force?: boolean }) => {
+    const force = options?.force ?? false;
+    if (fetchedAuthorizationProjects.current[projectId] && !force) {
+      return;
+    }
+
+    const shouldShowSpinner = !fetchedAuthorizationProjects.current[projectId];
+    if (shouldShowSpinner) {
       setAuthMatrixLoading(true);
+    }
+
+    try {
       const response = await fetch(`/api/admin/authorization-matrix?project_id=${projectId}`, {
         headers: {
           'x-user-role': userRole
@@ -94,10 +132,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole }) => {
       
       const data = await response.json();
       setAuthorizationMatrix(data);
+      fetchedAuthorizationProjects.current[projectId] = true;
     } catch (error) {
       console.error('Error fetching authorization matrix:', error);
     } finally {
-      setAuthMatrixLoading(false);
+      if (shouldShowSpinner) {
+        setAuthMatrixLoading(false);
+      }
     }
   }, [userRole]);
 
@@ -107,9 +148,18 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole }) => {
     }
   }, [activeTab, selectedProject, fetchAuthorizationMatrix]);
 
-  const fetchCurrencyConfig = useCallback(async () => {
-    try {
+  const fetchCurrencyConfig = useCallback(async (options?: { force?: boolean }) => {
+    const force = options?.force ?? false;
+    if (hasFetchedCurrency.current && !force) {
+      return;
+    }
+
+    const shouldShowSpinner = !hasFetchedCurrency.current;
+    if (shouldShowSpinner) {
       setCurrencyLoading(true);
+    }
+
+    try {
       const response = await fetch('/api/admin/currency', {
         headers: {
           'x-user-role': userRole
@@ -122,10 +172,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole }) => {
       
       const data = await response.json();
       setCurrencyConfig(data);
+      hasFetchedCurrency.current = true;
     } catch (error) {
       console.error('Error fetching currency configuration:', error);
     } finally {
-      setCurrencyLoading(false);
+      if (shouldShowSpinner) {
+        setCurrencyLoading(false);
+      }
     }
   }, [userRole]);
 
@@ -322,7 +375,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole }) => {
                 fields={mrFields} 
                 onUpdate={(updatedFields) => {
                   setMrFields(updatedFields);
-                  fetchDashboardData(); // Refresh dashboard data
+                  fetchMRFields({ force: true });
+                  fetchDashboardData({ force: true }); // Refresh dashboard data
                 }} 
               />
             )}
@@ -357,7 +411,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole }) => {
                 matrix={authorizationMatrix} 
                 onUpdate={(updatedMatrix) => {
                   setAuthorizationMatrix(updatedMatrix);
-                  fetchDashboardData(); // Refresh dashboard data
+                  fetchAuthorizationMatrix(selectedProject, { force: true });
+                  fetchDashboardData({ force: true }); // Refresh dashboard data
                 }} 
               />
             )}
@@ -380,7 +435,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userRole }) => {
                 currency={currencyConfig} 
                 onUpdate={(updatedConfig) => {
                   setCurrencyConfig(updatedConfig);
-                  fetchDashboardData(); // Refresh dashboard data
+                  fetchCurrencyConfig({ force: true });
+                  fetchDashboardData({ force: true }); // Refresh dashboard data
                 }} 
               />
             ) : (

@@ -17,7 +17,7 @@ interface MRLineItem {
 interface CreateMRRequest {
   projectId: string;
   lineItems: MRLineItem[];
-  attachments: string[]; // File URLs after upload
+  attachments?: string[]; // File URLs after upload
 }
 
 export async function POST(request: NextRequest) {
@@ -43,6 +43,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Create Material Request using database
+    const attachments = body.attachments ?? [];
+
     const newMR = await db.createMaterialRequest({
       projectId: body.projectId,
       createdBy: 'user-123', // In real app, get from auth context
@@ -57,7 +59,7 @@ export async function POST(request: NextRequest) {
         serialChassisEngineNo: item.serialChassisEngineNo,
         modelYear: item.modelYear
       })),
-      attachments: body.attachments.map(url => ({
+      attachments: attachments.map(url => ({
         fileName: url.split('/').pop() || 'unknown',
         fileUrl: url,
         fileType: 'application/octet-stream'

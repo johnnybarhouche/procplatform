@@ -265,10 +265,10 @@ export interface LineItemDecision {
   mr_line_item_id: string;
   mr_line_item: MRLineItem;
   selected_quote_id: string;
-  selected_quote: Quote;
+  selected_quote?: Quote;
   decision: 'approved' | 'rejected';
   comments?: string;
-  created_at: string;
+  created_at?: string;
 }
 
 export interface QuoteApprovalDashboardProps {

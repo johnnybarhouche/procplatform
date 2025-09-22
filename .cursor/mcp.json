@@ -1,0 +1,16 @@
+{
+    "mcpServers": {
+    "supabase": {
+    "command": "npx",
+    "args": [
+    "-y",
+    "@supabase/mcp-server-supabase",
+    "--read-only",
+    "--project-ref=Cursor MCP Server"
+    ],
+    "env": {
+    "SUPABASE_ACCESS_TOKEN": "sbp_7d69a2ea08cc421265ce6e05c8ae1fd1d029c21f"
+    }
+    }
+    }
+    }

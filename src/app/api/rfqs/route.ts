@@ -239,7 +239,7 @@ export const rfqStore: RFQ[] = (() => {
       id: 'rfq-1001',
       rfq_number: 'RFQ-1001',
       material_request_id: materialRequest.id,
-      material_request,
+      material_request: materialRequest,
       status: 'quotes_received',
       created_at: '2025-02-11T07:00:00Z',
       updated_at: '2025-02-13T07:00:00Z',
@@ -269,4 +269,118 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.json({ rfqs: results });
+}
+
+interface CreateRFQRequest {
+  material_request_id: string;
+  line_item_ids: string[];
+  due_date?: string;
+  terms?: string;
+  remarks?: string;
+  suppliers: Array<{
+    supplier_id: string;
+    name?: string;
+    email?: string;
+    category?: string;
+  }>;
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = (await request.json()) as CreateRFQRequest;
+
+    if (!body.material_request_id || !Array.isArray(body.line_item_ids) || body.line_item_ids.length === 0) {
+      return NextResponse.json({ error: 'Material request and at least one line item are required.' }, { status: 400 });
+    }
+
+    if (!Array.isArray(body.suppliers) || body.suppliers.length === 0) {
+      return NextResponse.json({ error: 'Select at least one supplier before dispatch.' }, { status: 400 });
+    }
+
+    const rfqId = `rfq-${Date.now()}`;
+    const createdAt = new Date().toISOString();
+    const dueDate = body.due_date ?? createdAt.slice(0, 10);
+
+    const selectedLineItems = materialRequest.line_items.filter((line) => body.line_item_ids.includes(line.id));
+    const effectiveLineItems = selectedLineItems.length > 0 ? selectedLineItems : materialRequest.line_items;
+
+    const supplierRecords: RFQSupplier[] = body.suppliers.map((entry, index) => {
+      const existingSupplier = supplierStore.find((sup) => sup.id === entry.supplier_id);
+      const supplierFallbackId = entry.supplier_id || `manual-${index}-${Date.now()}`;
+      const now = new Date().toISOString();
+      const supplierDetails = existingSupplier ?? {
+        id: supplierFallbackId,
+        supplier_code: supplierFallbackId.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10) || 'MANUAL',
+        name: entry.name ?? 'Manual Supplier',
+        email: entry.email ?? 'manual@example.com',
+        phone: '+000-000-0000',
+        address: 'Not provided',
+        category: entry.category ?? 'General Supplies',
+        rating: 0,
+        quote_count: 0,
+        avg_response_time: 0,
+        last_quote_date: now.slice(0, 10),
+        is_active: true,
+        status: 'pending',
+        has_been_used: false,
+        contacts: [],
+        performance_metrics: {
+          id: `perf-${supplierFallbackId}`,
+          supplier_id: supplierFallbackId,
+          total_quotes: 0,
+          successful_quotes: 0,
+          avg_response_time_hours: 0,
+          on_time_delivery_rate: 0,
+          quality_rating: 0,
+          communication_rating: 0,
+          last_updated: now,
+        },
+        compliance_docs: [],
+        created_at: now,
+        updated_at: now,
+        created_by: 'system',
+        created_by_name: 'System',
+      };
+
+      return {
+        id: `${rfqId}-supplier-${index}`,
+        rfq_id: rfqId,
+        supplier_id: supplierDetails.id,
+        supplier: supplierDetails,
+        status: 'responded',
+        sent_at: createdAt,
+        portal_link: `https://portal.example.com/rfq/${rfqId}?supplier=${supplierDetails.id}`,
+        email_tracking_id: `track-${rfqId}-${index}`,
+        invitation_type: existingSupplier ? 'suggested' : 'manual',
+      } satisfies RFQSupplier;
+    });
+
+    const rfq: RFQ = {
+      id: rfqId,
+      rfq_number: `RFQ-${Date.now()}`,
+      material_request_id: materialRequest.id,
+      material_request: {
+        ...materialRequest,
+        line_items: effectiveLineItems,
+      },
+      status: 'sent',
+      created_at: createdAt,
+      updated_at: createdAt,
+      sent_at: createdAt,
+      due_date: dueDate,
+      terms: body.terms,
+      remarks: body.remarks,
+      suppliers: supplierRecords,
+      quotes: [],
+      created_by: 'user-123',
+      created_by_name: 'Procurement Officer',
+    };
+
+    rfqStore.unshift(rfq);
+
+    return NextResponse.json(rfq, { status: 201 });
+  } catch (error) {
+    console.error('Failed to create RFQ:', error);
+    return NextResponse.json({ error: 'Failed to create RFQ' }, { status: 500 });
+  }
 }

@@ -283,7 +283,7 @@ export async function POST(request: NextRequest) {
     // Group line items by supplier
     const supplierGroups = new Map<string, LineItemDecision[]>();
     quoteApproval.line_item_decisions.forEach(decision => {
-      if (decision.decision === 'approved') {
+      if (decision.decision === 'approved' && decision.selected_quote) {
         const supplierId = decision.selected_quote.supplier_id;
         if (!supplierGroups.has(supplierId)) {
           supplierGroups.set(supplierId, []);
@@ -296,8 +296,9 @@ export async function POST(request: NextRequest) {
     
     // Create PR for each supplier
     for (const [supplierId, decisions] of supplierGroups) {
-      const supplier = decisions[0].selected_quote.supplier;
-      const totalValue = decisions.reduce((sum, decision) => sum + decision.selected_quote.total_amount, 0);
+      const firstQuote = decisions[0].selected_quote;
+      const supplier = firstQuote?.supplier ?? buildSampleSupplier();
+      const totalValue = decisions.reduce((sum, decision) => sum + (decision.selected_quote?.total_amount || 0), 0);
       
       const newPR: PurchaseRequisition = {
         id: `pr-${Date.now()}-${supplierId}`,
@@ -308,7 +309,7 @@ export async function POST(request: NextRequest) {
         supplier,
         status: 'draft',
         total_value: totalValue,
-        currency: decisions[0].selected_quote.currency,
+        currency: firstQuote?.currency || 'AED',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         created_by: 'system',
@@ -319,11 +320,11 @@ export async function POST(request: NextRequest) {
           mr_line_item_id: decision.mr_line_item_id,
           mr_line_item: decision.mr_line_item,
           quote_id: decision.selected_quote_id,
-          quote: decision.selected_quote,
+          quote: decision.selected_quote ?? firstQuote!,
           quantity: decision.mr_line_item.quantity,
-          unit_price: decision.selected_quote.line_items.find(li => li.mr_line_item_id === decision.mr_line_item_id)?.unit_price || 0,
-          total_price: decision.selected_quote.line_items.find(li => li.mr_line_item_id === decision.mr_line_item_id)?.total_price || 0,
-          lead_time_days: decision.selected_quote.line_items.find(li => li.mr_line_item_id === decision.mr_line_item_id)?.lead_time_days || 7,
+          unit_price: decision.selected_quote?.line_items.find(li => li.mr_line_item_id === decision.mr_line_item_id)?.unit_price || 0,
+          total_price: decision.selected_quote?.line_items.find(li => li.mr_line_item_id === decision.mr_line_item_id)?.total_price || 0,
+          lead_time_days: decision.selected_quote?.line_items.find(li => li.mr_line_item_id === decision.mr_line_item_id)?.lead_time_days || 7,
           remarks: decision.comments,
         })),
         approvals: [],
