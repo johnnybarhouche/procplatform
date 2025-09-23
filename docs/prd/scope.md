@@ -6,6 +6,7 @@ In Scope (MVP)
 	•	Admin-configurable MR fields.
 	•	Role-based access control (RBAC) & project authorization matrices.
 	•	Audit logs, notifications, and attachments.
+	•	Authentication with username/password, Remember Me, first-login OTP verification, request-access intake, and admin-led project initiation (logo upload, default currency, role assignments).
 	•	Analytics dashboards (basic KPIs).
 	•	Currency: AED (with admin-configurable USD conversion).
 	•	Integrations: SSO, e-signature.

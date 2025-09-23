@@ -9,7 +9,7 @@ const materialRequest: MaterialRequest = {
   project_name: 'Project Alpha',
   requester_id: 'requester-1',
   requester_name: 'John Doe',
-  status: 'submitted',
+  status: 'new_request',
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
   line_items: [
@@ -136,8 +136,8 @@ describe('RFQWizard', () => {
     fireEvent.click(screen.getByText('Next'));
 
     // Step 2: Supplier selection
-    const supplierCard = screen.getByText('ABC Construction Supplies');
-    fireEvent.click(supplierCard);
+    const supplierCheckbox = screen.getByLabelText('Invite ABC Construction Supplies for Steel Beam 10m');
+    fireEvent.click(supplierCheckbox);
     fireEvent.click(screen.getByText('Next'));
 
     // Step 3: Details
@@ -155,6 +155,7 @@ describe('RFQWizard', () => {
       expect.objectContaining({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: expect.stringContaining('line_suppliers'),
       }),
     );
   });

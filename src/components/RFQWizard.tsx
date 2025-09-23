@@ -1,12 +1,18 @@
 'use client';
 
-import { useMemo, useState, useCallback } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { MaterialRequest, MRLineItem, RFQ, Supplier } from '@/types/procurement';
-import { Button, Card, Input, Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow, Badge } from '@/components/ui';
+import { Badge, Button, Card, Input } from '@/components/ui';
 import { cn } from '@/lib/cn';
 
 interface ManualSupplier {
   id: string;
+  name: string;
+  email: string;
+  category: string;
+}
+
+interface ManualDraft {
   name: string;
   email: string;
   category: string;
@@ -20,17 +26,40 @@ interface RFQWizardProps {
 }
 
 const steps = ['Line Items', 'Suppliers', 'Details', 'Review'];
+const DEFAULT_CATEGORY = 'General Supplies';
+
+function createInitialSelectionMap(lineItems: MRLineItem[]) {
+  return lineItems.reduce<Record<string, Set<string>>>((acc, line) => {
+    acc[line.id] = new Set();
+    return acc;
+  }, {});
+}
+
+function buildManualDrafts(lineItems: MRLineItem[]) {
+  return lineItems.reduce<Record<string, ManualDraft>>((drafts, line) => {
+    drafts[line.id] = {
+      name: '',
+      email: '',
+      category: DEFAULT_CATEGORY,
+    };
+    return drafts;
+  }, {});
+}
 
 export function RFQWizard({ materialRequest, suppliers, onClose, onCreated }: RFQWizardProps) {
+  const lineItems = materialRequest.line_items;
+
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedLineItemIds, setSelectedLineItemIds] = useState<Set<string>>(
-    () => new Set(materialRequest.line_items.map((item) => item.id))
+    () => new Set(lineItems.map((item) => item.id))
   );
-  const [selectedSupplierIds, setSelectedSupplierIds] = useState<Set<string>>(new Set());
-  const [manualSuppliers, setManualSuppliers] = useState<ManualSupplier[]>([]);
-  const [manualName, setManualName] = useState('');
-  const [manualEmail, setManualEmail] = useState('');
-  const [manualCategory, setManualCategory] = useState('General Supplies');
+  const [lineSupplierSelections, setLineSupplierSelections] = useState<Record<string, Set<string>>>(
+    () => createInitialSelectionMap(lineItems)
+  );
+  const [manualSuppliersByLine, setManualSuppliersByLine] = useState<Record<string, ManualSupplier[]>>({});
+  const [manualDrafts, setManualDrafts] = useState<Record<string, ManualDraft>>(
+    () => buildManualDrafts(lineItems)
+  );
   const [dueDate, setDueDate] = useState('');
   const [terms, setTerms] = useState('');
   const [remarks, setRemarks] = useState('');
@@ -38,58 +67,67 @@ export function RFQWizard({ materialRequest, suppliers, onClose, onCreated }: RF
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const lineItems = materialRequest.line_items;
+  const supplierMap = useMemo(() => new Map(suppliers.map((supplier) => [supplier.id, supplier])), [suppliers]);
 
-  const categoryCounts = useMemo(() => {
-    const counts = new Map<string, number>();
-    lineItems.forEach((item) => {
-      const key = item.description.split(' ')[0].toLowerCase();
-      counts.set(key, (counts.get(key) ?? 0) + 1);
-    });
-    return counts;
-  }, [lineItems]);
-
-  const scoreSupplier = useCallback(
-    (supplier: Supplier): number => {
-      let score = supplier.rating;
-      if (supplier.has_been_used) score += 2;
-      const categoryKey = supplier.category?.split(' ')[0]?.toLowerCase();
-      if (categoryKey && categoryCounts.has(categoryKey)) {
-        score += categoryCounts.get(categoryKey)! * 1.5;
-      }
-      score -= supplier.avg_response_time / 24;
-      return score;
-    },
-    [categoryCounts]
+  const selectedLineItems = useMemo(
+    () => lineItems.filter((item) => selectedLineItemIds.has(item.id)),
+    [lineItems, selectedLineItemIds]
   );
 
-  const suggestedSuppliers = useMemo(() => {
-    return [...suppliers].sort((a, b) => scoreSupplier(b) - scoreSupplier(a));
-  }, [suppliers, scoreSupplier]);
+  const scoreSupplierForLine = useCallback((line: MRLineItem, supplier: Supplier) => {
+    let score = supplier.rating;
+    if (supplier.has_been_used) {
+      score += 2;
+    }
 
-  const allSuppliersSelected = selectedSupplierIds.size + manualSuppliers.length > 0;
-  const allLineItemsSelected = selectedLineItemIds.size > 0;
+    const descriptionTokens = line.description.toLowerCase().split(/\s+/g);
+    if (supplier.category) {
+      const categoryToken = supplier.category.toLowerCase();
+      if (descriptionTokens.some((token) => categoryToken.includes(token))) {
+        score += 1.5;
+      }
+    }
 
-  const manualSupplierValid = manualName.trim().length > 0 && /@/.test(manualEmail);
+    if (supplier.avg_response_time > 0) {
+      score -= supplier.avg_response_time / 48;
+    }
 
-  const reviewSuppliers = useMemo(() => {
-    const autoSuppliers = suggestedSuppliers.filter((supplier) => selectedSupplierIds.has(supplier.id));
-    return [
-      ...autoSuppliers.map((supplier) => ({
-        id: supplier.id,
-        name: supplier.name,
-        email: supplier.email,
-        category: supplier.category,
-        type: 'existing' as const,
-      })),
-      ...manualSuppliers.map((supplier) => ({
-        ...supplier,
-        type: 'manual' as const,
-      })),
-    ];
-  }, [manualSuppliers, selectedSupplierIds, suggestedSuppliers]);
+    return score;
+  }, []);
 
-  function toggleLineItem(lineItem: MRLineItem) {
+  const suggestionsByLine = useMemo(() => {
+    const map = new Map<string, Supplier[]>();
+    selectedLineItems.forEach((line) => {
+      const sorted = [...suppliers]
+        .sort((a, b) => scoreSupplierForLine(line, b) - scoreSupplierForLine(line, a))
+        .slice(0, 6);
+      map.set(line.id, sorted);
+    });
+    return map;
+  }, [selectedLineItems, suppliers, scoreSupplierForLine]);
+
+  const manualDraftForLine = useCallback(
+    (lineId: string): ManualDraft => {
+      if (!manualDrafts[lineId]) {
+        setManualDrafts((drafts) => ({ ...drafts, [lineId]: { name: '', email: '', category: DEFAULT_CATEGORY } }));
+        return { name: '', email: '', category: DEFAULT_CATEGORY };
+      }
+      return manualDrafts[lineId];
+    },
+    [manualDrafts]
+  );
+
+  const updateManualDraft = useCallback((lineId: string, field: keyof ManualDraft, value: string) => {
+    setManualDrafts((drafts) => ({
+      ...drafts,
+      [lineId]: {
+        ...manualDraftForLine(lineId),
+        [field]: value,
+      },
+    }));
+  }, [manualDraftForLine]);
+
+  const toggleLineItem = useCallback((lineItem: MRLineItem) => {
     setSelectedLineItemIds((prev) => {
       const next = new Set(prev);
       if (next.has(lineItem.id)) {
@@ -99,33 +137,104 @@ export function RFQWizard({ materialRequest, suppliers, onClose, onCreated }: RF
       }
       return next;
     });
-  }
+  }, []);
 
-  function toggleSupplier(supplierId: string) {
-    setSelectedSupplierIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(supplierId)) {
-        next.delete(supplierId);
+  const toggleSupplierForLine = useCallback((lineId: string, supplierId: string) => {
+    setLineSupplierSelections((prev) => {
+      const next = { ...prev };
+      const currentSet = new Set(next[lineId] ?? []);
+      if (currentSet.has(supplierId)) {
+        currentSet.delete(supplierId);
       } else {
-        next.add(supplierId);
+        currentSet.add(supplierId);
       }
+      next[lineId] = currentSet;
       return next;
     });
-  }
+  }, []);
 
-  function handleAddManualSupplier() {
-    if (!manualSupplierValid) return;
-    const supplier: ManualSupplier = {
-      id: `manual-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-      name: manualName.trim(),
-      email: manualEmail.trim(),
-      category: manualCategory.trim() || 'General Supplies',
+  const selectAllSuppliersForLine = useCallback((lineId: string, suggestions: Supplier[]) => {
+    setLineSupplierSelections((prev) => ({
+      ...prev,
+      [lineId]: new Set(suggestions.map((supplier) => supplier.id)),
+    }));
+  }, []);
+
+  const clearSuppliersForLine = useCallback((lineId: string) => {
+    setLineSupplierSelections((prev) => ({ ...prev, [lineId]: new Set() }));
+    setManualSuppliersByLine((prev) => ({
+      ...prev,
+      [lineId]: [],
+    }));
+    setManualDrafts((prev) => ({
+      ...prev,
+      [lineId]: { name: '', email: '', category: DEFAULT_CATEGORY },
+    }));
+  }, []);
+
+  const addManualSupplier = useCallback((lineId: string) => {
+    const draft = manualDraftForLine(lineId);
+    const isValid = draft.name.trim().length > 0 && /@/.test(draft.email.trim());
+    if (!isValid) return;
+
+    const manualSupplier: ManualSupplier = {
+      id: `manual-${lineId}-${Date.now()}`,
+      name: draft.name.trim(),
+      email: draft.email.trim(),
+      category: draft.category.trim() || DEFAULT_CATEGORY,
     };
-    setManualSuppliers((current) => [...current, supplier]);
-    setManualName('');
-    setManualEmail('');
-    setManualCategory('General Supplies');
-  }
+
+    setManualSuppliersByLine((prev) => ({
+      ...prev,
+      [lineId]: [...(prev[lineId] ?? []), manualSupplier],
+    }));
+
+    setManualDrafts((prev) => ({
+      ...prev,
+      [lineId]: { name: '', email: '', category: DEFAULT_CATEGORY },
+    }));
+  }, [manualDraftForLine]);
+
+  const removeManualSupplier = useCallback((lineId: string, manualId: string) => {
+    setManualSuppliersByLine((prev) => ({
+      ...prev,
+      [lineId]: (prev[lineId] ?? []).filter((supplier) => supplier.id !== manualId),
+    }));
+  }, []);
+
+  const suppliersSelectedForLine = useCallback(
+    (lineId: string) => {
+      const suggestedCount = lineSupplierSelections[lineId]?.size ?? 0;
+      const manualCount = manualSuppliersByLine[lineId]?.length ?? 0;
+      return suggestedCount + manualCount;
+    },
+    [lineSupplierSelections, manualSuppliersByLine]
+  );
+
+  const hasSuppliersForAllSelectedLines = useMemo(() => {
+    if (selectedLineItems.length === 0) return false;
+    return selectedLineItems.every((line) => suppliersSelectedForLine(line.id) > 0);
+  }, [selectedLineItems, suppliersSelectedForLine]);
+
+  const reviewLines = useMemo(() => {
+    return selectedLineItems.map((line) => {
+      const suggestedSelections = Array.from(lineSupplierSelections[line.id] ?? []).map((supplierId) => {
+        const supplier = supplierMap.get(supplierId);
+        return supplier ? { supplier, type: 'suggested' as const } : null;
+      }).filter(Boolean) as Array<{ supplier: Supplier; type: 'suggested' }>;
+
+      const manualSelections = (manualSuppliersByLine[line.id] ?? []).map((manual) => ({
+        manual,
+        type: 'manual' as const,
+      }));
+
+      return {
+        line,
+        suggested: suggestedSelections,
+        manual: manualSelections,
+      };
+    });
+  }, [lineSupplierSelections, manualSuppliersByLine, selectedLineItems, supplierMap]);
 
   async function handleSubmit() {
     setIsSubmitting(true);
@@ -133,6 +242,43 @@ export function RFQWizard({ materialRequest, suppliers, onClose, onCreated }: RF
     setSuccessMessage(null);
 
     try {
+      const lineSuppliersPayload = selectedLineItems.map((line) => ({
+        line_item_id: line.id,
+        suppliers: [
+          ...Array.from(lineSupplierSelections[line.id] ?? []).map((supplierId) => {
+            const supplier = supplierMap.get(supplierId);
+            return {
+              supplier_id: supplierId,
+              type: 'suggested' as const,
+              name: supplier?.name,
+              email: supplier?.email,
+              category: supplier?.category,
+            };
+          }),
+          ...(manualSuppliersByLine[line.id] ?? []).map((manual) => ({
+            supplier_id: manual.id,
+            type: 'manual' as const,
+            name: manual.name,
+            email: manual.email,
+            category: manual.category,
+          })),
+        ],
+      }));
+
+      const aggregatedSuppliers = new Map<string, { supplier_id: string; name?: string; email?: string; category?: string }>();
+      lineSuppliersPayload.forEach((entry) => {
+        entry.suppliers.forEach((supplier) => {
+          if (!aggregatedSuppliers.has(supplier.supplier_id)) {
+            aggregatedSuppliers.set(supplier.supplier_id, {
+              supplier_id: supplier.supplier_id,
+              name: supplier.name,
+              email: supplier.email,
+              category: supplier.category,
+            });
+          }
+        });
+      });
+
       const response = await fetch('/api/rfqs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -142,15 +288,8 @@ export function RFQWizard({ materialRequest, suppliers, onClose, onCreated }: RF
           due_date: dueDate || undefined,
           terms: terms || undefined,
           remarks: remarks || undefined,
-          suppliers: [
-            ...Array.from(selectedSupplierIds).map((supplierId) => ({ supplier_id: supplierId })),
-            ...manualSuppliers.map((supplier) => ({
-              supplier_id: supplier.id,
-              name: supplier.name,
-              email: supplier.email,
-              category: supplier.category,
-            })),
-          ],
+          suppliers: Array.from(aggregatedSuppliers.values()),
+          line_suppliers: lineSuppliersPayload,
         }),
       });
 
@@ -171,10 +310,10 @@ export function RFQWizard({ materialRequest, suppliers, onClose, onCreated }: RF
 
   function canProceed(step: number) {
     if (step === 0) {
-      return allLineItemsSelected;
+      return selectedLineItemIds.size > 0;
     }
     if (step === 1) {
-      return allSuppliersSelected;
+      return hasSuppliersForAllSelectedLines;
     }
     if (step === 2) {
       return dueDate.length > 0;
@@ -185,7 +324,6 @@ export function RFQWizard({ materialRequest, suppliers, onClose, onCreated }: RF
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6">
       <div className="relative max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-2xl bg-brand-surface shadow-xl">
-        {/* Header */}
         <div className="flex items-center justify-between border-b border-brand-text/10 px-8 py-6">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-brand-text/60">RFQ Wizard</p>
@@ -213,7 +351,6 @@ export function RFQWizard({ materialRequest, suppliers, onClose, onCreated }: RF
           </div>
         </div>
 
-        {/* Content */}
         <div className="space-y-6 px-8 py-6">
           {error && (
             <div className="rounded-lg border border-status-warning/40 bg-status-warning/10 px-4 py-3 text-sm text-status-warning">
@@ -226,165 +363,220 @@ export function RFQWizard({ materialRequest, suppliers, onClose, onCreated }: RF
             </div>
           )}
 
-            {currentStep === 0 && (
-              <section className="space-y-4">
-                <header className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-semibold text-brand-text">Select line items</h3>
-                    <p className="text-sm text-brand-text/60">Choose which items will be included in this RFQ.</p>
-                  </div>
-                  <div className="flex gap-3">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setSelectedLineItemIds(new Set(lineItems.map((item) => item.id)))}
-                    >
-                      Select all
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => setSelectedLineItemIds(new Set())}>
+          {currentStep === 0 && (
+            <section className="space-y-4">
+              <header className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-brand-text">Select line items</h3>
+                  <p className="text-sm text-brand-text/60">Choose which items will be included in this RFQ.</p>
+                </div>
+                <div className="flex gap-3">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedLineItemIds(new Set(lineItems.map((item) => item.id)))}
+                  >
+                    Select all
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => setSelectedLineItemIds(new Set())}>
                     Clear
                   </Button>
                 </div>
               </header>
 
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableHeaderCell>Select</TableHeaderCell>
-                    <TableHeaderCell>Item</TableHeaderCell>
-                    <TableHeaderCell>Quantity</TableHeaderCell>
-                    <TableHeaderCell>UoM</TableHeaderCell>
-                    <TableHeaderCell>Location</TableHeaderCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-xs uppercase tracking-wide text-brand-text/50">
+                    <th className="px-3 py-2">Select</th>
+                    <th className="px-3 py-2">Item</th>
+                    <th className="px-3 py-2">Quantity</th>
+                    <th className="px-3 py-2">UoM</th>
+                    <th className="px-3 py-2">Location</th>
+                  </tr>
+                </thead>
+                <tbody>
                   {lineItems.map((item) => {
                     const selected = selectedLineItemIds.has(item.id);
                     return (
-                      <TableRow
-                        key={item.id}
-                        className={cn(selected && 'bg-brand-primary/5')}
-                      >
-                        <TableCell>
+                      <tr key={item.id} className={cn('border-b border-brand-text/10 last:border-b-0', selected && 'bg-brand-primary/5')}>
+                        <td className="px-3 py-2">
                           <input
                             type="checkbox"
                             checked={selected}
                             onChange={() => toggleLineItem(item)}
                             className="h-4 w-4 rounded border-brand-text/20 text-brand-primary focus:ring-brand-primary"
                           />
-                        </TableCell>
-                        <TableCell>
+                        </td>
+                        <td className="px-3 py-2">
                           <div className="font-medium text-brand-text">{item.description}</div>
                           <div className="text-xs text-brand-text/50">{item.item_code}</div>
-                        </TableCell>
-                        <TableCell>{item.quantity}</TableCell>
-                        <TableCell>{item.uom}</TableCell>
-                        <TableCell>{item.location ?? '—'}</TableCell>
-                      </TableRow>
+                        </td>
+                        <td className="px-3 py-2">{item.quantity}</td>
+                        <td className="px-3 py-2">{item.uom}</td>
+                        <td className="px-3 py-2">{item.location ?? '—'}</td>
+                      </tr>
                     );
                   })}
-                </TableBody>
-              </Table>
+                </tbody>
+              </table>
             </section>
           )}
 
           {currentStep === 1 && (
             <section className="space-y-6">
               <header className="space-y-1">
-                <h3 className="text-lg font-semibold text-brand-text">Select suppliers</h3>
-                <p className="text-sm text-brand-text/60">Recommended suppliers are ranked using historical performance and category fit.</p>
+                <h3 className="text-lg font-semibold text-brand-text">Select suppliers per line</h3>
+                <p className="text-sm text-brand-text/60">
+                  Recommended suppliers are organised beneath each line item. Pick individual suppliers or use Select all to invite
+                  everyone for that line. Add manual contacts when no suggestions exist.
+                </p>
               </header>
 
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                {suggestedSuppliers.map((supplier) => {
-                  const selected = selectedSupplierIds.has(supplier.id);
-                  return (
-                    <Card
-                      key={supplier.id}
-                      className={cn(
-                        'cursor-pointer border transition-colors',
-                        selected ? 'border-brand-primary bg-brand-primary/5' : 'border-brand-text/10 hover:border-brand-text/20'
-                      )}
-                      onClick={() => toggleSupplier(supplier.id)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="text-base font-semibold text-brand-text">{supplier.name}</h4>
-                          <p className="text-sm text-brand-text/60">{supplier.category}</p>
-                          <div className="mt-2 flex flex-wrap gap-2 text-xs text-brand-text/60">
-                            <span>Rating: {supplier.rating.toFixed(1)}</span>
-                            <span>{supplier.quote_count} quotes</span>
-                            <span>Avg response {supplier.avg_response_time}h</span>
-                          </div>
-                        </div>
-                        <input
-                          type="checkbox"
-                          className="h-4 w-4 rounded border-brand-text/20 text-brand-primary focus:ring-brand-primary"
-                          onChange={() => toggleSupplier(supplier.id)}
-                          checked={selected}
-                          aria-label={`select supplier ${supplier.name}`}
-                        />
+              {selectedLineItems.length === 0 && (
+                <Card className="border-dashed border-brand-text/20 bg-brand-primary/5 p-6 text-sm text-brand-text/70">
+                  Select at least one line item to see supplier recommendations.
+                </Card>
+              )}
+
+              {selectedLineItems.map((line) => {
+                const suggestions = suggestionsByLine.get(line.id) ?? [];
+                const selectedSuggestions = lineSupplierSelections[line.id] ?? new Set();
+                const manualEntries = manualSuppliersByLine[line.id] ?? [];
+                const draft = manualDraftForLine(line.id);
+                const hasValidManualDraft = draft.name.trim().length > 0 && /@/.test(draft.email.trim());
+
+                const primaryContact = (supplierId: string) => {
+                  const supplier = supplierMap.get(supplierId);
+                  if (!supplier) return null;
+                  return supplier.contacts?.find((contact) => contact.is_primary) ?? supplier.contacts?.[0] ?? null;
+                };
+
+                return (
+                  <Card key={line.id} className="border-brand-text/15">
+                    <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                      <div>
+                        <h4 className="text-base font-semibold text-brand-text">{line.description}</h4>
+                        <p className="text-sm text-brand-text/60">
+                          {line.quantity} {line.uom} · {line.item_code}
+                        </p>
                       </div>
-                    </Card>
-                  );
-                })}
-              </div>
-
-              <Card className="space-y-4 border-dashed border-brand-text/20 bg-brand-primary/5 p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="text-sm font-semibold text-brand-text">Invite a new supplier</h4>
-                    <p className="text-xs text-brand-text/60">Add ad-hoc contacts for this RFQ.</p>
-                  </div>
-                  <Button variant="ghost" size="sm" onClick={handleAddManualSupplier} disabled={!manualSupplierValid}>
-                    Add supplier
-                  </Button>
-                </div>
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                  <Input
-                    label="Supplier name"
-                    value={manualName}
-                    onChange={(event) => setManualName(event.target.value)}
-                    required
-                  />
-                  <Input
-                    label="Contact email"
-                    type="email"
-                    value={manualEmail}
-                    onChange={(event) => setManualEmail(event.target.value)}
-                    required
-                    error={manualEmail && !manualSupplierValid ? 'Enter a valid email address.' : undefined}
-                  />
-                  <Input
-                    label="Category"
-                    value={manualCategory}
-                    onChange={(event) => setManualCategory(event.target.value)}
-                  />
-                </div>
-
-                {manualSuppliers.length > 0 && (
-                  <div className="space-y-2">
-                    <h5 className="text-xs font-semibold uppercase tracking-wide text-brand-text/60">Manual invites</h5>
-                    {manualSuppliers.map((supplier) => (
-                      <div key={supplier.id} className="flex items-center justify-between rounded-md border border-brand-text/10 px-3 py-2 text-sm">
-                        <div>
-                          <p className="font-medium text-brand-text">{supplier.name}</p>
-                          <p className="text-xs text-brand-text/60">{supplier.email}</p>
-                        </div>
+                      <div className="flex gap-2">
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() =>
-                            setManualSuppliers((current) => current.filter((item) => item.id !== supplier.id))
-                          }
+                          onClick={() => selectAllSuppliersForLine(line.id, suggestions)}
+                          disabled={suggestions.length === 0}
                         >
-                          Remove
+                          Select all
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => clearSuppliersForLine(line.id)}>
+                          Clear
                         </Button>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </Card>
+                    </div>
+
+                    <div className="mt-4 space-y-3">
+                      {suggestions.length > 0 ? (
+                        suggestions.map((supplier) => {
+                          const selected = selectedSuggestions.has(supplier.id);
+                          const contact = primaryContact(supplier.id);
+                          return (
+                            <div
+                              key={`${line.id}-${supplier.id}`}
+                              className={cn(
+                                'flex items-start justify-between rounded-lg border px-4 py-3 transition-colors',
+                                selected
+                                  ? 'border-brand-primary bg-brand-primary/5'
+                                  : 'border-brand-text/15 hover:border-brand-text/25'
+                              )}
+                            >
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <h5 className="text-sm font-semibold text-brand-text">{supplier.name}</h5>
+                                  <Badge variant="primary">Suggested</Badge>
+                                </div>
+                                <p className="text-xs text-brand-text/60">{supplier.category}</p>
+                                <div className="mt-2 flex flex-wrap gap-3 text-xs text-brand-text/60">
+                                  <span>Rating {supplier.rating.toFixed(1)}</span>
+                                  <span>{supplier.quote_count} quotes</span>
+                                  <span>Avg response {supplier.avg_response_time}h</span>
+                                  <span>Last quote {new Date(supplier.last_quote_date).toLocaleDateString()}</span>
+                                </div>
+                                {contact && (
+                                  <div className="mt-2 text-xs text-brand-text/60">
+                                    Contact: {contact.name} · {contact.email}
+                                  </div>
+                                )}
+                              </div>
+                              <input
+                                type="checkbox"
+                                checked={selected}
+                                onChange={() => toggleSupplierForLine(line.id, supplier.id)}
+                                className="mt-1 h-4 w-4 rounded border-brand-text/20 text-brand-primary focus:ring-brand-primary"
+                                aria-label={`Invite ${supplier.name} for ${line.description}`}
+                              />
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <div className="rounded-lg border border-dashed border-status-warning/40 bg-status-warning/5 px-4 py-3 text-sm text-status-warning">
+                          No historical suppliers found for this line. Add a new supplier below to continue.
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="mt-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-semibold text-brand-text">Invite a new supplier</p>
+                        <Button variant="ghost" size="sm" onClick={() => addManualSupplier(line.id)} disabled={!hasValidManualDraft}>
+                          Add supplier
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                        <Input
+                          label="Supplier name"
+                          value={draft.name}
+                          onChange={(event) => updateManualDraft(line.id, 'name', event.target.value)}
+                          required
+                        />
+                        <Input
+                          label="Contact email"
+                          type="email"
+                          value={draft.email}
+                          onChange={(event) => updateManualDraft(line.id, 'email', event.target.value)}
+                          required
+                          error={draft.email && !/@/.test(draft.email) ? 'Enter a valid email address.' : undefined}
+                        />
+                        <Input
+                          label="Category"
+                          value={draft.category}
+                          onChange={(event) => updateManualDraft(line.id, 'category', event.target.value)}
+                        />
+                      </div>
+
+                      {manualEntries.length > 0 && (
+                        <div className="space-y-2">
+                          <h5 className="text-xs font-semibold uppercase tracking-wide text-brand-text/60">Manual invites</h5>
+                          {manualEntries.map((manual) => (
+                            <div key={manual.id} className="flex items-center justify-between rounded-md border border-brand-text/10 px-3 py-2 text-sm">
+                              <div>
+                                <p className="font-medium text-brand-text">{manual.name}</p>
+                                <p className="text-xs text-brand-text/60">{manual.email}</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge variant="warning">Manual</Badge>
+                                <Button variant="ghost" size="sm" onClick={() => removeManualSupplier(line.id, manual.id)}>
+                                  Remove
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                );
+              })}
             </section>
           )}
 
@@ -453,43 +645,43 @@ export function RFQWizard({ materialRequest, suppliers, onClose, onCreated }: RF
                 )}
               </Card>
 
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                <Card className="space-y-3 border-brand-text/15 p-4">
-                  <h4 className="text-sm font-semibold text-brand-text">Line items ({selectedLineItemIds.size})</h4>
-                  <div className="space-y-2">
-                    {lineItems
-                      .filter((item) => selectedLineItemIds.has(item.id))
-                      .map((item) => (
-                        <div key={item.id} className="rounded-md border border-brand-text/10 px-3 py-2">
-                          <p className="text-sm font-medium text-brand-text">{item.description}</p>
-                          <p className="text-xs text-brand-text/50">
-                            {item.quantity} {item.uom} · {item.item_code}
-                          </p>
-                        </div>
-                      ))}
+              {reviewLines.map(({ line, suggested, manual }) => (
+                <Card key={`review-${line.id}`} className="space-y-3 border-brand-text/15 p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-sm font-semibold text-brand-text">{line.description}</h4>
+                      <p className="text-xs text-brand-text/60">{line.quantity} {line.uom} · {line.item_code}</p>
+                    </div>
+                    <Badge variant="primary">{suggested.length + manual.length} supplier(s)</Badge>
                   </div>
-                </Card>
 
-                <Card className="space-y-3 border-brand-text/15 p-4">
-                  <h4 className="text-sm font-semibold text-brand-text">Suppliers ({reviewSuppliers.length})</h4>
                   <div className="space-y-2">
-                    {reviewSuppliers.map((supplier) => (
-                      <div key={supplier.id} className="flex items-center justify-between rounded-md border border-brand-text/10 px-3 py-2">
+                    {suggested.map(({ supplier }) => (
+                      <div key={`${line.id}-${supplier.id}`} className="flex items-center justify-between rounded-md border border-brand-text/10 px-3 py-2 text-sm">
                         <div>
-                          <p className="text-sm font-medium text-brand-text">{supplier.name}</p>
-                          <p className="text-xs text-brand-text/50">{supplier.email}</p>
+                          <p className="font-medium text-brand-text">{supplier.name}</p>
+                          <p className="text-xs text-brand-text/60">{supplier.email}</p>
                         </div>
-                        <Badge variant={supplier.type === 'manual' ? 'warning' : 'primary'}>{supplier.type}</Badge>
+                        <Badge variant="primary">Suggested</Badge>
+                      </div>
+                    ))}
+
+                    {manual.map(({ manual: supplier }) => (
+                      <div key={supplier.id} className="flex items-center justify-between rounded-md border border-brand-text/10 px-3 py-2 text-sm">
+                        <div>
+                          <p className="font-medium text-brand-text">{supplier.name}</p>
+                          <p className="text-xs text-brand-text/60">{supplier.email}</p>
+                        </div>
+                        <Badge variant="warning">Manual</Badge>
                       </div>
                     ))}
                   </div>
                 </Card>
-              </div>
+              ))}
             </section>
-            )}
+          )}
         </div>
 
-        {/* Footer */}
         <footer className="flex justify-between border-t border-brand-text/10 px-8 py-6">
           <Button variant="ghost" onClick={onClose} disabled={isSubmitting}>
             Cancel

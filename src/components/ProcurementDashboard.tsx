@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { MaterialRequest, RFQ, Supplier } from "@/types/procurement";
 import {
   Badge,
@@ -36,6 +36,7 @@ export default function ProcurementDashboard({}: ProcurementDashboardProps) {
   const [comparisonError, setComparisonError] = useState<string | null>(null);
   const [comparisonRFQ, setComparisonRFQ] = useState<RFQ | null>(null);
   const [comparisonSummary, setComparisonSummary] = useState<ComparisonSummary | null>(null);
+  const [detailMaterialRequest, setDetailMaterialRequest] = useState<MaterialRequest | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -61,7 +62,21 @@ export default function ProcurementDashboard({}: ProcurementDashboardProps) {
           ? suppliersData
           : [];
 
-      setMaterialRequests(Array.isArray(mrs) ? mrs : []);
+      const normalized = (Array.isArray(mrs) ? mrs : []).map((mr) => {
+        const nextStatus: MaterialRequest['status'] = mr.status === 'submitted'
+          ? 'new_request'
+          : mr.status === 'in_progress'
+            ? 'rfq_sent'
+            : mr.status;
+
+        return {
+          ...mr,
+          status: nextStatus,
+          rfq_sent_at: nextStatus === 'rfq_sent' ? mr.updated_at ?? mr.created_at : mr.rfq_sent_at,
+        } satisfies MaterialRequest;
+      });
+
+      setMaterialRequests(normalized);
       setSuppliers(suppliersResult);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -79,11 +94,15 @@ export default function ProcurementDashboard({}: ProcurementDashboardProps) {
   const handleRFQCreated = (rfq: RFQ) => {
     setFeedback(`RFQ ${rfq.rfq_number} dispatched to ${rfq.suppliers.length} supplier(s).`);
     setMaterialRequests((current) =>
-      current.map((mr) =>
-        mr.id === rfq.material_request_id
-          ? { ...mr, status: mr.status === "submitted" ? "in_progress" : mr.status }
-          : mr
-      )
+      current.map((mr) => {
+        if (mr.id !== rfq.material_request_id) return mr;
+
+        return {
+          ...mr,
+          status: 'rfq_sent',
+          rfq_sent_at: rfq.sent_at ?? new Date().toISOString(),
+        } satisfies MaterialRequest;
+      })
     );
     setIsWizardOpen(false);
     setActiveRFQ(null);
@@ -119,36 +138,63 @@ export default function ProcurementDashboard({}: ProcurementDashboardProps) {
     setFeedback(`Selections recorded for RFQ ${summary.rfq_number}.`);
   };
 
-  const filteredMRs = (materialRequests || []).filter((mr) => {
-    if (filterStatus === "all") return true;
-    return mr.status === filterStatus;
-  });
+  const filteredMRs = useMemo(() => {
+    return (materialRequests || []).filter((mr) => {
+      if (filterStatus === 'all') return true;
+      return mr.status === filterStatus;
+    });
+  }, [materialRequests, filterStatus]);
 
-  const sortedMRs = [...filteredMRs].sort((a, b) => {
-    switch (sortBy) {
-      case "created_at":
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      case "project":
-        return a.project_name.localeCompare(b.project_name);
-      case "requester":
-        return a.requester_name.localeCompare(b.requester_name);
-      default:
-        return 0;
-    }
-  });
+  const sortedMRs = useMemo(() => {
+    return [...filteredMRs].sort((a, b) => {
+      switch (sortBy) {
+        case "created_at":
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case "project":
+          return a.project_name.localeCompare(b.project_name);
+        case "requester":
+          return a.requester_name.localeCompare(b.requester_name);
+        default:
+          return 0;
+      }
+    });
+  }, [filteredMRs, sortBy]);
 
-  const getStatusVariant = (status: string) => {
+  const getStatusVariant = (status: MaterialRequest['status']) => {
     switch (status) {
-      case "submitted":
-        return "primary" as const;
-      case "in_progress":
-        return "warning" as const;
-      case "approved":
-        return "success" as const;
-      case "rejected":
-        return "danger" as const;
+      case 'new_request':
+        return 'danger' as const;
+      case 'rfq_sent':
+        return 'success' as const;
+      case 'draft':
+        return 'neutral' as const;
+      case 'approved':
+        return 'success' as const;
+      case 'rejected':
+        return 'danger' as const;
       default:
-        return "neutral" as const;
+        return 'primary' as const;
+    }
+  };
+
+  const getStatusLabel = (status: MaterialRequest['status']) => {
+    switch (status) {
+      case 'new_request':
+        return 'New Request';
+      case 'rfq_sent':
+        return 'RFQ Sent';
+      case 'draft':
+        return 'Draft';
+      case 'submitted':
+        return 'Submitted';
+      case 'in_progress':
+        return 'In Progress';
+      case 'approved':
+        return 'Approved';
+      case 'rejected':
+        return 'Rejected';
+      default:
+        return status;
     }
   };
 
@@ -181,7 +227,7 @@ export default function ProcurementDashboard({}: ProcurementDashboardProps) {
 
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
           <Card
-            className="lg:col-span-2"
+            className="lg:col-span-3"
             header="Material Requests Inbox"
             actions={
               <div className="flex gap-3">
@@ -191,10 +237,8 @@ export default function ProcurementDashboard({}: ProcurementDashboardProps) {
                   className="rounded-md border border-brand-text/20 bg-brand-surface px-3 py-2 text-sm text-brand-text focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary"
                 >
                   <option value="all">All Status</option>
-                  <option value="submitted">Submitted</option>
-                  <option value="in_progress">In Progress</option>
-                  <option value="approved">Approved</option>
-                  <option value="rejected">Rejected</option>
+                  <option value="new_request">New Request</option>
+                  <option value="rfq_sent">RFQ Sent</option>
                 </select>
                 <select
                   value={sortBy}
@@ -211,55 +255,51 @@ export default function ProcurementDashboard({}: ProcurementDashboardProps) {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableHeaderCell>Request</TableHeaderCell>
-                  <TableHeaderCell>Status</TableHeaderCell>
+                  <TableHeaderCell>MR</TableHeaderCell>
+                  <TableHeaderCell>Project</TableHeaderCell>
                   <TableHeaderCell>Requester</TableHeaderCell>
-                  <TableHeaderCell>Line Items</TableHeaderCell>
-                  <TableHeaderCell>Total (AED)</TableHeaderCell>
+                  <TableHeaderCell>Created</TableHeaderCell>
                   <TableHeaderCell className="text-right">Actions</TableHeaderCell>
+                  <TableHeaderCell className="text-right">Status</TableHeaderCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {sortedMRs.map((mr) => (
                   <TableRow key={mr.id}>
                     <TableCell>
-                      <div className="font-semibold text-brand-text">MR-{mr.mrn}</div>
-                      <div className="text-xs text-brand-text/60">{mr.project_name}</div>
+                      <div className="font-semibold text-brand-text">{mr.mrn}</div>
+                      <div className="text-xs text-brand-text/60">{mr.id}</div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={getStatusVariant(mr.status)}>
-                        {mr.status.replace("_", " ").toUpperCase()}
-                      </Badge>
+                      <div className="text-sm font-medium text-brand-text">{mr.project_name}</div>
+                      <div className="text-xs text-brand-text/60">{mr.project_id}</div>
                     </TableCell>
                     <TableCell>
                       <div className="text-sm font-medium text-brand-text">{mr.requester_name}</div>
                       <div className="text-xs text-brand-text/60">{new Date(mr.created_at).toLocaleDateString()}</div>
                     </TableCell>
-                    <TableCell>{mr.line_items.length}</TableCell>
                     <TableCell>
-                      {mr.line_items
-                        .reduce((sum, item) => sum + item.quantity * item.unit_price, 0)
-                        .toLocaleString()}
+                      <div className="text-sm text-brand-text/80">{new Date(mr.created_at).toLocaleString()}</div>
+                      {mr.rfq_sent_at && (
+                        <div className="text-xs text-brand-text/50">RFQ sent {new Date(mr.rfq_sent_at).toLocaleString()}</div>
+                      )}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => setDetailMaterialRequest(mr)}>
                           View Details
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleOpenComparison(mr)}
-                          disabled={comparisonLoading}
-                        >
-                          Compare quotes
-                        </Button>
-                        {mr.status === "submitted" && (
+                        {mr.status === "new_request" && (
                           <Button variant="primary" size="sm" onClick={() => handleOpenWizard(mr)}>
                             Create RFQ
                           </Button>
                         )}
                       </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Badge variant={getStatusVariant(mr.status)}>
+                        {getStatusLabel(mr.status)}
+                      </Badge>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -267,31 +307,6 @@ export default function ProcurementDashboard({}: ProcurementDashboardProps) {
             </Table>
           </Card>
 
-          <Card
-            header="Supplier Suggestions"
-            className="lg:col-span-1"
-            actions={<span className="text-xs text-brand-text/60">Historical suppliers and pricing</span>}
-          >
-            <div className="space-y-4">
-              {(suppliers || []).slice(0, 5).map((supplier) => (
-                <Card key={supplier.id} header={supplier.name} className="border-brand-text/15">
-                  <div className="flex items-start justify-between text-sm">
-                    <div className="space-y-1">
-                      <p className="text-brand-text/70">{supplier.category}</p>
-                      <p className="text-xs text-brand-text/50">Avg response {supplier.avg_response_time}h</p>
-                      <p className="text-xs text-brand-text/50">
-                        Last quote {new Date(supplier.last_quote_date).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-semibold text-status-success">{supplier.rating}/5.0</div>
-                      <div className="text-xs text-brand-text/50">{supplier.quote_count} quotes</div>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </Card>
         </div>
 
         {comparisonSummary && (
@@ -348,6 +363,61 @@ export default function ProcurementDashboard({}: ProcurementDashboardProps) {
           onClose={() => setComparisonRFQ(null)}
           onSaveSelections={handleComparisonSaved}
         />
+      )}
+
+      {detailMaterialRequest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6">
+          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-brand-surface shadow-xl">
+            <div className="flex items-center justify-between border-b border-brand-text/10 px-6 py-5">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-brand-text/60">Material Request</p>
+                <h2 className="text-2xl font-bold text-brand-text">{detailMaterialRequest.mrn}</h2>
+                <p className="text-sm text-brand-text/60">{detailMaterialRequest.project_name}</p>
+              </div>
+              <Button variant="ghost" onClick={() => setDetailMaterialRequest(null)}>
+                Close
+              </Button>
+            </div>
+
+            <div className="space-y-4 px-6 py-5">
+              <div>
+                <h3 className="text-sm font-semibold text-brand-text">Requester</h3>
+                <p className="text-sm text-brand-text/70">{detailMaterialRequest.requester_name}</p>
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="text-sm font-semibold text-brand-text">Line items</h3>
+                <div className="space-y-2">
+                  {detailMaterialRequest.line_items.map((item) => (
+                    <div key={item.id} className="rounded-md border border-brand-text/10 px-3 py-2">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-brand-text">{item.description}</p>
+                          <p className="text-xs text-brand-text/60">{item.item_code}</p>
+                        </div>
+                        <div className="text-right text-xs text-brand-text/70">
+                          {item.quantity} {item.uom}
+                          {item.location && <div className="text-brand-text/50">{item.location}</div>}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {detailMaterialRequest.attachments.length > 0 && (
+                <div className="space-y-2">
+                  <h3 className="text-sm font-semibold text-brand-text">Attachments</h3>
+                  <ul className="list-disc space-y-1 pl-5 text-sm text-brand-text/70">
+                    {detailMaterialRequest.attachments.map((attachment) => (
+                      <li key={attachment.id}>{attachment.filename}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

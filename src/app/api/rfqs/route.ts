@@ -17,7 +17,7 @@ const materialRequest: MaterialRequest = {
   project_name: 'Project Alpha',
   requester_id: 'user-requester',
   requester_name: 'Ayesha Rahman',
-  status: 'in_progress',
+  status: 'new_request',
   created_at: '2025-02-10T08:15:00Z',
   updated_at: '2025-02-12T09:30:00Z',
   remarks: 'Urgent structural materials',
@@ -283,6 +283,16 @@ interface CreateRFQRequest {
     email?: string;
     category?: string;
   }>;
+  line_suppliers?: Array<{
+    line_item_id: string;
+    suppliers: Array<{
+      supplier_id: string;
+      type?: 'suggested' | 'manual';
+      name?: string;
+      email?: string;
+      category?: string;
+    }>;
+  }>;
 }
 
 export async function POST(request: NextRequest) {
@@ -347,7 +357,7 @@ export async function POST(request: NextRequest) {
         rfq_id: rfqId,
         supplier_id: supplierDetails.id,
         supplier: supplierDetails,
-        status: 'responded',
+        status: 'pending',
         sent_at: createdAt,
         portal_link: `https://portal.example.com/rfq/${rfqId}?supplier=${supplierDetails.id}`,
         email_tracking_id: `track-${rfqId}-${index}`,
@@ -355,12 +365,18 @@ export async function POST(request: NextRequest) {
       } satisfies RFQSupplier;
     });
 
+    const responseMaterialRequest: MaterialRequest = {
+      ...materialRequest,
+      status: 'rfq_sent',
+      rfq_sent_at: createdAt,
+    };
+
     const rfq: RFQ = {
       id: rfqId,
       rfq_number: `RFQ-${Date.now()}`,
       material_request_id: materialRequest.id,
       material_request: {
-        ...materialRequest,
+        ...responseMaterialRequest,
         line_items: effectiveLineItems,
       },
       status: 'sent',
@@ -374,6 +390,16 @@ export async function POST(request: NextRequest) {
       quotes: [],
       created_by: 'user-123',
       created_by_name: 'Procurement Officer',
+      line_suppliers: body.line_suppliers?.map((entry) => ({
+        line_item_id: entry.line_item_id,
+        suppliers: entry.suppliers.map((supplier) => ({
+          supplier_id: supplier.supplier_id,
+          type: supplier.type ?? 'suggested',
+          name: supplier.name,
+          email: supplier.email,
+          category: supplier.category,
+        })),
+      })),
     };
 
     rfqStore.unshift(rfq);

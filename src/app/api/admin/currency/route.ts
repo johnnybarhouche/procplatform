@@ -1,95 +1,56 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { CurrencyConfig } from '@/types/admin';
+import { NextResponse } from 'next/server';
 
-// Mock currency configuration data
-const mockCurrencyConfig: CurrencyConfig = {
-  id: '1',
-  base_currency: 'AED',
-  usd_rate: 3.6725,
-  last_updated: new Date().toISOString(),
-  updated_by: 'admin@company.com'
-};
-
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
-    // Check for admin role
-    const userRole = request.headers.get('x-user-role') || 'admin';
+    // Check for admin role in headers
+    const userRole = request.headers.get('x-user-role');
     
     if (userRole !== 'admin') {
-      return NextResponse.json(
-        { error: 'Access denied. Admin role required.' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 100));
-
-    return NextResponse.json(mockCurrencyConfig);
-  } catch (error) {
-    console.error('Error fetching currency configuration:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch currency configuration' },
-      { status: 500 }
-    );
-  }
-}
-
-export async function PUT(request: NextRequest) {
-  try {
-    // Check for admin role
-    const userRole = request.headers.get('x-user-role') || 'admin';
-    
-    if (userRole !== 'admin') {
-      return NextResponse.json(
-        { error: 'Access denied. Admin role required.' },
-        { status: 403 }
-      );
-    }
-
-    const body = await request.json();
-    const { usd_rate } = body;
-
-    // Validate input
-    if (typeof usd_rate !== 'number' || usd_rate <= 0) {
-      return NextResponse.json(
-        { error: 'Invalid USD rate. Must be a positive number.' },
-        { status: 400 }
-      );
-    }
-
-    // Validate reasonable range (AED to USD should be around 3.6-3.7)
-    if (usd_rate < 3.0 || usd_rate > 4.0) {
-      return NextResponse.json(
-        { error: 'USD rate seems unreasonable. Please verify the rate.' },
-        { status: 400 }
-      );
-    }
-
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 200));
-
-    // In a real implementation, this would update the database
-    const updatedConfig: CurrencyConfig = {
-      ...mockCurrencyConfig,
-      usd_rate,
-      last_updated: new Date().toISOString(),
-      updated_by: userRole
+    // Mock currency configuration data
+    const currencyConfig = {
+      id: '1',
+      default_currency: 'USD',
+      supported_currencies: [
+        { code: 'USD', name: 'US Dollar', symbol: '$', rate: 1.0 },
+        { code: 'EUR', name: 'Euro', symbol: '€', rate: 0.85 },
+        { code: 'GBP', name: 'British Pound', symbol: '£', rate: 0.73 },
+        { code: 'JPY', name: 'Japanese Yen', symbol: '¥', rate: 110.0 },
+        { code: 'CAD', name: 'Canadian Dollar', symbol: 'C$', rate: 1.25 },
+        { code: 'AUD', name: 'Australian Dollar', symbol: 'A$', rate: 1.35 }
+      ],
+      exchange_rate_source: 'api',
+      auto_update_rates: true,
+      rate_update_frequency: 'daily',
+      last_updated: new Date().toISOString()
     };
 
-    // Log audit trail
-    console.log(`Currency configuration updated by ${userRole} at ${new Date().toISOString()}. New USD rate: ${usd_rate}`);
-
-    return NextResponse.json({
-      message: 'Currency configuration updated successfully',
-      currency: updatedConfig
-    });
+    return NextResponse.json(currencyConfig);
   } catch (error) {
-    console.error('Error updating currency configuration:', error);
-    return NextResponse.json(
-      { error: 'Failed to update currency configuration' },
-      { status: 500 }
-    );
+    console.error('Error fetching currency configuration:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
+export async function PUT(request: Request) {
+  try {
+    // Check for admin role in headers
+    const userRole = request.headers.get('x-user-role');
+    
+    if (userRole !== 'admin') {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    }
+
+    const updatedConfig = await request.json();
+    
+    // In a real application, you would save this to a database
+    console.log('Updated currency configuration:', updatedConfig);
+    
+    return NextResponse.json({ message: 'Currency configuration updated successfully' });
+  } catch (error) {
+    console.error('Error updating currency configuration:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}

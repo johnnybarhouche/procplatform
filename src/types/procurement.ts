@@ -5,12 +5,13 @@ export interface MaterialRequest {
   project_name: string;
   requester_id: string;
   requester_name: string;
-  status: 'draft' | 'submitted' | 'in_progress' | 'approved' | 'rejected';
+  status: 'new_request' | 'rfq_sent' | 'draft' | 'submitted' | 'in_progress' | 'approved' | 'rejected';
   created_at: string;
   updated_at: string;
   line_items: MRLineItem[];
   attachments: Attachment[];
   remarks?: string;
+  rfq_sent_at?: string;
 }
 
 export interface MRLineItem {
@@ -123,6 +124,18 @@ export interface RFQ {
   created_by: string;
   created_by_name: string;
   comparison_summary?: ComparisonSummary;
+  line_suppliers?: RFQLineSuppliers[];
+}
+
+export interface RFQLineSuppliers {
+  line_item_id: string;
+  suppliers: Array<{
+    supplier_id: string;
+    type: 'suggested' | 'manual';
+    name?: string;
+    email?: string;
+    category?: string;
+  }>;
 }
 
 export interface RFQSupplier {

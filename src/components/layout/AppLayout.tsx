@@ -11,11 +11,29 @@ interface AppLayoutProps {
   navItems: NavItem[];
   activeNavId: string;
   onNavigate?: (item: NavItem) => void;
-  projects: Array<{ id: string; name: string }>;
+  projects: Array<{ id: string; name: string; logo?: string }>;
   selectedProjectId: string;
-  onProjectChange: (projectId: string) => void;
   userRole: 'requester' | 'procurement' | 'approver' | 'admin';
-  onRoleChange: (role: 'requester' | 'procurement' | 'approver' | 'admin') => void;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+    designation: string;
+    role: string;
+    project: string;
+  };
+  onUserUpdate: (user: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+    designation: string;
+    role: string;
+    project: string;
+  }) => void;
   children: ReactNode;
 }
 
@@ -25,9 +43,9 @@ export function AppLayout({
   onNavigate,
   projects,
   selectedProjectId,
-  onProjectChange,
   userRole,
-  onRoleChange,
+  user,
+  onUserUpdate,
   children,
 }: AppLayoutProps) {
   const mobileNavItems = useMemo(
@@ -61,9 +79,9 @@ export function AppLayout({
       <TopBar
         projects={projects}
         selectedProjectId={selectedProjectId}
-        onProjectChange={onProjectChange}
         userRole={userRole}
-        onRoleChange={onRoleChange}
+        user={user}
+        onUserUpdate={onUserUpdate}
         innerClassName={topBarInnerClass}
       />
 

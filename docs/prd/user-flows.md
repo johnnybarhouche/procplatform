@@ -1,23 +1,33 @@
 # User Flows
 
+
+5.0 Authentication & Landing
+	•	Sign-in page presents Username, Password, Remember Me toggle (with shared-device warning), and Request Access CTA.
+	•	First-time sign-ins require an emailed one-time passcode prior to granting workspace access; OTP entry shows countdown, resend, and rate-limited error states.
+	•	Post-login routing lands users in the project tied to their username; multi-project access prompts a searchable selection modal with recent projects.
+	•	Request Access flow captures contact details, company, desired project, and justification, notifying admins and surfacing confirmation to the requester.
+	•	Admin landing workspace includes a project initiation wizard for project name, description, company logo upload/preview, default currency, and initial role assignments (editable later with branding preview).
+
 5.1 Material Request (MR)
 	•	Project pre-selected (auto if 1 project, dropdown if multiple).
 	•	Line items include: MRN, ItemCode, Description, UoM, Qty, Remarks, Location, Brand/Asset, Serial/Chassis/Engine No., Model Year.
 	•	Configurable via Admin.
 	•	Attach photos/files.
 	•	Supplier suggestions not visible to end user.
+	•	Primary action buttons (Import from Excel, Add Line Item, Submit MR) align with the page title baseline on desktop.
 
 5.2 Procurement (RFQ)
-	•	Procurement inbox for submitted MRs.
-	•	Supplier Suggestions Panel (procurement-only): shows historical suppliers and prices.
-	•	RFQ creation: group lines, select suppliers, send tracked emails/portal links.
+	•	Procurement inbox lists submitted MRs with requester, project, created date, and a right-aligned status column using chips: New Request (light red) and RFQ Sent (light green); amount and compare-quotes columns are removed.
+	•	Send RFQ action flips status from New Request to RFQ Sent automatically; View Details opens the originating MR.
+	•	Supplier suggestions no longer occupy a persistent right-side panel; they surface inline under each selected line item within the wizard with contact, category, and last purchase data.
+	•	RFQ creation: group lines, review suggested suppliers per line (with contacts and history indicators), add new suppliers when needed, optionally send requests per supplier or select-all at the line level, and dispatch tracked emails/portal links.
 	•	Capture quotes: manual entry/upload.
 	•	Comparison grid for quotes.
-	•	Submit "Quote Pack" to end user for mandatory approval.
+	•	Submit “Quote Pack” to end user for mandatory approval.
 
 5.3 Quote Approval (End User)
-	•	End user reviews comparison grid.
-	•	Must approve supplier(s) per line (split awards supported).
+	•	End user reviews an expanded comparison grid without the secondary “Select Supplier” panel.
+	•	Supplier selections happen directly within each line of the grid (radio buttons per supplier column, split awards supported).
 	•	Locked lines proceed to PR creation.
 
 5.4 Purchase Requisition (PR)

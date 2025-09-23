@@ -1,201 +1,127 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { MRFieldConfig } from '@/types/admin';
+import { NextResponse } from 'next/server';
 
-// Mock MR field configuration data
-const mockMRFields: MRFieldConfig[] = [
-  {
-    id: '1',
-    field_name: 'project_id',
-    field_label: 'Project',
-    is_visible: true,
-    is_required: true,
-    display_order: 1,
-    field_type: 'select',
-    validation_rules: { required: true },
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: '2',
-    field_name: 'requested_by',
-    field_label: 'Requested By',
-    is_visible: true,
-    is_required: true,
-    display_order: 2,
-    field_type: 'text',
-    validation_rules: { required: true, maxLength: 100 },
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: '3',
-    field_name: 'department',
-    field_label: 'Department',
-    is_visible: true,
-    is_required: true,
-    display_order: 3,
-    field_type: 'select',
-    validation_rules: { required: true },
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: '4',
-    field_name: 'priority',
-    field_label: 'Priority',
-    is_visible: true,
-    is_required: false,
-    display_order: 4,
-    field_type: 'select',
-    validation_rules: {},
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: '5',
-    field_name: 'justification',
-    field_label: 'Justification',
-    is_visible: true,
-    is_required: true,
-    display_order: 5,
-    field_type: 'textarea',
-    validation_rules: { required: true, minLength: 10 },
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: '6',
-    field_name: 'delivery_date',
-    field_label: 'Required Delivery Date',
-    is_visible: true,
-    is_required: false,
-    display_order: 6,
-    field_type: 'date',
-    validation_rules: {},
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: '7',
-    field_name: 'budget_code',
-    field_label: 'Budget Code',
-    is_visible: true,
-    is_required: false,
-    display_order: 7,
-    field_type: 'text',
-    validation_rules: { maxLength: 50 },
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: '8',
-    field_name: 'attachments',
-    field_label: 'Attachments',
-    is_visible: true,
-    is_required: false,
-    display_order: 8,
-    field_type: 'file',
-    validation_rules: { maxFileSize: '10MB', allowedTypes: ['pdf', 'doc', 'docx', 'xls', 'xlsx'] },
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  }
-];
-
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
-    // Check for admin role
-    const userRole = request.headers.get('x-user-role') || 'admin';
+    // Check for admin role in headers
+    const userRole = request.headers.get('x-user-role');
     
     if (userRole !== 'admin') {
-      return NextResponse.json(
-        { error: 'Access denied. Admin role required.' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Mock MR field configuration data
+    const mrFields = [
+      {
+        id: '1',
+        field_name: 'project_id',
+        display_name: 'Project',
+        field_type: 'select',
+        required: true,
+        order: 1,
+        options: [
+          { value: '1', label: 'Project Alpha' },
+          { value: '2', label: 'Project Beta' },
+          { value: '3', label: 'Project Gamma' }
+        ],
+        validation_rules: {
+          required: true
+        }
+      },
+      {
+        id: '2',
+        field_name: 'requested_by',
+        display_name: 'Requested By',
+        field_type: 'text',
+        required: true,
+        order: 2,
+        validation_rules: {
+          required: true,
+          min_length: 2
+        }
+      },
+      {
+        id: '3',
+        field_name: 'department',
+        display_name: 'Department',
+        field_type: 'select',
+        required: true,
+        order: 3,
+        options: [
+          { value: 'engineering', label: 'Engineering' },
+          { value: 'operations', label: 'Operations' },
+          { value: 'maintenance', label: 'Maintenance' },
+          { value: 'safety', label: 'Safety' }
+        ],
+        validation_rules: {
+          required: true
+        }
+      },
+      {
+        id: '4',
+        field_name: 'priority',
+        display_name: 'Priority',
+        field_type: 'select',
+        required: true,
+        order: 4,
+        options: [
+          { value: 'low', label: 'Low' },
+          { value: 'medium', label: 'Medium' },
+          { value: 'high', label: 'High' },
+          { value: 'urgent', label: 'Urgent' }
+        ],
+        validation_rules: {
+          required: true
+        }
+      },
+      {
+        id: '5',
+        field_name: 'delivery_date',
+        display_name: 'Required Delivery Date',
+        field_type: 'date',
+        required: true,
+        order: 5,
+        validation_rules: {
+          required: true,
+          min_date: 'today'
+        }
+      },
+      {
+        id: '6',
+        field_name: 'justification',
+        display_name: 'Justification',
+        field_type: 'textarea',
+        required: false,
+        order: 6,
+        validation_rules: {
+          max_length: 500
+        }
+      }
+    ];
 
-    return NextResponse.json(mockMRFields);
+    return NextResponse.json(mrFields);
   } catch (error) {
     console.error('Error fetching MR field configuration:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch MR field configuration' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
-export async function PUT(request: NextRequest) {
+export async function PUT(request: Request) {
   try {
-    // Check for admin role
-    const userRole = request.headers.get('x-user-role') || 'admin';
+    // Check for admin role in headers
+    const userRole = request.headers.get('x-user-role');
     
     if (userRole !== 'admin') {
-      return NextResponse.json(
-        { error: 'Access denied. Admin role required.' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
-    const body = await request.json();
-    const { fields } = body;
-
-    // Validate input
-    if (!Array.isArray(fields)) {
-      return NextResponse.json(
-        { error: 'Invalid input. Fields must be an array.' },
-        { status: 400 }
-      );
-    }
-
-    // Validate each field
-    for (const field of fields) {
-      if (!field.id || !field.field_name || !field.field_label) {
-        return NextResponse.json(
-          { error: 'Invalid field configuration. Missing required fields.' },
-          { status: 400 }
-        );
-      }
-
-      if (typeof field.is_visible !== 'boolean' || typeof field.is_required !== 'boolean') {
-        return NextResponse.json(
-          { error: 'Invalid field configuration. is_visible and is_required must be boolean.' },
-          { status: 400 }
-        );
-      }
-
-      if (typeof field.display_order !== 'number' || field.display_order < 1) {
-        return NextResponse.json(
-          { error: 'Invalid field configuration. display_order must be a positive number.' },
-          { status: 400 }
-        );
-      }
-    }
-
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 200));
-
-    // In a real implementation, this would update the database
-    // For now, we'll just return the updated fields
-    const updatedFields = fields.map((field: MRFieldConfig) => ({
-      ...field,
-      updated_at: new Date().toISOString()
-    }));
-
-    // Log audit trail
-    console.log(`MR field configuration updated by ${userRole} at ${new Date().toISOString()}`);
-
-    return NextResponse.json({
-      message: 'MR field configuration updated successfully',
-      fields: updatedFields
-    });
+    const updatedFields = await request.json();
+    
+    // In a real application, you would save this to a database
+    console.log('Updated MR field configuration:', updatedFields);
+    
+    return NextResponse.json({ message: 'MR field configuration updated successfully' });
   } catch (error) {
     console.error('Error updating MR field configuration:', error);
-    return NextResponse.json(
-      { error: 'Failed to update MR field configuration' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
-

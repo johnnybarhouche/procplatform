@@ -16,11 +16,11 @@
 
 2. Global Layout
 	•	Top Bar (persistent):
-	•	Left: Customer logo + Application/Project name (brand-specific).
-	•	Right cluster ordered left→right as: Project selector, Role selector, Notifications bell, User avatar; all four stay on one horizontal line with 12px gaps.
+	•	Left: Company logo uploaded during project initiation alongside the active project name (replaces the “Global Operations” placeholder).
+	•	Right cluster ordered left→right as: role indicator (bold, non-interactive), notifications bell, and user initials avatar that opens the profile menu (update name, email, phone number, address, designation). All controls live on a single baseline with the project title.
 	•	Background: Deep Blue #002664, text/icons White.
 	•	Pinned to top (position: sticky/fixed) so global controls remain visible; apply subtle shadow when content scrolls beneath and keep the bar height constant so the nav offset never drifts.
-	•	Spacing to canvas mirrors horizontal gutters: 8px ≤1280px, 12px at 1281–1440px, 16px ≥1441px so headings align with sidebar labels across every page.
+	•	Spacing to canvas mirrors horizontal gutters: 8px ≤1280px, 12px at 1281–1440px, 16px ≥1441px so headings align with sidebar labels across every page; enforce perfect vertical alignment across logo, title, and right-side controls.
 	•	Left Navigation (desktop):
 	•	Background: White.
 	•	Active item: Blue highlight bar, bold text.
@@ -40,6 +40,14 @@
 
 3. Core User Flows
 
+3.0 Authentication & Landing
+	•	Sign-in page collects Username, Password, and a Request Access CTA alongside a Remember Me toggle; styling follows enterprise tokens.
+	•	First-time sign-ins trigger a one-time passcode emailed to the user; the session remains inactive until the OTP is validated. OTP input supports six-character entry, countdown timer, resend, and inline error messaging for expired codes.
+	•	Successful authentication routes users into the project mapped to their username; multi-project users choose from authorised projects after login, with a searchable modal listing recent projects.
+	•	Request Access workflow captures name, email, phone, company, desired project, and justification; confirmation toast plus email notification route requests to admins for approval.
+	•	Remember Me toggle drives cookie duration (30 days) and surfaces a “public device?” helper label to discourage use on shared machines.
+	•	Admin landing workspace provides a project initiation wizard to capture project name, upload the company logo, define default currency, and assign initial roles; admins can revisit to adjust roles later and preview branding on the top bar.
+
 3.1 Material Request (MR)
 	•	Form:
 	•	Project auto-selected or dropdown if multiple.
@@ -47,17 +55,21 @@
 	•	Attachments: photos/files at MR or line level.
 	•	States: Draft (grey), Submitted (blue).
 	•	CTA Buttons: Blue background, white text.
+	•	Primary action group (Import from Excel, Add Line Item, Submit MR) aligns with the page title baseline on the top-right of the canvas.
 
 ⸻
 
 3.2 Procurement (RFQ)
-	•	Inbox: Table with MRs (status, requester, project).
+	•	Inbox: Table lists requester, project, created date, and positions status as the final column; status chips use light red for New Request and light green for RFQ Sent. Remove amount and compare-quotes columns.
+	•	Sending an RFQ flips the status chip from New Request to RFQ Sent automatically.
+	•	View Details button on each row opens the originating MR; supplier suggestion sidebar is removed.
 	•	Wizard Flow:
-	1.	Select MR lines.
-	2.	Supplier Suggestions (procurement only, right-side panel).
-	3.	Add suppliers manually.
-	4.	Set due date/terms.
-	5.	Dispatch RFQ.
+	1.	Select MR lines for inclusion.
+	2.	Review suggested suppliers surfaced inline under each selected line item with contact details pulled from historical purchases.
+	3.	Add new suppliers when suggestions are absent or incomplete.
+	4.	Send requests to individual suppliers or Select All at the line level before dispatching.
+	5.	Set due date/terms and dispatch RFQ notifications.
+	•	Inline supplier cards show company, contact, category tags, last purchase date/price, and badges when suggestion confidence is low or missing data.
 	•	Quote Comparison Grid:
 	•	Rows = Items, Columns = Suppliers.
 	•	Highlight lowest price per line in green.
@@ -65,10 +77,11 @@
 ⸻
 
 3.3 Quote Approval (End User)
-	•	Read-only Comparison Grid.
-	•	Selection via radio buttons per line.
+	•	Read-only comparison grid stays central but expands horizontally for improved readability; remove the secondary right-side “Select Supplier” panel.
+	•	Approvers choose suppliers directly within each line of the grid using radio buttons in the supplier columns (split awards supported).
 	•	Confirmation modal before submission.
-	•	Mandatory step; split awards supported. End user must select supplier(s) per line before PR creation
+	•	Mandatory step; end user must select supplier(s) per line before PR creation.
+	•	Sticky summary bar at the bottom lists selected suppliers, savings deltas, and highlights lines awaiting decisions; modal reiterates these details.
 
 ⸻
 
@@ -121,6 +134,8 @@
 	•	MR Field Configurator: Drag/drop list, toggles for required/visible.
 	•	Authorization Matrix: Table (Role vs Threshold).
 	•	Currency Settings: AED↔USD rate entry.
+	•	Project Initiation Wizard: Steps for Basics (project name, description, currency), Branding (logo upload with preview, accent color select), and Roles (assign users to Administrator, Procurement, Approver defaults); completion preview shows how the header will render.
+	•	Admins can relaunch the wizard from the landing page to update branding and role mappings post-launch.
 	•	PO Templates (new):
 	•	List with versions.
 	•	Wizard for Upload → Placeholders → Preview → Assign → Publish.
@@ -131,6 +146,7 @@
 4. Cross-Cutting UX Elements
 	•	Traceability Chips: Blue pill components linking MR ↔ PR ↔ PO.
 	•	Notifications: Bell with red badge for pending items.
+	•	Profile Menu: Avatar circle opens panel for updating name, email, phone, address, and designation; include shortcuts to “Manage Notification Preferences” and “Sign out”.
 	•	Forms: White background, Blue headers, Black labels, Grey field borders.
 	•	Error States: Red text + inline icon.
 	•	Mobile Approvals: Swipe cards → left (Reject, Red), right (Approve, Green).

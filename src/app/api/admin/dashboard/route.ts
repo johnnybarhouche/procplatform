@@ -1,72 +1,67 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { AdminDashboardData, AdminActivity } from '@/types/admin';
+import { NextResponse } from 'next/server';
 
-// Mock admin dashboard data
-const mockAdminDashboardData: AdminDashboardData = {
-  total_users: 25,
-  active_users: 22,
-  total_projects: 8,
-  system_health: 'healthy',
-  recent_activity: [
-    {
-      id: '1',
-      action: 'User Role Updated',
-      actor: 'admin@company.com',
-      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-      details: 'Updated role for john.doe@company.com to procurement_manager'
-    },
-    {
-      id: '2',
-      action: 'Authorization Matrix Updated',
-      actor: 'admin@company.com',
-      timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-      details: 'Updated approval thresholds for Project Alpha'
-    },
-    {
-      id: '3',
-      action: 'Currency Rate Updated',
-      actor: 'admin@company.com',
-      timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
-      details: 'Updated USD to AED rate to 3.6725'
-    },
-    {
-      id: '4',
-      action: 'System Settings Updated',
-      actor: 'admin@company.com',
-      timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
-      details: 'Updated email notification settings'
-    }
-  ],
-  system_stats: {
-    total_mrs: 156,
-    total_prs: 89,
-    total_pos: 67,
-    total_suppliers: 23
-  }
-};
-
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
-    // Check for admin role (in real implementation, this would be from JWT/session)
-    const userRole = request.headers.get('x-user-role') || 'admin';
+    // Check for admin role in headers
+    const userRole = request.headers.get('x-user-role');
     
     if (userRole !== 'admin') {
-      return NextResponse.json(
-        { error: 'Access denied. Admin role required.' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Mock admin dashboard data
+    const dashboardData = {
+      system_health: 'healthy',
+      total_users: 45,
+      active_users: 38,
+      total_projects: 3,
+      system_stats: {
+        total_mrs: 127,
+        pending_approvals: 8,
+        completed_this_month: 23
+      },
+      recent_activity: [
+        {
+          id: '1',
+          action: 'User created new MR',
+          details: 'Material Request #MR-2024-001 created for Project Alpha',
+          actor: 'John Smith',
+          timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() // 2 hours ago
+        },
+        {
+          id: '2',
+          action: 'RFQ sent to suppliers',
+          details: 'RFQ #RFQ-2024-003 sent to 5 suppliers',
+          actor: 'Sarah Johnson',
+          timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString() // 4 hours ago
+        },
+        {
+          id: '3',
+          action: 'Quote approved',
+          details: 'Quote #Q-2024-002 approved for $15,000',
+          actor: 'Mike Wilson',
+          timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString() // 6 hours ago
+        },
+        {
+          id: '4',
+          action: 'PO generated',
+          details: 'Purchase Order #PO-2024-001 generated',
+          actor: 'System',
+          timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString() // 8 hours ago
+        },
+        {
+          id: '5',
+          action: 'New user registered',
+          details: 'Emily Davis registered and assigned to Project Beta',
+          actor: 'System',
+          timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString() // 12 hours ago
+        }
+      ]
+    };
 
-    return NextResponse.json(mockAdminDashboardData);
+    return NextResponse.json(dashboardData);
   } catch (error) {
     console.error('Error fetching admin dashboard data:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch admin dashboard data' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
-

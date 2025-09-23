@@ -6,3 +6,7 @@ export * from './Tabs';
 export * from './Modal';
 export * from './Select';
 export * from './Badge';
+export * from './OtpInput';
+export * from './AvatarMenu';
+export * from './StatusChip';
+export * from './Stepper';

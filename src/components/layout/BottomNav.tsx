@@ -27,7 +27,9 @@ export function BottomNav({ navItems, activeNavId, onNavigate, innerClassName }:
               onClick={() => onNavigate?.(item)}
               className={cn(
                 'flex flex-col items-center gap-1 rounded-md px-3 py-2 text-xs font-medium transition focus:outline-none focus:ring-2 focus:ring-brand-primary',
-                isActive ? 'text-brand-primary' : 'text-brand-text/60 hover:text-brand-primary'
+                isActive 
+                  ? 'text-brand-primary' 
+                  : 'text-brand-text/60 hover:text-brand-primary'
               )}
             >
               <span className="text-lg" aria-hidden="true">

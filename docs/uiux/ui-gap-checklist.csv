@@ -9,3 +9,5 @@ Admin,PO Templates,Wizard steps missing,High,Design→Dev,Workflow,"Design/uploa
 Cross-Cutting,UX Tokens,Brand colors/spacing not centralized,Critical,Design→Dev,Tokens,"Create Tailwind theme mapping DSV palette and 8px spacing"
 Cross-Cutting,Accessibility,Contrast/focus states unverified,Medium,Dev,QA,"Run WCAG AA pass once tokens applied"
 Analytics,Analytics Dashboard,KPI/Export styling off-brand,Medium,Dev,Styling,"Update cards/buttons with DSV palette"
+Auth,Authentication,First-login OTP challenge + request-access flows missing from UI,High,Dev,Interaction,"Implement sign-in, request-access modal, and OTP input per docs/front-end.md#3.0"
+Admin,Project Initiation Wizard,Branding/logo onboarding wizard absent,High,Design→Dev,Workflow,"Design multi-step wizard and surface preview in admin landing"
